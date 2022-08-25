@@ -54,7 +54,7 @@ public final class SaveSystem {
     }
 
     private static void declareEntityIDs() throws IOException {
-        Enemy pixie = new Enemy(ImageIO.read(new File("Sprites\\Pixie.png")), 
+        Enemy pixie = new Enemy(Spritesheet.getSpriteSheet("Pixie"), 
           "Pixie", 50, 50, 10);
         StackableItem stack = new StackableItem((StackableItem) getItem(3), 5);
 		stack.setCapacity(6);

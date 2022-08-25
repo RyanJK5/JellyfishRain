@@ -14,6 +14,7 @@ import bullethell.Entity;
 import bullethell.GameSolid;
 import bullethell.Globals;
 import bullethell.Player;
+import bullethell.Spritesheet;
 
 public class MeleeWeapon extends Weapon {
 
@@ -45,13 +46,11 @@ public class MeleeWeapon extends Weapon {
     @Override
     public void attack() {
         Player player = Player.get();
-        if (!(player.getCurrentFire() >= getFireTime() && player.isAlive())) return;
-        try {
-            (new AtkBox(ImageIO.read(new File("Sprites/Slash.png")), new Rectangle(140, 0, 43, 162))).update();
-            player.setCurrentFire(0);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (!(player.getCurrentFire() >= getFireTime() && player.isAlive())) {
+            return;
         }
+        (new AtkBox(Spritesheet.getSpriteSheet("Slash"), new Rectangle(140, 0, 43, 162))).update();
+        player.setCurrentFire(0);
     }
 
     @Override
@@ -91,7 +90,7 @@ public class MeleeWeapon extends Weapon {
         private int numHits = 0;
         private int lastHit = 0;
 
-        public AtkBox(BufferedImage sprite, Rectangle bounds) {
+        public AtkBox(Spritesheet sprite, Rectangle bounds) {
             super(sprite, null, getWepDMG(), 0, 0, true);
             setHitbox(new Rectangle(bounds.x, bounds.y, bounds.width, bounds.height));
         }
@@ -128,7 +127,7 @@ public class MeleeWeapon extends Weapon {
             if (!(obj instanceof Enemy enem && !enem.friendly())) return false;
             if (numHits < maxHits && age - hitDelay >= lastHit && !enem.isInvicible()) {
                 enem.registerDMG(dmg);
-                Player.get().registerDealtDMG(dmg);
+                Player.get().registerDealtDMG(dmg, this);
                 numHits++;
                 lastHit = age;
                 return true;

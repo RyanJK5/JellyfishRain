@@ -19,7 +19,6 @@ import bullethell.items.Item;
 import bullethell.items.ItemDrop;
 import bullethell.items.StackableItem;
 import bullethell.movement.Path;
-import bullethell.movement.SeekingPath;
 
 public class Enemy extends Entity {
     
@@ -32,15 +31,24 @@ public class Enemy extends Entity {
     private List<Hit> hits = new ArrayList<>();
     private HashMap<Item, Float> lootTable = new HashMap<>();
 
-    public Enemy(BufferedImage sprite, String name, Path path, int maxHP, int dmg, float speed) throws IOException {
-        super(sprite, path, dmg, maxHP, speed, false);
+    public Enemy(Spritesheet spritesheet, String name, Path path, int maxHP, int dmg, float speed) throws IOException {
+        super(spritesheet, path, dmg, maxHP, speed, false);
         this.name = name;
         healthBar = new HealthBar();
         healthBar.kill();   
     }
     
-    public Enemy(BufferedImage sprite, String name, int maxHP, int dmg, float speed) throws IOException {
-        this(sprite, name, Path.DEFAULT_PATH, maxHP, dmg, speed);
+    public Enemy(Spritesheet spritesheet, String name, int maxHP, int dmg, float speed) throws IOException {
+        this(spritesheet, name, Path.DEFAULT_PATH, maxHP, dmg, speed);
+    }
+
+    private Enemy(Enemy enemy) throws IOException {
+        super(new Spritesheet(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB), 1, 1),
+          enemy.path, enemy.dmg, enemy.maxHP, enemy.speed, false);
+        name = enemy.name;
+        healthBar = new HealthBar();
+        healthBar.kill();
+        lootTable = enemy.lootTable;
     }
 
     public void addItemsLootTable(HashMap<Item, Float> newItems) {
@@ -222,7 +230,7 @@ public class Enemy extends Entity {
 					int fullWidth = (int) (slivWidth * getHP());
 					g.drawImage(frontSprite, x, y, fullWidth, h, null);
 				}
-			} catch (Exception e) { e.printStackTrace(); }
+			} catch (IOException e) { e.printStackTrace(); }
 		}
     }
 
@@ -233,20 +241,7 @@ public class Enemy extends Entity {
 
     public Enemy clone() {
         try {
-            Enemy obj = new Enemy(sprite, name, path, maxHP, dmg, speed);
-            if (path instanceof SeekingPath sPath) {
-                SeekingPath newPath = new SeekingPath(obj, sPath.getPrey());
-                obj.setPath(newPath);
-            }
-            obj.setLocation(getLocation());
-            obj.isAlive = isAlive;
-            obj.essential = essential;
-            obj.setHitbox(getHitbox());
-            obj.invincible = invincible;
-            obj.drawIndicator = drawIndicator;
-            obj.ignoreSolids = ignoreSolids;
-            obj.addItemsLootTable(lootTable);
-            return obj;
+            return new Enemy(this);
         } catch (IOException e) {
             return null;
         }

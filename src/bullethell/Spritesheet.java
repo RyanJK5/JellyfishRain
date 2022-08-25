@@ -29,4 +29,12 @@ public class Spritesheet {
 
     public int getWidth() { return sprites.length; }
     public int getHeight() { return sprites[0].length; }
+
+    public static Spritesheet getSpriteSheet(String fileName) {
+        return new Spritesheet(Globals.getImage(fileName), 1, 1);
+    }
+
+    public static Spritesheet getSpriteSheet(BufferedImage image) {
+        return new Spritesheet(image, 1, 1);
+    }
 }

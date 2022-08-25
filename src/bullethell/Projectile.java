@@ -7,13 +7,8 @@ import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.imageio.ImageIO;
 
 import bullethell.items.MeleeWeapon;
 import bullethell.movement.Path;
@@ -42,32 +37,42 @@ public class Projectile extends Entity {
 
 	protected boolean indicatorPortion = false;
 
-	public Projectile(BufferedImage sprite, Path path, boolean immortal, int lifeSpan, float speed, int dmg) {
-		super(sprite, path, dmg, 0, speed, false);
+	public Projectile(Spritesheet spritesheet, Path path, boolean immortal, int lifeSpan, float speed, int dmg) {
+		super(spritesheet, path, dmg, 0, speed, false);
 		this.lifeSpan = lifeSpan;
 		this.immortal = immortal;
 		this.constDMG = dmg;
-		this.dmg = 0;
 
 		setHitbox(new Polygon(new int[] {x, x + w / 2, x + w, x + w / 2},
 		  new int[] {y + h / 2, y, y + h / 2, y + h},
 		  4));
 	}
 
-	public Projectile(BufferedImage sprite, Path path, int speed, int dmg) {
-		this(sprite, path, true, 0, speed, dmg);
+	public Projectile(Spritesheet spritesheet, Path path, int speed, int dmg) {
+		this(spritesheet, path, true, 0, speed, dmg);
 	}
 	
-	public Projectile(BufferedImage sprite, Path path) {
-		this(sprite, path, true, 0, DEFAULT_SPEED, DEFAULT_DMG);
+	public Projectile(Spritesheet spritesheet, Path path) {
+		this(spritesheet, path, true, 0, DEFAULT_SPEED, DEFAULT_DMG);
 	}
 	
-	public Projectile(Path path) throws IOException {
-		this(ImageIO.read(new File("Sprites/Bullet.png")), path, true, 0, DEFAULT_SPEED, DEFAULT_DMG);
+	public Projectile(Path path) {
+		this(new Spritesheet(Globals.getImage("Bullet"), 1, 1), path, true, 0, DEFAULT_SPEED, DEFAULT_DMG);
 	}
-	
-	public Projectile() throws IOException {
-		this(ImageIO.read(new File("Sprites/Bullet.png")), Path.DEFAULT_PATH, true, 0, DEFAULT_SPEED, DEFAULT_DMG);
+
+	public Projectile() {
+		this(Path.DEFAULT_PATH);
+	}
+
+	private Projectile(Projectile proj) {
+		super(proj);
+		lifeSpan = proj.lifeSpan;
+		immortal = proj.immortal;
+		constDMG = proj.dmg;
+
+		setHitbox(new Polygon(new int[] {x, x + w / 2, x + w, x + w / 2},
+		  new int[] {y + h / 2, y, y + h / 2, y + h},
+		  4));
 	}
 
 	@Override
@@ -133,7 +138,7 @@ public class Projectile extends Entity {
 			}
 			entity.registerDMG(dmg);
 			if (friendly()) {
-				Player.get().registerDealtDMG(dmg);
+				Player.get().registerDealtDMG(dmg, this);
 			}
 			hits.add(entity);
 
@@ -200,7 +205,7 @@ public class Projectile extends Entity {
 	public int getPierce() { return pierce; }
 
 	public Projectile clone() {
-		return new Projectile(sprite, path, immortal, lifeSpan, speed, constDMG);
+		return new Projectile(this);
 	}
 
 	public boolean equals(Projectile obj) {

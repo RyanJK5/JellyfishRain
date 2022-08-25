@@ -22,7 +22,6 @@ import bullethell.items.Ability;
 import bullethell.items.Accessory;
 import bullethell.items.Core;
 import bullethell.items.Item;
-import bullethell.items.MeleeWeapon;
 import bullethell.items.Recipe;
 import bullethell.items.StackableItem;
 import bullethell.items.Weapon;
@@ -117,7 +116,7 @@ public final class Player extends Entity {
 	public static Player get() {
 		if (player == null) {
 			try {
-				player = new Player(ImageIO.read(new File("Sprites/PlayerSprite.png")));
+				player = new Player(Spritesheet.getSpriteSheet("PlayerSprite"));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -144,7 +143,7 @@ public final class Player extends Entity {
 		}
 	}
 
-	private Player(BufferedImage sprite) throws IOException {
+	private Player(Spritesheet sprite) throws IOException {
 		super(sprite, null, 0, DEFAULT_MAX_HP, DEFAULT_SPEED, true);
 		cameraX = 0;
 		cameraY = 0;
@@ -659,9 +658,8 @@ public final class Player extends Entity {
 		}
 	}
 
-	public void registerDealtDMG(int dmg) {
-		Weapon wep = getEquipmentInv().getWepSlot().getItem(); 
-		if (wep == null || wep.getManaCost() > 0 || !(wep instanceof MeleeWeapon)) {
+	public void registerDealtDMG(int dmg, GameSolid sender) {
+		if (sender instanceof Projectile) {
 			return;
 		}
 		mana += dmg;

@@ -133,10 +133,10 @@ public class SliderButton extends Button implements MouseMotionListener {
           .contains(Player.cursorX(), Player.cursorY())) {
             sliderBox.setLocation(Player.cursorX() - sliderBox.width / 2, sliderBox.y);
             value = (float) ((sliderBox.getCenterX() - (x + w - OFF_SLIDER.getWidth() - 20)) / OFF_SLIDER.getWidth());
-            if (value < 0) {
+            if (value < 0.01f) {
                 value = 0;
             }
-            if (value > 1) {
+            if (value > 0.99f) {
                 value = 1;
             }
 

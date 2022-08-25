@@ -1,5 +1,7 @@
 package bullethell;
 
+import java.awt.Graphics2D;
+import java.awt.AlphaComposite;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
@@ -16,6 +18,9 @@ public non-sealed abstract class Entity extends GameSolid implements ActionListe
 	protected boolean drawIndicator;
     protected Path path;
 
+    protected Animation[] animations;
+    protected int currentAnimation;
+
     protected int dmg;
     protected int maxHP, hp;
     protected float speed;
@@ -23,8 +28,11 @@ public non-sealed abstract class Entity extends GameSolid implements ActionListe
     protected boolean invincible;
     protected boolean ignoreSolids;
 
-    protected Entity(BufferedImage sprite, Path path, int dmg, int maxHP, float speed, boolean friendly) {
-        super(sprite);
+    protected Entity(Spritesheet spritesheet, Path path, int dmg, int maxHP, float speed, boolean friendly) {
+        super(spritesheet.getSprite(0, 0));
+
+        animations = Animation.getAnimations(spritesheet);
+
         this.path = path;
         this.dmg = dmg;
         this.maxHP = maxHP;
@@ -33,6 +41,24 @@ public non-sealed abstract class Entity extends GameSolid implements ActionListe
         this.friendly = friendly;
 
         Globals.GLOBAL_TIMER.addActionListener(this);
+    }
+
+    protected Entity(Entity entity) {
+        super(entity);
+        path = entity.path;
+        dmg = entity.dmg;
+        maxHP = entity.maxHP;
+        hp = maxHP;
+        speed = entity.speed;
+        friendly = entity.friendly;
+        animations = entity.animations;
+        
+        invincible = entity.invincible;
+        drawIndicator = entity.drawIndicator;
+        ignoreSolids = entity.ignoreSolids;
+
+        setSprite(animations[0].getFrame());
+        setHitbox(new java.awt.Rectangle(x, y, w, h));
     }
 
     public void move() {
@@ -55,8 +81,38 @@ public non-sealed abstract class Entity extends GameSolid implements ActionListe
     @Override
 	public void paint(Graphics g) {
         if (drawIndicator) path.drawIndicator(g, getLocation());
-		super.paint(g);
+		if (rotationDeg > 0 || opacity != 1f) {
+			Graphics2D g2 = (Graphics2D) g.create();
+			g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
+			g2.rotate(rotationDeg, getCenterX(), getCenterY());
+			g2.drawImage(animations[currentAnimation].getFrame(), x, y, null);
+			g2.dispose();
+			return;
+		}
+		g.drawImage(animations[currentAnimation].getFrame(), x, y, null);
 	}
+
+    @Override
+    @Deprecated
+    public BufferedImage getSprite() { return super.getSprite(); }
+
+    public void setAnimation(int index) {
+        animations[currentAnimation].reset();
+        currentAnimation = index;
+        animations[currentAnimation].restart();
+    }
+
+    public Animation getAnimation(int index) {
+        return animations[index];
+    }
+
+    public Animation getCurrentAnimation() {
+        return animations[currentAnimation];
+    }
+
+    public void setAnimations(Spritesheet spritesheet) {
+
+    }
 
     @Override
 	public void toGhost() {

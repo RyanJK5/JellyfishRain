@@ -72,6 +72,7 @@ public final class GameDisplay extends JPanel {
 	}
 	
 	protected void endGame() {
+		Globals.freezeHotkeys = true;
 		Entity.removeAll(null);
 		if (scene != null) {
 			scene.end();
@@ -229,6 +230,7 @@ public final class GameDisplay extends JPanel {
 			}
 
 			private void updateMap(KeyEvent e, boolean pressed) {
+				
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE && pressed) {
 					if (!OptionsMenu.get().isActive() && !freezeHotkeys) {
 						OptionsMenu.get().start(0, 0);

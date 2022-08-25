@@ -54,6 +54,12 @@ public class GameObject implements Cloneable {
 		this(sprite, 0, ghost);
 	}
 
+	protected GameObject(GameObject obj) {
+		setLocation(obj.getLocation());
+        isAlive = obj.isAlive;
+        essential = obj.essential;
+	}
+
 	private GameObject(BufferedImage sprite, int layerNum, boolean ghost) {
 		setSprite(sprite);
 
@@ -231,6 +237,10 @@ public class GameObject implements Cloneable {
 	}
 
 	public void setSprite(BufferedImage newSprite) {
+		if (newSprite != null && (newSprite.getWidth() <= 0 || newSprite.getHeight() <= 0)) {
+			throw new IllegalArgumentException("newSprite must have a width and height greater than 0");
+		}
+		
 		if (newSprite == null) {
 			sprite = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
 		} else {
@@ -244,11 +254,7 @@ public class GameObject implements Cloneable {
 	public Point getLocation() { return new Point(x, y); }
 
 	public GameObject clone() {
-		GameObject obj = new GameObject(sprite, layerNumber);
-		obj.setLocation(getLocation());
-		obj.isAlive = isAlive;
-		obj.essential = essential;
-		return obj;
+		return new GameObject(this);
 	}
 
 	public boolean equals(GameObject obj) {

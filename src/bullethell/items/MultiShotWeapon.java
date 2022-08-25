@@ -8,6 +8,7 @@ import javax.imageio.ImageIO;
 
 import bullethell.Player;
 import bullethell.Projectile;
+import bullethell.Spritesheet;
 import bullethell.movement.AngledPath;
 import bullethell.movement.Path;
 
@@ -57,7 +58,7 @@ public class MultiShotWeapon extends Weapon {
 
             for (double i = -maxSpread / 2; i <= maxSpread / 2; i += maxSpread / (shotNum - 1)) {
                 Path path = new AngledPath(angle + i);
-                Projectile proj = new Projectile(projSprite, path, false, 0, getShotSpeed(), getWepDMG());
+                Projectile proj = new Projectile(Spritesheet.getSpriteSheet(projSprite), path, false, 0, getShotSpeed(), getWepDMG());
                 proj.setLocation(centerX, centerY);
                 proj.setFriendly(true);
                 proj.setRange(getRange());

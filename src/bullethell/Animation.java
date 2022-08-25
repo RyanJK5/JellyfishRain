@@ -1,12 +1,12 @@
 package bullethell;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Animation {
-    private static List<Animation> instances = new ArrayList<>();
+public class Animation implements ActionListener {
 
     private boolean moving = false;
     private List<BufferedImage> frames = new ArrayList<>();
@@ -20,18 +20,19 @@ public class Animation {
         this.startFrame = startFrame;
         currentFrame = startFrame;
 
-        if (instances.size() == 0) {
-            Globals.GLOBAL_TIMER.addActionListener((ActionEvent e) -> {
-                for (Animation instance : instances) {
-                    if (!instance.moving) continue;
-                    if (instance.currentFrame != this.frames.size() - 1)
-                        instance.currentFrame++;
-                    else
-                        instance.currentFrame = 0;
-                }
-            });
+        Globals.GLOBAL_TIMER.addActionListener(this);
+    }
+
+    public void actionPerformed(ActionEvent e) {
+        if (!moving) {
+            return;
         }
-        instances.add(this);
+
+        if (currentFrame != frames.size() - 1) {
+            currentFrame++;
+        } else {
+            currentFrame = 0;
+        }
     }
 
     public void restart() {
@@ -59,9 +60,22 @@ public class Animation {
     
     public int getFrameIndex() { return currentFrame; }
     public BufferedImage getFrame() { return frames.get(currentFrame); }
+    public BufferedImage getFrame(int index) { return frames.get(index); }
 
     @Override
     public String toString() { 
         return "{" + "moving=" + moving + ", currentFrame=" + currentFrame + "}";
+    }
+
+    public static Animation[] getAnimations(Spritesheet spritesheet) {
+        Animation[] result = new Animation[spritesheet.getHeight()];
+        for (int i = 0; i < spritesheet.getHeight(); i++) {
+            BufferedImage[] frames = new BufferedImage[spritesheet.getWidth()];
+            for (int j = 0; j < spritesheet.getWidth(); j++) {
+                frames[j] = spritesheet.getSprite(i, j);
+            }
+            result[i] = new Animation(frames, 0);
+        }
+        return result;
     }
 }

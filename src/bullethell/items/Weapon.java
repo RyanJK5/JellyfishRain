@@ -11,6 +11,7 @@ import javax.imageio.ImageIO;
 import bullethell.Globals;
 import bullethell.Player;
 import bullethell.Projectile;
+import bullethell.Spritesheet;
 import bullethell.movement.AngledPath;
 import bullethell.movement.Path;
 
@@ -85,7 +86,7 @@ public class Weapon extends Item {
         
         Path path = new AngledPath(angle);
 
-        Projectile proj = new Projectile(projSprite, path, false, 0, shotSpeed, dmg);
+        Projectile proj = new Projectile(Spritesheet.getSpriteSheet(projSprite), path, false, 0, shotSpeed, dmg);
         proj.rotate((float) -angle + 180);
         proj.setRange(range);
         proj.setLocation(centerX, centerY);
