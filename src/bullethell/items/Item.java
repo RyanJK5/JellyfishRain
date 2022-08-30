@@ -17,7 +17,7 @@ public class Item extends GameObject {
     private String[] data;
 
     public Item(String name) throws IOException {
-        this(ImageIO.read(new File("Sprites/Item.png")), name);
+        this(ImageIO.read(new File("sprites/Item.png")), name);
     }
 
     public Item(BufferedImage sprite, String name) {

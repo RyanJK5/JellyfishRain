@@ -36,7 +36,7 @@ final class CoreForge implements Scene {
     @Override
     public void start(int x, int y) {
         try {
-            GameObject coreForge = new GameObject(ImageIO.read(new File("Sprites\\CoreForge.png")), 1);
+            GameObject coreForge = new GameObject(ImageIO.read(new File("sprites\\CoreForge.png")), 1);
             coreForge.setLocation(x, y);
 
             int[] xpoints = {28, 63, 119, 192, 276, 362, 452, 537, 622, 694, 750, 785, 393};
@@ -49,8 +49,8 @@ final class CoreForge implements Scene {
                 xpoints[i] += coreForge.getX();
                 ypoints[i] += coreForge.getY();
                 
-                Container<Core> cont = new SolidContainer<>(ImageIO.read(new File(i < 12 ? "Sprites\\CoreForgeSmall.png" :
-                 "Sprites\\CoreForgeBig.png")), Core.class);
+                Container<Core> cont = new SolidContainer<>(ImageIO.read(new File(i < 12 ? "sprites\\CoreForgeSmall.png" :
+                 "sprites\\CoreForgeBig.png")), Core.class);
                 cont.setLayer(1);
                 cont.setLocation(xpoints[i], ypoints[i]);
 
@@ -62,7 +62,7 @@ final class CoreForge implements Scene {
             }
             Container<Core> finalResult = result;
 
-            Trigger trigger = new Trigger(ImageIO.read(new File("Sprites/button.png")), 
+            Trigger trigger = new Trigger(ImageIO.read(new File("sprites/button.png")), 
             new Trigger.Type[] {Trigger.ON_CLICK, Trigger.CURSOR_OVER, Trigger.TARGET_IN_RANGE}) {
                 
                 HashMap<Core, List<Core>> coreToBasicCores = new LinkedHashMap<>();
@@ -104,7 +104,7 @@ final class CoreForge implements Scene {
                     }
 
                     try {
-                        Core resultCore = new Core(ImageIO.read(new File("Sprites/Item.png")), "result");
+                        Core resultCore = new Core(ImageIO.read(new File("sprites/Item.png")), "result");
                         resultCore.setMultipliers(new float[9]);
                         for (Core core : cores) {
                             float[] multipliers = core.getMultipliers();

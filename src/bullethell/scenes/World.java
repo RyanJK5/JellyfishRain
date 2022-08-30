@@ -96,7 +96,7 @@ public final class World implements Scene, ActionListener {
                 chest.setLocation(100, 800);
             }
             
-            sigilPedestal = new SolidContainer<>(ImageIO.read(new File("Sprites\\SigilContainer.png")), 
+            sigilPedestal = new SolidContainer<>(ImageIO.read(new File("sprites\\SigilContainer.png")), 
               Item.class) {
                 @Override
                 public boolean moveItem(boolean taking) {
@@ -148,9 +148,15 @@ public final class World implements Scene, ActionListener {
     @Override
     public void end() {
         Forge.get().end();
-        casty.kill();
-        chest.kill();
-        sigilPedestal.kill();
+        if (casty != null) {
+            casty.kill();
+        }
+        if (chest != null) {
+            chest.kill();
+        }
+        if (sigilPedestal != null) {
+            sigilPedestal.kill();
+        }
     }
 
     @Override

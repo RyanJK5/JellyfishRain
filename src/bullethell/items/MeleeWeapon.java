@@ -30,7 +30,7 @@ public class MeleeWeapon extends Weapon {
     }
 
     public MeleeWeapon(String name, int dmg, int fireTime) throws IOException {
-        this(ImageIO.read(new File("Sprites/Item.png")), name, dmg, DEFAULT_FIRE_TIME);
+        this(ImageIO.read(new File("sprites/Item.png")), name, dmg, DEFAULT_FIRE_TIME);
     }
 
     public MeleeWeapon(BufferedImage sprite, String name) {

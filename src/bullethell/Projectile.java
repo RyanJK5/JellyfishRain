@@ -1,8 +1,9 @@
 package bullethell;
 
+import java.awt.Graphics2D;
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.geom.AffineTransform;
@@ -46,6 +47,7 @@ public class Projectile extends Entity {
 		setHitbox(new Polygon(new int[] {x, x + w / 2, x + w, x + w / 2},
 		  new int[] {y + h / 2, y, y + h / 2, y + h},
 		  4));
+		getCurrentAnimation().start();
 	}
 
 	public Projectile(Spritesheet spritesheet, Path path, int speed, int dmg) {
@@ -161,10 +163,15 @@ public class Projectile extends Entity {
 			}
 		}
 		if ((indicatorProjDelay == 0) || (age >= indicatorProjDelay)) {
-			Graphics2D g2 = (Graphics2D) g.create();
-			g2.rotate(rotationDeg, getCenterX(), getCenterY());
-			g2.drawImage(sprite, x, y, null);
-			g2.dispose();
+			if (rotationDeg > 0 || opacity != 1f) {
+				Graphics2D g2 = (Graphics2D) g.create();
+				g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
+				g2.rotate(rotationDeg, getCenterX(), getCenterY());
+				g2.drawImage(animations[currentAnimation].getFrame(), x, y, null);
+				g2.dispose();
+				return;
+			}
+			g.drawImage(animations[currentAnimation].getFrame(), x, y, null);
 		}
 	}
 

@@ -25,7 +25,7 @@ public class Ability extends Item {
     }
 
     private Ability(String spriteName, String name, Type type) throws IOException {
-        this(ImageIO.read(new File("Sprites\\" + spriteName + ".png")), name, type);
+        this(ImageIO.read(new File("sprites\\" + spriteName + ".png")), name, type);
     }
 
     public static enum Type {

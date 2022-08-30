@@ -46,7 +46,7 @@ public final class MainMenu implements Scene {
             title = new Text("Untitled Awesome", new Font(null, Font.BOLD, 128));
             title.setLocation(Globals.SCREEN_WIDTH / 2 - titleWidth / 2, 300);
             
-            BufferedImage titleScreenButtons = ImageIO.read(new File("Sprites\\TitleButtons.png"));
+            BufferedImage titleScreenButtons = ImageIO.read(new File("sprites\\TitleButtons.png"));
             BufferedImage trig1 = titleScreenButtons
               .getSubimage(0, 0, titleScreenButtons.getWidth(), titleScreenButtons.getHeight() / 3);
             newGame = new Button(trig1) {
@@ -63,7 +63,7 @@ public final class MainMenu implements Scene {
             newGame.setLocation(Globals.SCREEN_WIDTH / 2 - newGame.getWidth() / 2, Globals.SCREEN_HEIGHT / 2);
             newGame.setLoop(false);
 
-            boolean firstTime = !new File("Data\\PlayerData.dat").exists();
+            boolean firstTime = !new File("data\\PlayerData.dat").exists();
             BufferedImage trig2 = titleScreenButtons.getSubimage(0, titleScreenButtons.getHeight() / 3, 
               titleScreenButtons.getWidth(), titleScreenButtons.getHeight() / 3);
             continueGame = new Button(trig2) {

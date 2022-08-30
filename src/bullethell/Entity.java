@@ -1,13 +1,14 @@
 package bullethell;
 
-import java.awt.Graphics2D;
 import java.awt.AlphaComposite;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -51,14 +52,17 @@ public non-sealed abstract class Entity extends GameSolid implements ActionListe
         hp = maxHP;
         speed = entity.speed;
         friendly = entity.friendly;
-        animations = entity.animations;
+        animations = Arrays.copyOf(entity.animations, entity.animations.length);
         
         invincible = entity.invincible;
         drawIndicator = entity.drawIndicator;
         ignoreSolids = entity.ignoreSolids;
 
+
         setSprite(animations[0].getFrame());
         setHitbox(new java.awt.Rectangle(x, y, w, h));
+
+        Globals.GLOBAL_TIMER.addActionListener(this);
     }
 
     public void move() {
@@ -89,12 +93,12 @@ public non-sealed abstract class Entity extends GameSolid implements ActionListe
 			g2.dispose();
 			return;
 		}
-		g.drawImage(animations[currentAnimation].getFrame(), x, y, null);
+        g.drawImage(animations[currentAnimation].getFrame(), x, y, null);
 	}
 
     @Override
     @Deprecated
-    public BufferedImage getSprite() { return super.getSprite(); }
+    public BufferedImage getSprite() { return getCurrentAnimation().getFrame(); }
 
     public void setAnimation(int index) {
         animations[currentAnimation].reset();
@@ -111,7 +115,7 @@ public non-sealed abstract class Entity extends GameSolid implements ActionListe
     }
 
     public void setAnimations(Spritesheet spritesheet) {
-
+        animations = Animation.getAnimations(spritesheet);
     }
 
     @Override

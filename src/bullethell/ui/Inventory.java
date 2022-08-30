@@ -85,7 +85,7 @@ public class Inventory<T extends Item> extends UI implements Iterable<Container<
 
     private void makeNavigation() {
         try {
-            backButton = new Trigger(ImageIO.read(new File("Sprites/BackButton.png")), 
+            backButton = new Trigger(ImageIO.read(new File("sprites/BackButton.png")), 
               new Trigger.Type[] {Trigger.ON_CLICK, Trigger.CURSOR_OVER}) {
     
                 @Override
@@ -95,7 +95,7 @@ public class Inventory<T extends Item> extends UI implements Iterable<Container<
                     }
                 }
             };
-            forwardButton = new Trigger(ImageIO.read(new File("Sprites/ForwardButton.png")), 
+            forwardButton = new Trigger(ImageIO.read(new File("sprites/ForwardButton.png")), 
               new Trigger.Type[] {Trigger.ON_CLICK, Trigger.CURSOR_OVER}) {
                     
                 @Override

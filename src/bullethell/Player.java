@@ -153,7 +153,7 @@ public final class Player extends Entity {
 		setEssential(true);
 		createBars();
 
-		BufferedImage slotSprite = ImageIO.read(new File("Sprites/InventorySlot.png"));
+		BufferedImage slotSprite = ImageIO.read(new File("sprites/InventorySlot.png"));
 		loadouts = new ArrayList<>();
 		
 		
@@ -254,8 +254,8 @@ public final class Player extends Entity {
 		BufferedImage ui = Globals.getImage("UI");
 		BufferedImage empty = Globals.getImage("UIEmpty");
 		healthBar = new HealthBar(empty.getSubimage(0, 332, 300, 54), ui.getSubimage(0, 332, 300, 54));
-		adrenalineBar = new HealthBar(ImageIO.read(new File("Sprites/AdrenalineBarBack.png")),
-		 ImageIO.read(new File("Sprites/AdrenalineBarFront.png"))) {
+		adrenalineBar = new HealthBar(ImageIO.read(new File("sprites/AdrenalineBarBack.png")),
+		 ImageIO.read(new File("sprites/AdrenalineBarFront.png"))) {
 			
 			@Override
 			public void paint(Graphics g) {
@@ -594,7 +594,7 @@ public final class Player extends Entity {
 	private void gameKill() {
 		kill();
 		try {
-			if (new File("Data\\PlayerData.dat").exists()) {
+			if (new File("data\\PlayerData.dat").exists()) {
 				SaveSystem.writePlayerData(true);
 				SaveSystem.writeEntityData();
 			}
@@ -636,7 +636,11 @@ public final class Player extends Entity {
 					xDif += dir.xDif;
 					yDif += dir.yDif;
 				}
+				if (xDif == 0 && yDif == 0) {
+					xDif = 1;
+				}
 			}
+
 
 			while (collidedWith(obj)) {
 				setLocation(x - xDif, y - yDif);

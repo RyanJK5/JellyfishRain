@@ -16,7 +16,7 @@ public sealed class GameSolid extends GameObject permits Entity {
 	protected static final Quadtree<GameSolid> quadtree = new Quadtree<>(new Rectangle(Globals.WIDTH, Globals.HEIGHT));
 	protected static final List<GameSolid> solids = new ArrayList<>();
 
-	protected static final boolean showHitboxes = true;
+	protected static final boolean showHitboxes = false;
 	private Shape hitbox;
 
 	public GameSolid(BufferedImage sprite) {

@@ -76,7 +76,7 @@ final class ErnestoBoss implements Scene, Bossfight {
     public void start(int x, int y) {
         Globals.setGameState(GameState.CUTSCENE);
         Globals.main.setBackground(new java.awt.Color(22, 22, 22));
-        Scene.playsound(new File("Audio\\Switch.wav"));
+        Scene.playsound(new File("audio\\Switch.wav"));
         Globals.GLOBAL_TIMER.removeActionListener(World.get());
         Thread lightfx = new Thread(() -> {
             GameObject obj = new GameObject(null, 105) {
@@ -108,18 +108,19 @@ final class ErnestoBoss implements Scene, Bossfight {
         try {
             lightfx.join(0);
             Globals.setGameState(GameState.BOSS);
-            Scene.playsound(new File("Audio\\AtTheSpeedOfLight.wav"));
+            Scene.playsound(new File("audio\\AtTheSpeedOfLight.wav"));
 
             player.resetAdren();
 
             boss = new Ernesto();
             boss.setLocation(WIDTH / 2 - boss.getWidth() / 2, HEIGHT / 2 - boss.getHeight() / 2);
-            boss.setLayer(2);
+            boss.setLayer(1);
             boss.kill();
     
             class LaserProj extends Projectile {
                 
                 static float rotateIncr;
+                static int animation = 0;
 
                 static BufferedImage baseSprite = Globals.getImage("LaserBlue");
                 static BufferedImage resultSprite = new BufferedImage(baseSprite.getWidth(), WIDTH, BufferedImage.TYPE_INT_ARGB);
@@ -128,11 +129,11 @@ final class ErnestoBoss implements Scene, Bossfight {
                 }
 
                 LaserProj(float rotationDegrees) {
-                    super(Spritesheet.getSpriteSheet(resultSprite), Path.DEFAULT_PATH, DEFAULT_SPEED, 75);
-                    setHitbox(new Rectangle(x, y, resultSprite.getWidth(), WIDTH));
+                    super(new Spritesheet(resultSprite, 10, 2), Path.DEFAULT_PATH, DEFAULT_SPEED, 75);
+                    setHitbox(new Rectangle(x, y, resultSprite.getWidth() / 10, WIDTH));
 
                     rotateIncr = 0.03f;
-                    setLocation(boss.getX() + 18, boss.getY() + 41);
+                    setLocation(boss.getCenterX(), boss.getCenterY());
                     rotate(rotationDegrees);
     
                     setAlwaysDraw(true);
@@ -140,21 +141,29 @@ final class ErnestoBoss implements Scene, Bossfight {
                     setPierce(Integer.MAX_VALUE);
                     setIndicatorDelay(750);
                     setIndicatorLifespan(750);
+
+                    setAnimation(animation);
+                    getCurrentAnimation().start();
+                    getCurrentAnimation().setFrameRate(animation == 0 ? 3 : 6);
                 }
 
                 @Override
                 public void paint(Graphics g) {
                     if (drawIndicator && (age < indicatorLifespan || indicatorLifespan == 0)) {
                         g.setColor(new Color(128,128,128,50));
-                        new StraightPath((int) Math.toDegrees(rotationDeg)).drawIndicator(g, new Point(boss.getX() + 33, boss.getY() + 53));
-                    
+                        new StraightPath((int) Math.toDegrees(rotationDeg)).drawIndicator(g, new Point(boss.getCenterX(), boss.getCenterY()));
                     }
                     if ((indicatorProjDelay == 0) || (age >= indicatorProjDelay)) {
-                        Graphics2D g2 = (Graphics2D) g.create();
-                        g2.rotate(rotationDeg, getCenterX(), getCenterY());
-                        g2.drawImage(sprite, x, y, null);
-                        g2.dispose();
-                }
+                        if (rotationDeg > 0 || opacity != 1f) {
+                            Graphics2D g2 = (Graphics2D) g.create();
+                            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
+                            g2.rotate(rotationDeg, getCenterX(), getCenterY());
+                            g2.drawImage(animations[currentAnimation].getFrame(), x, y, null);
+                            g2.dispose();
+                            return;
+                        }
+                        g.drawImage(animations[currentAnimation].getFrame(), x, y, null);
+                    }
                 }
 
                 @Override
@@ -233,33 +242,25 @@ final class ErnestoBoss implements Scene, Bossfight {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     for (int i = 1; i <= 5; i++) {
-                        try {
-                            Projectile proj = new ErnestoPhase1Proj();
-                            if (rand.nextBoolean()) {
-                                proj.setLocation(0, i * proj.getHeight() * 4 + rand.nextInt(-50, 50));
-                                proj.setPath(new StraightPath(Direction.RIGHT));
-                            } else {
-                                proj.setLocation(WIDTH, i * proj.getHeight() * 4 + rand.nextInt(-50, 50));
-                                proj.setPath(new StraightPath(Direction.LEFT));
-                            }
-                        } catch (IOException e1) {
-                            e1.printStackTrace();
+                        Projectile proj = new ErnestoGridProj();
+                        if (rand.nextBoolean()) {
+                            proj.setLocation(0, i * proj.getHeight() * 4 + rand.nextInt(-50, 50));
+                            proj.setPath(new StraightPath(Direction.RIGHT));
+                        } else {
+                            proj.setLocation(WIDTH, i * proj.getHeight() * 4 + rand.nextInt(-50, 50));
+                            proj.setPath(new StraightPath(Direction.LEFT));
                         }
                     }
                     for (int i = 1; i <= 5; i++) {
                         Projectile proj;
-                        try {
-                            proj = new ErnestoPhase1Proj();
-                        
-                            if (rand.nextBoolean()) {
-                                proj.setLocation(i * proj.getWidth() * 7 + rand.nextInt(-100, 100), 0);
-                                proj.setPath(new StraightPath(Direction.DOWN));
-                            } else {
-                                proj.setLocation(i * proj.getWidth() * 7 + rand.nextInt(-100, 100), HEIGHT);
-                                proj.setPath(new StraightPath(Direction.UP));
-                            }
-                        } catch (IOException e1) {
-                            e1.printStackTrace();
+                        proj = new ErnestoGridProj();
+                    
+                        if (rand.nextBoolean()) {
+                            proj.setLocation(i * proj.getWidth() * 7 + rand.nextInt(-100, 100), 0);
+                            proj.setPath(new StraightPath(Direction.DOWN));
+                        } else {
+                            proj.setLocation(i * proj.getWidth() * 7 + rand.nextInt(-100, 100), HEIGHT);
+                            proj.setPath(new StraightPath(Direction.UP));
                         }
                     }
                     timesPerformed++;
@@ -272,7 +273,7 @@ final class ErnestoBoss implements Scene, Bossfight {
                 public void end() {
                     timer.stop();
                     if (nextTimer != null) nextTimer.start();
-                    Entity.removeAll(obj -> obj instanceof ErnestoPhase1Proj);
+                    Entity.removeAll(obj -> obj instanceof ErnestoProj);
                 }
             });
             sinkHole.addActionListener(new TimerListener(sinkHole, bossDash, 140) {
@@ -292,9 +293,8 @@ final class ErnestoBoss implements Scene, Bossfight {
                         Point newPoint = circlePath.move(timesPerformed % 70 > 35 ? -2 : 2);
                         point.x += newPoint.x;
                         point.y += newPoint.y;
-                        Projectile proj;
                         try {
-                            proj = new ErnestoPhase2Proj();
+                            Projectile proj = new ErnestoPhase2Proj();
                             proj.setRange((int) (Point.distance(point.x, point.y, centerPoint.x, centerPoint.y)));
                             proj.setLocation(point);
                             proj.setSpeed(20);
@@ -360,7 +360,7 @@ final class ErnestoBoss implements Scene, Bossfight {
                         Point newPoint = circlePath.move(4);
                             point.x += newPoint.x;
                             point.y += newPoint.y;
-                            Projectile proj = new Projectile();
+                            Projectile proj = new ErnestoProj();
                             proj.setPath(new LinePath(new Line2D.Float(centerPoint.x, centerPoint.y, point.x, point.y), true));
                             proj.setLocation(point);
                             proj.setSpeed(10);
@@ -428,7 +428,7 @@ final class ErnestoBoss implements Scene, Bossfight {
                     }
                 }
             });
-            bossLaser.addActionListener(new TimerListener(bossLaser, bossDash, 180) {
+            bossLaser.addActionListener(new TimerListener(bossLaser, bossDash, 60) {
                 LaserProj[] proj = new LaserProj[4];
                             
                 float numDown = 0.08f;
@@ -437,7 +437,8 @@ final class ErnestoBoss implements Scene, Bossfight {
                 public void actionPerformed(ActionEvent e) {
                     if (!flipped && timesPerformed == 0) {
                         boss.setSpeed(20);
-                        boss.setPath(new LinePath(new Line2D.Float(boss.getX(), boss.getY(), WIDTH / 2 - 33, HEIGHT / 2 - 55), false));
+                        boss.setPath(new LinePath(new Line2D.Float(boss.getX(), boss.getY(), WIDTH / 2 - boss.getWidth() / 2, HEIGHT / 2 - boss.getHeight() / 2),
+                          false));
                         flipped = !flipped;
                     }
                     if (!boss.getPath().isActive() && timesPerformed == 0) {
@@ -485,6 +486,7 @@ final class ErnestoBoss implements Scene, Bossfight {
                 boss.setPath(Path.DEFAULT_PATH);
                 tpDash.start();
                 switchTimer.stop();
+                ErnestoProj.animation = 1;
             });
             switchTimer.start();
     
@@ -557,7 +559,7 @@ final class ErnestoBoss implements Scene, Bossfight {
                         timeSinceFade++;
                     }
                     if (timeSinceFade == 10) {
-                        Projectile proj = new Projectile();
+                        Projectile proj = new ErnestoProj();
                         proj.setLocation(boss.getCenterX(), boss.getCenterY());
                         proj.setPath(new SeekingPath(proj, player));
                         proj.setSpeed(12);
@@ -614,7 +616,7 @@ final class ErnestoBoss implements Scene, Bossfight {
                     double slope = (line.getY2() - line.getY1()) / (line.getX2() - line.getX1());
                     slope = -1 / slope;
                     for (int i = 0; i < 2; i++) {
-                        Projectile proj = new Projectile() {
+                        Projectile proj = new ErnestoProj() {
                             @Override
                             public void move() {
                                 Point newCoords = path.move(speed);
@@ -649,6 +651,8 @@ final class ErnestoBoss implements Scene, Bossfight {
                 bossLaser.start();
                 switchToFirst.stop();
     
+                ErnestoProj.animation = 0;
+
                 boss.setAnimations(Spritesheet.getSpriteSheet(boss.origSprite));
             });
             switchToFirst.start();
@@ -662,7 +666,10 @@ final class ErnestoBoss implements Scene, Bossfight {
                 bossRadial.stop();
                 bossDash.stop();
                 bossLaser.stop();
-    
+                
+                LaserProj.animation = 1;
+                ErnestoProj.animation = 2;
+
                 boss.switchAlpha = false;
                 boss.timesPerformed = 0;
                 boss.setSpeed(20);
@@ -693,7 +700,7 @@ final class ErnestoBoss implements Scene, Bossfight {
                     int[] ypoints = {109, 130, 180, 159, 209, 159, 180, 130, 109, 88, 38, 59, 9, 59, 38, 88};
                     Projectile[] projs = new Projectile[xpoints.length];
     
-                    class OctagramProj extends Projectile {
+                    class OctagramProj extends ErnestoProj {
                         int i;
                         OctagramProj(int index) throws IOException {
                             super();
@@ -775,12 +782,11 @@ final class ErnestoBoss implements Scene, Bossfight {
                             timeSinceFade = 0;
                         boss.setPath(new SeekingPath(boss, player));
                         for (int i = 0; i < xpoints.length; i += 2) {
-                            //if (timeSinceFade == 5) i++;
                             xpoints[i] -= 110;
                             ypoints[i] -= 110;
                             xpoints[i] *= 2;
                             ypoints[i] *= 2;
-                            Projectile proj = new Projectile();
+                            Projectile proj = new ErnestoProj();
                             proj.setDMG(100);
                             proj.setSpeed(15);
                             proj.setLocation(boss.getCenterX() + xpoints[i] - proj.getWidth() / 2, boss.getCenterY() + ypoints[i] - proj.getHeight() / 2);
@@ -812,7 +818,7 @@ final class ErnestoBoss implements Scene, Bossfight {
                 tpSit.start();
             });
             switchToFinal.start();
-    
+
             slowGrid.start();
         } catch (Exception e) { e.printStackTrace(); }
         });
@@ -825,7 +831,7 @@ final class ErnestoBoss implements Scene, Bossfight {
         Globals.main.setBackground(java.awt.Color.WHITE);
         Globals.GLOBAL_TIMER.addActionListener(World.get());
         Entity.removeAll(obj -> obj instanceof Projectile);
-        Scene.stopsound(new File("Audio\\AtTheSpeedOfLight.wav"));
+        Scene.stopsound(new File("audio\\AtTheSpeedOfLight.wav"));
         stopTimers();
     }
 
@@ -839,7 +845,7 @@ final class ErnestoBoss implements Scene, Bossfight {
           }
     }
 
-    private class ErnestoPhase2Proj extends Projectile {
+    private class ErnestoPhase2Proj extends ErnestoGridProj {
 
         public ErnestoPhase2Proj() throws IOException {
             super();
@@ -850,21 +856,61 @@ final class ErnestoBoss implements Scene, Bossfight {
         public boolean readyToKill() {
             return distanceTraveled >= range;
         }
+    }
 
-        public ErnestoPhase2Proj clone() {
-            try {
-                return new ErnestoPhase2Proj();
-            } catch (IOException e) {
-                return null;
+    private class ErnestoGridProj extends ErnestoProj {
+
+        static int num = 0;
+
+        public ErnestoGridProj() {
+            super();
+            setAnimation(num++ % 3);
+            getCurrentAnimation().setFrameRate(10);
+        }
+
+        @Override
+        public void update() {
+            age++;
+            if ((indicatorProjDelay != 0 && age < indicatorProjDelay) || !isAlive()) {
+                return;
+            } else {
+                dmg = constDMG;
             }
+            move();
+            if (readyToKill()) {
+                permakill();
+            }
+            
+            rotate((float) (Math.toDegrees(Math.toRadians(360) - rotationDeg)));
+            Point point = getPath().move(speed);
+            rotate((float) -Math.toDegrees(Math.atan2(point.x, point.y)) + 180);
         }
     }
 
-    private class ErnestoPhase1Proj extends Projectile {
-        public ErnestoPhase1Proj() throws IOException {
-            super();
+    private class ErnestoProj extends Projectile {
+
+        static int animation = 0;
+
+        public ErnestoProj() {
+            super(new Spritesheet(Globals.getImage("Jellyfish"), 8, 3), Path.DEFAULT_PATH);
             dmg = 100;
             speed = 4;
+            getCurrentAnimation().setFrameRate(10);
+            getCurrentAnimation().start();
+        }
+
+        @Override
+        public void update() {
+            super.update();
+
+            if (currentAnimation != animation) {
+                setAnimation(animation);
+                getCurrentAnimation().setFrameRate(10);
+            }
+
+            rotate((float) (Math.toDegrees(Math.toRadians(360) - rotationDeg)));
+            Point point = getPath().move(speed);
+            rotate((float) -Math.toDegrees(Math.atan2(point.x, point.y)) + 180);
         }
     }
 
@@ -921,7 +967,7 @@ final class ErnestoBoss implements Scene, Bossfight {
             Graphics2D g2d = newSprite.createGraphics();
             g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
             g2d.drawImage(origSprite, 0, 0, null);
-            sprite = newSprite;
+            setAnimations(Spritesheet.getSpriteSheet(newSprite));
             timesPerformed++;
             return timesPerformed % (1 / Math.abs(alphaDecr) * 2) == 0;
         }

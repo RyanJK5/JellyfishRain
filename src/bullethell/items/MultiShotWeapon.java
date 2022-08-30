@@ -28,7 +28,7 @@ public class MultiShotWeapon extends Weapon {
 
     public MultiShotWeapon(String name, int dmg, int fireSpeed, double maxSpread, int shotNum, int range, int manaCost) 
       throws IOException {
-        this(ImageIO.read(new File("Sprites/Item.png")), name, dmg, fireSpeed, maxSpread, shotNum, range, manaCost);
+        this(ImageIO.read(new File("sprites/Item.png")), name, dmg, fireSpeed, maxSpread, shotNum, range, manaCost);
     }
 
     public MultiShotWeapon(BufferedImage sprite, String name, double maxSpread, int shotNum, int range) {
@@ -44,7 +44,7 @@ public class MultiShotWeapon extends Weapon {
         Player player = Player.get();
         if (!(player.getCurrentFire() >= getFireTime() && player.isAlive())) return;
         try {
-            BufferedImage projSprite = ImageIO.read(new File("Sprites/FriendlyBullet.png"));
+            BufferedImage projSprite = ImageIO.read(new File("sprites/FriendlyBullet.png"));
             int centerX = player.getCenterX() - projSprite.getWidth(null) / 2;
             int centerY = player.getCenterY() - projSprite.getHeight(null) / 2;
             

@@ -58,20 +58,20 @@ final class Forge implements Scene {
     @Override
     public void start(int x, int y) {
         try {
-            BufferedImage forgeImg = ImageIO.read(new File("Sprites/Forge.png"));
+            BufferedImage forgeImg = ImageIO.read(new File("sprites/Forge.png"));
             forge = new GameSolid(forgeImg, 1);
             forge.setHitbox(new Ellipse2D.Float(0, 0, forge.getWidth(), forge.getHeight()));
             forge.setLocation(x, y);
 
             components = new Inventory<>(new Dimension(5, 3), 
-              ImageIO.read(new File("Sprites/InventorySlot.png")), Item.class);
+              ImageIO.read(new File("sprites/InventorySlot.png")), Item.class);
             components.setInteractable(false);
             components.setNavigable(false);
             components.setMovable(false);
             components.kill();
 
             availableComponents = new Inventory<>(new Dimension(5, 3),
-            ImageIO.read(new File("Sprites/InventorySlot.png")),
+            ImageIO.read(new File("sprites/InventorySlot.png")),
             Item.class);
             availableComponents.setInteractable(false);
             availableComponents.setNavigable(false);
@@ -84,7 +84,7 @@ final class Forge implements Scene {
             componentsText = new Text("Components:", font);
             componentsText.kill();
 
-            result = new Container<>(ImageIO.read(new File("Sprites/InventorySlot.png")), Item.class) {
+            result = new Container<>(ImageIO.read(new File("sprites/InventorySlot.png")), Item.class) {
                 @Override
                 public boolean moveItem(boolean taking, Inventory<? super Item> inventory) {
                     Player player = Player.get();
@@ -128,7 +128,7 @@ final class Forge implements Scene {
             result.kill();
 
             inv = new Inventory<>(new Dimension(10, 8), 
-              ImageIO.read(new File("Sprites/InventorySlot.png")), Recipe.class) {
+              ImageIO.read(new File("sprites/InventorySlot.png")), Recipe.class) {
                 
                 @Override
                 public void setLocation(int x, int y) {
@@ -205,7 +205,7 @@ final class Forge implements Scene {
             inv.kill();
             inv.setHitbox(inv.getFullWidth() + inv.getWidth() * 5 + 20, inv.getHeight());
 
-            craftButton = new Trigger(ImageIO.read(new File("Sprites/CraftButton.png")),
+            craftButton = new Trigger(ImageIO.read(new File("sprites/CraftButton.png")),
               new Trigger.Type[] {Trigger.CURSOR_OVER, Trigger.ON_CLICK}) {
                
                 @Override
@@ -267,9 +267,9 @@ final class Forge implements Scene {
         try {
             for (Container<Recipe> cont : inv) {
                 if (cont.getItem() != null && !cont.getItem().canCraftFromInv()) {
-                    cont.setSprite(ImageIO.read(new File("Sprites/RedInventorySlot.png")));
+                    cont.setSprite(ImageIO.read(new File("sprites/RedInventorySlot.png")));
                 } else {
-                    cont.setSprite(ImageIO.read(new File("Sprites/InventorySlot.png")));
+                    cont.setSprite(ImageIO.read(new File("sprites/InventorySlot.png")));
                 }
             }
         } catch (IOException e) {

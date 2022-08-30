@@ -322,7 +322,7 @@ public final class GameDisplay extends JPanel {
 
 		setFocusTraversalKeysEnabled(false);
 
-		BufferedImage cursorImage = ImageIO.read(new File("Sprites/Cursor.png"));
+		BufferedImage cursorImage = ImageIO.read(new File("sprites/Cursor.png"));
 		cursor = getToolkit().createCustomCursor(cursorImage, new Point(), "cursor");
 		blankCursor = getToolkit().createCustomCursor(new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB), 
 		  new Point(), "blank cursor");

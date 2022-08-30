@@ -43,8 +43,7 @@ public class Enemy extends Entity {
     }
 
     private Enemy(Enemy enemy) throws IOException {
-        super(new Spritesheet(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB), 1, 1),
-          enemy.path, enemy.dmg, enemy.maxHP, enemy.speed, false);
+        super(enemy);
         name = enemy.name;
         healthBar = new HealthBar();
         healthBar.kill();
@@ -215,14 +214,14 @@ public class Enemy extends Entity {
 		public static final int SHOW_TIME = 2000 / Globals.TIMER_DELAY;
     	
     	public HealthBar() throws IOException {
-    		super(ImageIO.read(new File("Sprites/HealthBarBackSmall.png")));
+    		super(ImageIO.read(new File("sprites/HealthBarBackSmall.png")));
     	}
     	
     	@Override
 		public void paint(Graphics g) {
 			try {
 				super.paint(g);
-                BufferedImage frontSprite = ImageIO.read(new File("Sprites/HealthBarFrontSmall.png"));
+                BufferedImage frontSprite = ImageIO.read(new File("sprites/HealthBarFrontSmall.png"));
 				if (getHP() > 0) {
 					float slivWidth;
 					slivWidth = (float) w / (float) getMaxHP();
@@ -243,6 +242,7 @@ public class Enemy extends Entity {
         try {
             return new Enemy(this);
         } catch (IOException e) {
+            e.printStackTrace();
             return null;
         }
     }

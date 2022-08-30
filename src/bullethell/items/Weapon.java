@@ -35,7 +35,7 @@ public class Weapon extends Item {
     }
 
     public Weapon(String name, int dmg, int fireTime, int range) throws IOException {
-        this(ImageIO.read(new File("Sprites/Item.png")), name, dmg, DEFAULT_FIRE_TIME, 0, 
+        this(ImageIO.read(new File("sprites/Item.png")), name, dmg, DEFAULT_FIRE_TIME, 0, 
             DEFAULT_MANA_COST);
     }
 
@@ -57,7 +57,7 @@ public class Weapon extends Item {
         defaultShotSpeed = shotSpeed;
         defaultManaCost = manaCost;
         try {
-            projSprite = ImageIO.read(new File("Sprites/FriendlyBullet.png"));
+            projSprite = ImageIO.read(new File("sprites/FriendlyBullet.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }

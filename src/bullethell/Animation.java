@@ -8,26 +8,28 @@ import java.util.List;
 
 public class Animation implements ActionListener {
 
-    private boolean moving = false;
     private List<BufferedImage> frames = new ArrayList<>();
     private int currentFrame;
     private int startFrame;
 
+    private int frameRate = 0;
+    private int timeSinceLastFrame;
+    
     public Animation(BufferedImage[] frames, int startFrame) {
         for (int i = 0; i < frames.length; i++) {
             this.frames.add(frames[i]);
         }
         this.startFrame = startFrame;
         currentFrame = startFrame;
-
-        Globals.GLOBAL_TIMER.addActionListener(this);
     }
-
+    
     public void actionPerformed(ActionEvent e) {
-        if (!moving) {
+        if (timeSinceLastFrame < frameRate) {
+            timeSinceLastFrame++;
             return;
         }
-
+        timeSinceLastFrame = 0;
+        
         if (currentFrame != frames.size() - 1) {
             currentFrame++;
         } else {
@@ -35,36 +37,52 @@ public class Animation implements ActionListener {
         }
     }
 
+    private void add() {
+        if (!Globals.contains(Globals.GLOBAL_TIMER.getActionListeners(), this)) {
+            Globals.GLOBAL_TIMER.addActionListener(this);
+        }
+    }
+
     public void restart() {
-        moving = true;
+        add();
         currentFrame = startFrame;
     }
 
     public void reset() {
-        moving = false;
+        Globals.GLOBAL_TIMER.removeActionListener(this);
         currentFrame = startFrame;
     }
 
     public void start() { 
-        moving = true;
+        add();
     }
 
     public void stop() {
-        moving = false;
+        Globals.GLOBAL_TIMER.removeActionListener(this);
     }
 
-    public boolean active() { return moving; }
+    public boolean active() { return Globals.contains(Globals.GLOBAL_TIMER.getActionListeners(), this); }
 
     public void setToFrame(int frame) { this.currentFrame = frame; }
     public int getNumOfFrames() { return frames.size(); }
     
+    /**
+     * @param frameRate the number of 12 millisecond intervals between each frame update
+     */
+    public void setFrameRate(int frameRate) {
+        if (frameRate < 0) {
+            throw new IllegalArgumentException("frameRate must be greater than 0");
+        }
+        this.frameRate = frameRate;
+    }
+
     public int getFrameIndex() { return currentFrame; }
     public BufferedImage getFrame() { return frames.get(currentFrame); }
     public BufferedImage getFrame(int index) { return frames.get(index); }
 
     @Override
     public String toString() { 
-        return "{" + "moving=" + moving + ", currentFrame=" + currentFrame + "}";
+        return "{" + "moving=" + active() + ", currentFrame=" + currentFrame + "}";
     }
 
     public static Animation[] getAnimations(Spritesheet spritesheet) {

@@ -31,13 +31,13 @@ public final class Globals {
     public static final int TIMER_DELAY = 12;
 
 	public static final ToggleAction eAction = new ToggleAction(false);
-    public static final Timer GLOBAL_TIMER = new Timer(TIMER_DELAY, null);
     
+    public static final Timer GLOBAL_TIMER = new Timer(TIMER_DELAY, null);
+
     public static Player player;
     
     public static GameDisplay main;
     public static JFrame frame;
-
     
     public static final Random rand = new Random();
 
@@ -163,7 +163,7 @@ public final class Globals {
 
     public static java.awt.image.BufferedImage getImage(String fileName) {
         try {
-            return ImageIO.read(new File("Sprites\\" + fileName + ".png"));
+            return ImageIO.read(new File("sprites\\" + fileName + ".png"));
         } catch (IOException e) {
             e.printStackTrace();
             return null;

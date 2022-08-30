@@ -65,28 +65,28 @@ public final class SaveSystem {
 
     private static void declareItemIDs() throws IOException {
         // Sword
-        ITEM_IDS[0] = new MeleeWeapon(ImageIO.read(new File("Sprites\\Sword.png")), "Swingy", 30, MeleeWeapon.DEFAULT_FIRE_TIME);
+        ITEM_IDS[0] = new MeleeWeapon(ImageIO.read(new File("sprites\\Sword.png")), "Swingy", 30, MeleeWeapon.DEFAULT_FIRE_TIME);
         
         // Casty
-        ITEM_IDS[1] = new Weapon(ImageIO.read(new File("Sprites\\Staff.png")), 
-          ImageIO.read(new File("Sprites\\TriangleBullet.png")), "Casty", 75, 5, 0, 100);
+        ITEM_IDS[1] = new Weapon(ImageIO.read(new File("sprites\\Staff.png")), 
+          ImageIO.read(new File("sprites\\TriangleBullet.png")), "Casty", 75, 5, 0, 100);
         
         // Shooty
-        ITEM_IDS[2] = new Weapon(ImageIO.read(new File("Sprites\\Scepter.png")), "Shooty", 10, Weapon.DEFAULT_FIRE_TIME, 0, 0);
+        ITEM_IDS[2] = new Weapon(ImageIO.read(new File("sprites\\Scepter.png")), "Shooty", 10, Weapon.DEFAULT_FIRE_TIME, 0, 0);
         
         // Magic Dust
-        ITEM_IDS[3] = new StackableItem(ImageIO.read(new File("Sprites\\MagicDust.png")), "Magic Dust");
+        ITEM_IDS[3] = new StackableItem(ImageIO.read(new File("sprites\\MagicDust.png")), "Magic Dust");
         
         // Health Charm
-        Accessory acc = new Accessory(ImageIO.read(new File("Sprites\\HealthCharm.png")), "Health Charm");
+        Accessory acc = new Accessory(ImageIO.read(new File("sprites\\HealthCharm.png")), "Health Charm");
         acc.setBonuses(new int[] {100, 0, 0, 0, 0, 0, 0, 0, 0, 0});
         ITEM_IDS[4] = acc;
         
         // Metal
-        ITEM_IDS[5] = new StackableItem(ImageIO.read(new File("Sprites\\Metal.png")), "Metal");
+        ITEM_IDS[5] = new StackableItem(ImageIO.read(new File("sprites\\Metal.png")), "Metal");
 
         // Strange Sigil
-        ITEM_IDS[6] = new Item(ImageIO.read(new File("Sprites\\Sigil.png")), "Strange Sigil");
+        ITEM_IDS[6] = new Item(ImageIO.read(new File("sprites\\Sigil.png")), "Strange Sigil");
 
         // Teleport Charm, Dash Charm, Slow Charm, Heal Charm
         for (int i = 0; i < Ability.Type.values().length; i++) {
@@ -185,7 +185,7 @@ public final class SaveSystem {
     }
 
     public static void writePlayerData(boolean onDeath) throws IOException {
-        File file = new File("Data\\PlayerData.dat");
+        File file = new File("data\\PlayerData.dat");
         Player obj = Player.get();
 
         int txtX, txtY;
@@ -274,7 +274,7 @@ public final class SaveSystem {
     }
 
     public static void readPlayerData() throws IOException {
-        File file = new File("Data\\PlayerData.dat");
+        File file = new File("data\\PlayerData.dat");
         if (!file.exists()) {
             return;
         }
@@ -394,7 +394,7 @@ public final class SaveSystem {
     }
 
     public static void writeEntityData() throws IOException {
-        File file = new File("Data\\EntityData.dat");
+        File file = new File("data\\EntityData.dat");
         
         try (FileWriter writer = new FileWriter(file)) {
             for (int i = 0; i < GameSolid.solids.size(); i++) {
@@ -417,7 +417,7 @@ public final class SaveSystem {
     }
 
     public static void readEntityData() throws IOException {
-        File file = new File("Data\\EntityData.dat");
+        File file = new File("data\\EntityData.dat");
         if (!file.exists()) {
             return;
         }
@@ -432,7 +432,7 @@ public final class SaveSystem {
     }
 
     public static void writeWorldData() throws IOException {
-        File file = new File("Data\\WorldData.dat");
+        File file = new File("data\\WorldData.dat");
 
         try (FileWriter writer = new FileWriter(file)) {
             for (boolean bool : World.get().getEvents()) {
@@ -442,7 +442,7 @@ public final class SaveSystem {
     }
 
     public static void loadWorld(boolean newWorld) throws IOException {
-        File file = new File("Data\\WorldData.dat");
+        File file = new File("data\\WorldData.dat");
         
         if (newWorld || !file.exists()) {
             World.get().start(0, 0);
@@ -462,7 +462,7 @@ public final class SaveSystem {
     }
 
     public static void writeSettingsData() throws IOException {
-        File file = new File("Data\\SettingsData.dat");
+        File file = new File("data\\SettingsData.dat");
         
         Integer[] keySet = Globals.KEY_MAP.keySet().toArray(new Integer[0]);
         Boolean[] values = Globals.KEY_MAP.values().toArray(new Boolean[0]);
@@ -477,7 +477,7 @@ public final class SaveSystem {
     }
 
     public static void readSettingsData() throws IOException {
-        File file = new File("Data\\SettingsData.dat");
+        File file = new File("data\\SettingsData.dat");
         if (!file.exists()) {
             return;
         }
