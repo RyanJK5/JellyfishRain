@@ -8,11 +8,8 @@ import java.util.List;
 import java.util.Objects;
 
 import bullethell.GameObject;
-import bullethell.Globals;
 import bullethell.Player;
-import bullethell.items.Ability;
 import bullethell.items.Item;
-import bullethell.items.StackableItem;
 
 public class Container<T extends Item> extends GameObject {
     
@@ -71,29 +68,29 @@ public class Container<T extends Item> extends GameObject {
     public boolean moveItem(boolean taking, Inventory<? super T> inventory) {
         Player player = Player.get();
         
-        boolean stackable = item != null && item instanceof StackableItem;
+        boolean stackable = item != null && item.canStack;
         if (!stackable) {
             stackable = stackable();
         }
-        boolean cursorStackable = player.getCursorSlot() instanceof StackableItem || player.getCursorSlot() == null;
+        boolean cursorStackable = player.getCursorSlot() == null || player.getCursorSlot().canStack;
 
         if (item != null) {
             if (taking && stackable) {
-                if (player.getCursorSlot() != null && cursorStackable) {
-                    ((StackableItem) player.getCursorSlot()).addFrom(1, (StackableItem) item);
+                if (player.getCursorSlot() != null && cursorStackable && player.getCursorSlot().equals(item)) {
+                    player.getCursorSlot().addFrom(1, item);
                 } else if (player.getCursorSlot() == null) {
-                    player.select(((StackableItem) item).take(1));
+                    player.select(item.take(1));
                 }
             } else if (player.getCursorSlot() == null) {
                 if (stackable) {
-                    player.select(((StackableItem) item).take(0));
+                    player.select(item.take(0));
                 } else {
                     player.select(item);
                     item = null;
                 }
             } else if (itemClass.isInstance(player.getCursorSlot())) {
                 if (stackable && cursorStackable && item.equals(player.getCursorSlot())) {
-                    ((StackableItem) item).addFrom(0, (StackableItem) player.getCursorSlot());
+                    item.addFrom(0, player.getCursorSlot());
                 } else if (inventory == null) {
                     T temp = (T) player.getCursorSlot();
                     player.select(item);
@@ -105,7 +102,7 @@ public class Container<T extends Item> extends GameObject {
             }
         } else if (!taking && player.getCursorSlot() != null && itemClass.isInstance(player.getCursorSlot())) {
             if (cursorStackable) {
-                item = (T) ((StackableItem) player.getCursorSlot()).take(0);
+                item = (T) player.getCursorSlot().take(0);
             } else {
                 item = (T) player.getCursorSlot();
                 player.select(null);
@@ -143,13 +140,6 @@ public class Container<T extends Item> extends GameObject {
     }
 
     public final boolean stackable() {
-        Class<? super T> stackableClass = itemClass;
-        while (stackableClass != Object.class) {
-            stackableClass = stackableClass.getSuperclass();
-            if (stackableClass.equals(StackableItem.class)) {
-                return true;
-            }
-        }
         return false;
     }
 
@@ -158,30 +148,22 @@ public class Container<T extends Item> extends GameObject {
         Item item;
         
         ItemDrawing(Item item, float scaleFactor) {
-            super(item.scaledSprite(scaleFactor), true);
+            super(null, true);
+            BufferedImage scaledImage = new BufferedImage((int) (item.getWidth() * scaleFactor), (int) (item.getHeight() * scaleFactor), 
+              BufferedImage.TYPE_INT_ARGB);
+            scaledImage.getGraphics().drawImage(item.getSprite(), 0, 0, scaledImage.getWidth(), scaledImage.getHeight(), null);
+            setSprite(scaledImage);
             this.item = item;
         }
         
         @Override
         public void paint(Graphics g) {
-            super.paint(g);
-            if (item instanceof StackableItem stack) {
-                g.drawString(Integer.toString(stack.getCount()), x, y + h);
-            }
-            else if (item.equals(Ability.getAbility(Ability.Type.HEAL))) {
-                g.drawString(Integer.toString(Player.get().getHealNum()), x, y + h);
-            }
+            BufferedImage temp = item.getSprite();
+            item.setSprite(getSprite());
+            item.setLocation(x, y);
+            item.paint(g);
+            item.setSprite(temp);
 
-            if (Player.cursorX() >= x && Player.cursorX() <= x + w &&
-            Player.cursorY() >= y && Player.cursorY() <= y + h &&
-            Player.get().getCursorSlot() == null) {
-                for (int i = 0; i < item.getData().length; i++) {
-                    if (item.getData()[i] != null) {
-                        g.drawString(item.getData()[i].toString(), Player.cursorX() + 10, 
-                          Player.cursorY() + 20 + i * Globals.DEFAULT_FONT.getSize());
-                    }
-                }
-            }
         }
     }
 }

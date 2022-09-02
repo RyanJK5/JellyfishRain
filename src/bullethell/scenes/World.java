@@ -11,11 +11,9 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import javax.imageio.ImageIO;
 
-import bullethell.Enemy;
 import bullethell.Entity;
 import bullethell.GameSolid;
 import bullethell.GameState;
@@ -24,8 +22,11 @@ import bullethell.Player;
 import bullethell.SaveSystem;
 import bullethell.SolidContainer;
 import bullethell.Trigger;
+import bullethell.enemies.Enemy;
+import bullethell.enemies.EnemyID;
 import bullethell.items.Item;
 import bullethell.items.ItemDrop;
+import bullethell.items.ItemID;
 import bullethell.movement.CirclePath;
 import bullethell.movement.SeekingPath;
 
@@ -64,7 +65,7 @@ public final class World implements Scene, ActionListener {
         try {
 
             if (!castyTaken) {
-                casty = new ItemDrop(SaveSystem.getItem(2), 1000, 200);
+                casty = new ItemDrop(ItemID.EXAMPLE_STAFF, 1, 1000, 200);
             }
             
             if (!chestOpened) {
@@ -75,12 +76,12 @@ public final class World implements Scene, ActionListener {
                     @Override
                     protected void activate() {
                         Globals.setGameState(GameState.ENCOUNTER);
-                        Player.get().getInventory().addItem(SaveSystem.getStackable(5, 14));
+                        Player.get().getInventory().addItem(ItemID.METAL.getItem().clone(14));
                         
                         permakill();
                         chest.permakill();
                         for (int i = 0; i < 6; i++) {
-                            Entity ent = SaveSystem.getEntity(0);
+                            Entity ent = EnemyID.PIXIE.getEnemy();
                             Point start = new Point(900, 200);
                             ent.setLocation(900 - ent.getWidth() / 2, 200 - ent.getHeight() / 2);
                             ent.setPath(new CirclePath(new Point(1000, 200), start, 2, true));
@@ -88,7 +89,6 @@ public final class World implements Scene, ActionListener {
                                 ent.move();
                             }
                             ent.setPath(new SeekingPath(ent, Player.get()));
-                            ent.setSpeed(new Random().nextInt(8, 12));
                             ((Enemy) ent).addToGroup(1);
                         }
                     }
@@ -101,7 +101,7 @@ public final class World implements Scene, ActionListener {
                 @Override
                 public boolean moveItem(boolean taking) {
                     if (Player.get().getCursorSlot() != null &&
-                      !Player.get().getCursorSlot().equals(SaveSystem.getItem(6))) {
+                      !Player.get().getCursorSlot().id.equals(ItemID.STRANGE_SIGIL)) {
                         return false;
                     }
                     return super.moveItem(taking);
@@ -124,7 +124,7 @@ public final class World implements Scene, ActionListener {
                             timesPerformed++;
                             return;
                         }
-                        Player.get().getInventory().addItem(SaveSystem.getItem(6));
+                        Player.get().getInventory().addItem(ItemID.STRANGE_SIGIL.getItem());
                         inBossFight = true;
                         Player.get().setLocation(sigilPedestal.getX() - 200, sigilPedestal.getY());
                         SaveSystem.writeData(false);

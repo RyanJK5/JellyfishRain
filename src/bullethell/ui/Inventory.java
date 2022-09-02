@@ -26,7 +26,7 @@ import bullethell.Globals;
 import bullethell.Player;
 import bullethell.Trigger;
 import bullethell.items.Item;
-import bullethell.items.StackableItem;
+import bullethell.items.ItemID;
 import bullethell.movement.Direction;
 
 public class Inventory<T extends Item> extends UI implements Iterable<Container<T>> {
@@ -131,7 +131,7 @@ public class Inventory<T extends Item> extends UI implements Iterable<Container<
 
                 displayedSlots = new ArrayList<>();
                 for (int i = 0; i < slots.size(); i++) {
-                    if (slots.get(i).getItem() != null && slots.get(i).getItem().getName().toLowerCase().contains(searchBar.getText().toLowerCase())) {
+                    if (slots.get(i).getItem() != null && slots.get(i).getItem().name.toLowerCase().contains(searchBar.getText().toLowerCase())) {
                         displayedSlots.add(slots.get(i));
                     }
                 }
@@ -258,7 +258,7 @@ public class Inventory<T extends Item> extends UI implements Iterable<Container<
     }
 
     private void sort(List<Container<T>> slots) {
-        List<StackableItem> stacks = new ArrayList<>();
+        List<Item> stacks = new ArrayList<>();
         outer: for (int i = 0; i < slots.size(); i++) {
             Container<T> cont = slots.get(i);
 
@@ -266,17 +266,17 @@ public class Inventory<T extends Item> extends UI implements Iterable<Container<
                 cont.setItem(null);
             }
 
-            if (cont.getItem() instanceof StackableItem stack) {
-                for (StackableItem oStack : stacks) {
-                    if (oStack.equals(stack)) {
-                        oStack.addFrom(0, stack);
-                        if (!stack.isAlive()) {
+            if (cont.getItem() != null && cont.getItem().canStack) {
+                for (Item oStack : stacks) {
+                    if (oStack.equals(cont.getItem())) {
+                        oStack.addFrom(0, cont.getItem());
+                        if (cont.getItem() != null && !cont.getItem().isAlive()) {
                             cont.setItem(null);
                         }
                         continue outer;
                     }
                 }
-                stacks.add(stack);
+                stacks.add(cont.getItem());
             }
         }
         
@@ -291,8 +291,8 @@ public class Inventory<T extends Item> extends UI implements Iterable<Container<
                 return -1;
             }
 
-            String str1 = o1.getItem().getName();
-            String str2 = o2.getItem().getName();
+            String str1 = o1.getItem().name;
+            String str2 = o2.getItem().name;
             for (int i = 0; i < str1.length(); i++) {
                 char char1 = Character.toUpperCase(str1.charAt(i));
                 char char2 = Character.toUpperCase(str2.charAt(i));
@@ -476,20 +476,18 @@ public class Inventory<T extends Item> extends UI implements Iterable<Container<
         return slots.size() - emptySlots();
     }
 
-    public List<Item> hasItems(T[] itemList) {
+    public List<Item> hasItems(ItemID[] itemList) {
         List<Item> result = new ArrayList<>();
         for (int i = 0; i < itemList.length; i++) {
-            Item oItem = itemList[i];
+            ItemID oItem = itemList[i];
             
-            List<Item> foundItems = new ArrayList<>();
             for (Container<T> cont : this) {
                 Item item = cont.getItem();
-                if (item == null || !item.equals(oItem)) {
+                if (item == null || item.id != oItem) {
                     continue;
                 }
-                foundItems.add(item);
+                result.add(item);
             }
-            result.addAll(foundItems);
         }
         return result;
     }
@@ -529,7 +527,7 @@ public class Inventory<T extends Item> extends UI implements Iterable<Container<
     public String toString() {
         String str = "{";
         for (int i = 0; i < slots.size(); i++) {
-            str += (slots.get(i).getItem() == null ? "null" : slots.get(i).getItem().getName()) + ", ";
+            str += (slots.get(i).getItem() == null ? "null" : slots.get(i).getItem().name) + ", ";
         }
         str += "}";
         return str;

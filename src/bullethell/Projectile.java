@@ -11,7 +11,7 @@ import java.awt.geom.Area;
 import java.util.ArrayList;
 import java.util.List;
 
-import bullethell.items.MeleeWeapon;
+import bullethell.items.weapons.ExampleSword;
 import bullethell.movement.Path;
 
 public class Projectile extends Entity {
@@ -117,7 +117,7 @@ public class Projectile extends Entity {
 		
 		if ((indicatorProjDelay != 0 && age < indicatorProjDelay) ||
 		  (obj instanceof Projectile) ||
-		  (obj instanceof MeleeWeapon.AtkBox)) {
+		  (obj instanceof ExampleSword.AtkBox)) {
 			return false;
 		}
 

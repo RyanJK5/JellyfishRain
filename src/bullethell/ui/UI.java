@@ -9,7 +9,6 @@ import java.util.List;
 import bullethell.GameObject;
 import bullethell.Globals;
 import bullethell.Player;
-import bullethell.items.StackableItem;
 
 public class UI extends GameObject {
 
@@ -67,7 +66,8 @@ public class UI extends GameObject {
                             }
 
                             inv.moveItem(Player.cursorX(), Player.cursorY(), e.getButton() == MouseEvent.BUTTON3);
-                            stackable = inv.getSlot(Player.cursorX(), Player.cursorY()) instanceof StackableItem;
+                            stackable = inv.getSlot(Player.cursorX(), Player.cursorY()) != null && 
+                              inv.getSlot(Player.cursorX(), Player.cursorY()).canStack;
                             
                             Thread.sleep(12);
                             

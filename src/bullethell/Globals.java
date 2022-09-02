@@ -50,7 +50,6 @@ public final class Globals {
     private static float volume = 1f;
 
 	public static final boolean PAINT_QUADTREE = false;
-	public static final boolean DEBUG_MODE = false;
 
     public static final int SCREEN_WIDTH = (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth();
     public static final int SCREEN_HEIGHT = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight();
@@ -168,6 +167,11 @@ public final class Globals {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public static int damageFormula(int baseDMG) {
+        return (int) ((1 + (float) Player.get().adren / (float) Player.get().maxAdr) * 
+          (baseDMG * (1 + Player.get().modifiers.mDMG) + Player.get().modifiers.pDMG));
     }
 
     public static void changeKeybind(int action, int keyBind, boolean keyEvent) {

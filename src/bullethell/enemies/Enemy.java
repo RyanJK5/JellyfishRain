@@ -1,6 +1,7 @@
-package bullethell;
+package bullethell.enemies;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.geom.AffineTransform;
@@ -9,54 +10,61 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Random;
 
 import javax.imageio.ImageIO;
 
-import bullethell.items.Item;
+import bullethell.Entity;
+import bullethell.GameObject;
+import bullethell.GameSolid;
+import bullethell.GameState;
+import bullethell.Globals;
+import bullethell.Player;
+import bullethell.Spritesheet;
 import bullethell.items.ItemDrop;
-import bullethell.items.StackableItem;
-import bullethell.movement.Path;
+import bullethell.items.ItemLoot;
 
-public class Enemy extends Entity {
+public abstract class Enemy extends Entity {
     
+    protected EnemyID id;
 	protected HealthBar healthBar;    
     protected String name;
     protected int timeSinceHit = 0;
     protected int dmgTaken;
     protected int groupID = -1;
 
-    private List<Hit> hits = new ArrayList<>();
-    private HashMap<Item, Float> lootTable = new HashMap<>();
+    private final List<Hit> hits = new ArrayList<>();
+    protected ItemLoot[] lootTable;
 
-    public Enemy(Spritesheet spritesheet, String name, Path path, int maxHP, int dmg, float speed) throws IOException {
-        super(spritesheet, path, dmg, maxHP, speed, false);
-        this.name = name;
-        healthBar = new HealthBar();
-        healthBar.kill();   
-    }
-    
-    public Enemy(Spritesheet spritesheet, String name, int maxHP, int dmg, float speed) throws IOException {
-        this(spritesheet, name, Path.DEFAULT_PATH, maxHP, dmg, speed);
+    protected Enemy() {
+        super();
+        
+        Dimension dimensions = getSpritesheetDimensions();
+
+        if (new File("sprites\\enemies\\" + getClass().getSimpleName() + ".png").exists()) {
+            setAnimations(new Spritesheet(Globals.getImage("enemies\\" + getClass().getSimpleName()), dimensions.width, dimensions.height)); 
+        } else {
+            setAnimations(new Spritesheet(Globals.getImage("enemies\\Default"), 1, 1));
+        }
+
+        try {
+            healthBar = new HealthBar();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        name = "Unnamed";
+
+        setValues();
+        createLootTable();
     }
 
-    private Enemy(Enemy enemy) throws IOException {
-        super(enemy);
-        name = enemy.name;
-        healthBar = new HealthBar();
-        healthBar.kill();
-        lootTable = enemy.lootTable;
-    }
+    protected abstract void setValues();
 
-    public void addItemsLootTable(HashMap<Item, Float> newItems) {
-        lootTable.putAll(newItems);
-    }
+    protected abstract void createLootTable();
 
-    public void addItemToLootTable(Item item, float chance) {
-        lootTable.put(item, chance);
-    }
+    protected Dimension getSpritesheetDimensions() {
+        return new Dimension(1, 1);
+    };
 
     @Override  
     public void update() {
@@ -69,6 +77,11 @@ public class Enemy extends Entity {
     		healthBar.kill();
     	}
     }
+
+    @Override
+    public final Enemy clone() {
+        return EnemyID.getEnemy(id);
+    }
     
     @Override
     public void setLocation(int x, int y) {
@@ -79,7 +92,7 @@ public class Enemy extends Entity {
         this.x = x;
         this.y = y;
         if (healthBar != null) {
-            healthBar.setLocation((x + w / 2) - healthBar.w / 2, y + h + 10);
+            healthBar.setLocation((x + w / 2) - healthBar.getWidth() / 2, y + h + 10);
         }
     }
 
@@ -143,14 +156,11 @@ public class Enemy extends Entity {
     private void gameKill() {
         permakill();
 
-        Random rand = new Random();
-        for (Item item : lootTable.keySet()) {
-            float chance = rand.nextFloat();
-            if (lootTable.get(item) >= chance) {
-                if (item instanceof StackableItem stack) {
-                    item = new StackableItem(stack, rand.nextInt(stack.getCount(), stack.getCapacity() + 1));
-                } 
-                new ItemDrop(item, getCenterX() + rand.nextInt(-20, 20), getCenterY() + rand.nextInt(-20, 20));
+        for (ItemLoot item : lootTable) {
+            float chance = Globals.rand.nextFloat();
+            if (item.chance >= chance) {
+                new ItemDrop(item.item, Globals.rand.nextInt(item.minAmount, item.maxAmount + 1), 
+                  getCenterX() + Globals.rand.nextInt(-20, 20), getCenterY() + Globals.rand.nextInt(-20, 20));
             }
         }
     }
@@ -174,7 +184,7 @@ public class Enemy extends Entity {
         return false;
     }
     
-    class Hit {
+    private class Hit {
         String text;
         int x, y;
         int origY;
@@ -209,7 +219,7 @@ public class Enemy extends Entity {
         }
     }
 
-    public class HealthBar extends GameObject {
+    private class HealthBar extends GameObject {
 		
 		public static final int SHOW_TIME = 2000 / Globals.TIMER_DELAY;
     	
@@ -238,23 +248,14 @@ public class Enemy extends Entity {
         return name;
     }
 
-    public Enemy clone() {
-        try {
-            return new Enemy(this);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
     @Override
     public void registerDMG(int dmg) {
         if (dmg <= 0) {
             return;
         }
         
-        dmgTaken = dmg;
-        hp -= dmg;
+        dmgTaken = Globals.damageFormula(dmg);
+        hp -= dmgTaken;
         timeSinceHit = 0;
         new Hit(dmgTaken, x + w, y);
         healthBar.revive();

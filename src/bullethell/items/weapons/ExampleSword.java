@@ -1,84 +1,53 @@
-package bullethell.items;
+package bullethell.items.weapons;
 
 import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
-import javax.imageio.ImageIO;
-
-import bullethell.Enemy;
 import bullethell.Entity;
 import bullethell.GameSolid;
 import bullethell.Globals;
 import bullethell.Player;
 import bullethell.Spritesheet;
+import bullethell.enemies.Enemy;
+import bullethell.items.EquipType;
+import bullethell.items.Item;
+import bullethell.items.ItemID;
+import bullethell.items.Recipe;
 
-public class MeleeWeapon extends Weapon {
+public final class ExampleSword extends Item {
 
-	public static final int DEFAULT_DMG = 40;
-    public static final int DEFAULT_FIRE_TIME = 300 / Globals.TIMER_DELAY;
-    public static final double DEFAULT_COVERAGE_ANGLE = 90;
-
-    private double coverage = DEFAULT_COVERAGE_ANGLE;
     private AtkBox atkBox;
-    
-    public MeleeWeapon(String name) throws IOException {
-        this(name, DEFAULT_DMG, DEFAULT_FIRE_TIME);
-    }
+    private float coverage;
 
-    public MeleeWeapon(String name, int dmg, int fireTime) throws IOException {
-        this(ImageIO.read(new File("sprites/Item.png")), name, dmg, DEFAULT_FIRE_TIME);
-    }
-
-    public MeleeWeapon(BufferedImage sprite, String name) {
-        this(sprite, name, DEFAULT_DMG, DEFAULT_FIRE_TIME);
-    }
-
-    public MeleeWeapon(BufferedImage sprite, String name, int dmg, int fireTime) {
-        super(sprite, name, dmg, fireTime, 0, 0);
-    }
-    
     public AtkBox getAtkBox() { return atkBox; }
 
     @Override
-    public void attack() {
+    protected void setValues() {
+        id = ItemID.EXAMPLE_SWORD;
+        equipType = EquipType.WEAPON;
+
+        name = "Example Sword";
+        
+        dmg = 40;
+        fireTime = 300 / Globals.TIMER_DELAY;
+        coverage = 90;
+    }
+
+    @Override
+    protected void addRecipes() {
+        new Recipe(new ItemID[] {ItemID.METAL}, id, new int[] {8}, 1);
+    }
+
+    @Override
+    public void onUse() {
         Player player = Player.get();
-        if (!(player.getCurrentFire() >= getFireTime() && player.isAlive())) {
+        if (!(player.getCurrentFire() >= fireTime && player.isAlive())) {
             return;
         }
         (new AtkBox(Spritesheet.getSpriteSheet("Slash"), new Rectangle(140, 0, 43, 162))).update();
         player.setCurrentFire(0);
     }
 
-    @Override
-    public MeleeWeapon clone() {
-        MeleeWeapon obj = new MeleeWeapon(sprite, name, getDefaultWepDMG(), getDefaultFireTime());
-        obj.coverage = coverage;
-		obj.setLocation(getLocation());
-		if (!isAlive()) {
-            obj.kill();
-        }
-		obj.setEssential(isEssential());
-        return obj;
-    }
-
-    @Override
-    public void updateData() {
-        List<String> data = new ArrayList<>();
-        data.add(getName());
-        data.add("   " + getWepDMG() + " damage");
-        if (getManaCost() > 0) {
-            data.add("   " + getManaCost() + " mana");
-        } else {
-            data.add("   " + "Restores mana");
-        }
-        data.add("   " + getFireTime() + " fire rate");
-        data.add("   " + getShotSpeed() + " shot speed");
-        setData(data.toArray(new String[0]));
-    }
+    private int getWepDMG() { return dmg; }
 
     public final class AtkBox extends Entity {
 		

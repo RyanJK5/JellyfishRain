@@ -2,7 +2,6 @@ package bullethell.scenes;
 
 import java.awt.Graphics;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -15,7 +14,11 @@ import bullethell.GameState;
 import bullethell.Player;
 import bullethell.SolidContainer;
 import bullethell.Trigger;
-import bullethell.items.Core;
+import bullethell.items.EquipType;
+import bullethell.items.Item;
+import bullethell.items.PlayerModifiers;
+import bullethell.items.WeaponModifiers;
+import bullethell.items.charms.CustomCore;
 import bullethell.ui.Container;
 
 final class CoreForge implements Scene {
@@ -43,14 +46,22 @@ final class CoreForge implements Scene {
             int[] ypoints = {3,  87, 160, 216, 251, 263, 263, 251, 216, 160, 87,  3,   112};
 
             @SuppressWarnings("unchecked")
-            Container<Core>[] pedestals = new Container[12];
-            Container<Core> result = null;
+            Container<Item>[] pedestals = new Container[12];
+            Container<Item> result = null;
             for (int i = 0; i < 13; i++) {
                 xpoints[i] += coreForge.getX();
                 ypoints[i] += coreForge.getY();
                 
-                Container<Core> cont = new SolidContainer<>(ImageIO.read(new File(i < 12 ? "sprites\\CoreForgeSmall.png" :
-                 "sprites\\CoreForgeBig.png")), Core.class);
+                Container<Item> cont = new SolidContainer<>(ImageIO.read(new File(i < 12 ? "sprites\\CoreForgeSmall.png" :
+                 "sprites\\CoreForgeBig.png")), Item.class) {
+                    @Override
+                    public boolean moveItem(boolean taking) {
+                        if (Player.get().getCursorSlot() != null && Player.get().getCursorSlot().equipType != EquipType.CORE) {
+                            return false;
+                        }
+                        return super.moveItem(taking);
+                    }
+                 };
                 cont.setLayer(1);
                 cont.setLocation(xpoints[i], ypoints[i]);
 
@@ -60,18 +71,18 @@ final class CoreForge implements Scene {
                     result = cont;
                 }
             }
-            Container<Core> finalResult = result;
+            Container<Item> finalResult = result;
 
             Trigger trigger = new Trigger(ImageIO.read(new File("sprites/button.png")), 
             new Trigger.Type[] {Trigger.ON_CLICK, Trigger.CURSOR_OVER, Trigger.TARGET_IN_RANGE}) {
                 
-                HashMap<Core, List<Core>> coreToBasicCores = new LinkedHashMap<>();
+                HashMap<Item, List<Item>> coreToBasicCores = new LinkedHashMap<>();
                 @Override
                 public void activate() {
                     boolean resultNull = finalResult.getItem() == null;
-                    List<Core> cores = new ArrayList<>();
-                    for (Container<Core> cont : pedestals) {
-                        Core item = cont.getItem();
+                    List<Item> cores = new ArrayList<>();
+                    for (Container<Item> cont : pedestals) {
+                        Item item = cont.getItem();
                         if (item == null) continue;
                         if (!resultNull) return;
                         cores.add(item);
@@ -80,12 +91,12 @@ final class CoreForge implements Scene {
                     if (cores.size() == 1) return;
                     if (cores.size() == 0 && resultNull) return;
 
-                    for (Container<Core> cont : pedestals) {
+                    for (Container<Item> cont : pedestals) {
                         cont.setItem(null);
                     }
 
                     if (!resultNull) {
-                        List<Core> oldCores = coreToBasicCores.get(finalResult.getItem());
+                        List<Item> oldCores = coreToBasicCores.get(finalResult.getItem());
                         if (oldCores == null) return;
                         for (int i = 0; i < oldCores.size(); i++) {
                             pedestals[i].setItem(oldCores.get(i));
@@ -97,34 +108,28 @@ final class CoreForge implements Scene {
                     if (coreToBasicCores.containsValue(cores)) {
                         for (int i = 0; i < coreToBasicCores.keySet().size(); i++) {
                             if (coreToBasicCores.values().toArray()[i].equals(cores)) {
-                                finalResult.setItem((Core) coreToBasicCores.keySet().toArray()[i]);
+                                finalResult.setItem(coreToBasicCores.keySet().toArray(new Item[0])[i]);
                                 return;
                             }
                         }
                     }
 
-                    try {
-                        Core resultCore = new Core(ImageIO.read(new File("sprites/Item.png")), "result");
-                        resultCore.setMultipliers(new float[9]);
-                        for (Core core : cores) {
-                            float[] multipliers = core.getMultipliers();
-                            int[] bonuses = core.getBonuses();
-                            for (int i = 0; i < multipliers.length; i++) {
-                                float mult = multipliers[i] / (float) cores.size();
-                                float num = (float) bonuses[i] / (float) cores.size();
-                                resultCore.getMultipliers()[i] += mult;
-                                resultCore.getBonuses()[i] += num;
-                            }
-                        }
+                    WeaponModifiers resultWepMods = new WeaponModifiers();
+                    PlayerModifiers resultPlayMods = new PlayerModifiers();
+                    for (Item core : cores) {
+                        resultWepMods.apply(core.weaponModifiers);
+                        resultPlayMods.apply(core.playerModifiers);
+                    }
+                    resultWepMods.apply(f -> f / cores.size(), i -> i / cores.size());
+                    resultPlayMods.apply(f -> f / cores.size(), i -> i / cores.size());
+                    Item resultCore = new CustomCore(resultWepMods, resultPlayMods);
 
-                        Thread thread = new Thread(() -> {
-                            resultCore.setName(Scene.promptString("Enter the new core's name: "));
-                        });
-                        thread.start();
-                        resultCore.updateData();
-                        finalResult.setItem(resultCore);
-                        coreToBasicCores.put(resultCore, cores);
-                    } catch (IOException e) { }
+                    Thread thread = new Thread(() -> {
+                        resultCore.name = Scene.promptString("Enter the new core's name: ");
+                    });
+                    thread.start();
+                    finalResult.setItem(resultCore);
+                    coreToBasicCores.put(resultCore, cores);
                 }
             
                 @Override

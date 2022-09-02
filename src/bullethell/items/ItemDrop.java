@@ -16,18 +16,17 @@ public final class ItemDrop extends Trigger {
 
     private final Item item;
 
-    public ItemDrop(Item item, int x, int y) {
-        super(item.getSprite(), new Trigger.Type[] {Trigger.TARGET_IN_RANGE});
-        this.item = item.clone();
+    public ItemDrop(ItemID id, int count, int x, int y) {
+        super(id.getSprite(), new Trigger.Type[] {Trigger.TARGET_IN_RANGE});
+        this.item = ItemID.getItem(id).clone(count);
         setLocation(x, y);
         setRange(RANGE);
         setTarget(Player.get());
 
         for (ItemDrop obj : drops) {
             if (Point.distance(getCenterX(), getCenterY(), obj.getCenterX(), obj.getCenterY()) <= RANGE &&
-              this.item instanceof StackableItem stack && obj.item instanceof StackableItem oStack &&
-              stack.equals(oStack)) {
-                oStack.addFrom(0, stack);
+              item.canStack && obj.item.canStack && item.equals(obj.item)) {
+                obj.item.addFrom(0, item);
                 permakill();
                 return;
             }

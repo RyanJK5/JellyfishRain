@@ -7,32 +7,29 @@ import java.util.Objects;
 
 import bullethell.Player;
 
-public class Recipe extends Item {
+public class Recipe {
 
-	private final Item[] components;
-    private final Item result;
+	private final ItemID[] components;
+    private final int[] componentCounts;
 
-    public Recipe(Item[] components, Item result) {
-        super(result.getSprite(), result.getName());
+    private final ItemID result;
+    private final int resultCount;
+
+    public Recipe(ItemID[] components, ItemID result, int[] componentCounts, int resultCount) {
         Objects.requireNonNull(components);
-        Objects.requireNonNull(result);
-        this.components = new Item[components.length];
-        for (int i = 0; i < this.components.length; i++) {
-            this.components[i] = (Item) components[i].clone();
-        }
-        this.result = (Item) result.clone();
-        updateData();
-    }
-
-    @Override
-    public void updateData() {
-        setData(result.getData());
+        this.components = components;
+        this.componentCounts = componentCounts;
+        this.result = result;
+        this.resultCount = resultCount;
+        Player.get().addRecipe(this);
     }
 
     public Item craft(Item[] items) {
         List<Item> seenItems = new ArrayList<>();
-        HashMap<StackableItem, StackableItem> providedStackablesToRecipe = new HashMap<>();
-        for (Item item : components) {
+        HashMap<Item, Integer> providedStackablesToRecipe = new HashMap<>();
+        for (int j = 0; j < components.length; j++) {
+            ItemID itemID = components[j];
+
             boolean successful = false;
             outer: for (int i = 0; i < items.length; i++) {
                 Item oItem = items[i];
@@ -44,12 +41,12 @@ public class Recipe extends Item {
                 }
                 seenItems.add(oItem);
 
-                if (!item.equals(oItem)) {
+                if (itemID != oItem.id) {
                     continue;
                 }
-                if (item instanceof StackableItem stack && oItem instanceof StackableItem oStack) {
-                    if (oStack.getCount() >= stack.getCount()) {
-                        providedStackablesToRecipe.put(oStack, stack);
+                if (ItemID.getItem(itemID).canStack && oItem.canStack) {
+                    if (oItem.count >= componentCounts[j]) {
+                        providedStackablesToRecipe.put(oItem, componentCounts[j]);
                     } else {
                         continue;
                     }
@@ -63,13 +60,14 @@ public class Recipe extends Item {
         }
 
         for (Item item : seenItems) {
-            if (item instanceof StackableItem stack) {
-                stack.take(providedStackablesToRecipe.get(stack).getCount());
-            } else {
-                item.kill();
+            if (item.canStack) {
+                item.take(providedStackablesToRecipe.get(item));
+                if (item.count == 0) {
+                    item.kill();
+                }
             }
         }
-        return (Item) result.clone();
+        return ItemID.getItem(result).clone(resultCount);
     }
 
     public Item craft(List<Item> items) {
@@ -83,35 +81,21 @@ public class Recipe extends Item {
     public boolean canCraftFromInv() {
         List<Item> testInv = new ArrayList<>();
         for (Item item : Player.get().getInventory().hasItems(components)) {
-            testInv.add((Item) item.clone());
+            testInv.add((Item) item.clone(item.count));
         }
         return craft(testInv) != null;
         
     }
 
-    public Item[] getComponents() { return components; }
+    public ItemID[] getComponents() { return components; }
+    public int[] getComponentCounts() { return componentCounts; }
+    public ItemID getResult() { return result; }
 
-    public List<Item> getComponentList() {
-        List<Item> result = new ArrayList<>();
-        for (Item item : components) {
+    public List<ItemID> getComponentList() {
+        List<ItemID> result = new ArrayList<>();
+        for (ItemID item : components) {
             result.add(item);
         }
         return result;
-    }
-
-    public Recipe clone() {
-        Recipe obj = new Recipe(components, result);
-		obj.setLocation(getLocation());
-		obj.setData(getData());
-        if (!isAlive()) {
-            obj.kill();
-        }
-		obj.setEssential(isEssential());
-        return obj;
-    }
-
-    @Override
-    public boolean equals(Item item) {
-        return item instanceof Recipe recipe && result.equals(recipe.result);
     }
 }

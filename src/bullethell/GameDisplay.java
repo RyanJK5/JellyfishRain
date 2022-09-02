@@ -1,6 +1,5 @@
 package bullethell;
 
-import static bullethell.Globals.DEBUG_MODE;
 import static bullethell.Globals.DEFAULT_COLOR;
 import static bullethell.Globals.DEFAULT_FONT;
 import static bullethell.Globals.GLOBAL_TIMER;
@@ -39,7 +38,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import bullethell.items.Ability;
+import bullethell.items.ItemID;
 import bullethell.movement.Direction;
 import bullethell.scenes.MainMenu;
 import bullethell.scenes.OptionsMenu;
@@ -65,10 +64,10 @@ public final class GameDisplay extends JPanel {
 		setScene(null, 0, 0);
 		player.setLocation(Globals.SCREEN_WIDTH / 2, Globals.SCREEN_HEIGHT / 2);
 		player.setLocation(Globals.WIDTH / 2, 100);
-		player.getInventory().addItem(Ability.getAbility(Ability.Type.DASH));
-		player.getInventory().addItem(Ability.getAbility(Ability.Type.HEAL));
-		player.getInventory().addItem(Ability.getAbility(Ability.Type.TELEPORT));
-		player.getInventory().addItem(Ability.getAbility(Ability.Type.SLOW));
+		player.getInventory().addItem(ItemID.DASH_ABILITY.getItem());
+		player.getInventory().addItem(ItemID.HEAL_ABILITY.getItem());
+		player.getInventory().addItem(ItemID.TP_ABILITY.getItem());
+		player.getInventory().addItem(ItemID.FOCUS_ABILITY.getItem());
 	}
 	
 	protected void endGame() {
@@ -122,15 +121,6 @@ public final class GameDisplay extends JPanel {
 				}
 
 				mouseDown = true;
-				if (DEBUG_MODE) {
-					for (GameObject obj : GameObject.debugGameObjectList()) {
-						if (obj.isAlive() && Player.cursorOver(new java.awt.Rectangle(obj.x, obj.y, obj.w, obj.h))) {
-							System.err.println(obj);
-							System.err.println(obj.hashCode());
-						}
-					}
-					System.err.println();
-				}
 
 				if (freezeCursor) {
 					return;

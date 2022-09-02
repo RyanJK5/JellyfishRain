@@ -31,8 +31,6 @@ public class GameObject implements Cloneable {
 	private List<Trigger> triggers = new ArrayList<>();
 
 	protected static final List<List<GameObject>> layers = new ArrayList<>();
-	private static final List<GameObject> debugObjects = new ArrayList<>();
-	
 
 	protected GameObject() {
 		this(new BufferedImage(1,1, BufferedImage.TYPE_INT_ARGB), 1, false);
@@ -76,9 +74,6 @@ public class GameObject implements Cloneable {
 			}
 			layers.get(layerNum).add(this);
 			layerNumber = layerNum;
-		}
-		if (Globals.DEBUG_MODE) {
-			debugObjects.add(this);
 		}
 	}
 	
@@ -263,29 +258,5 @@ public class GameObject implements Cloneable {
 	@Override
 	public String toString() {
 		return "{" + this.getClass() + ", x=" + x + ", y=" + y + ", w=" + w + ", h=" + h + ", alive=" + isAlive + "}";
-	}
-
-	/**
-	 * Thrown by {@code debugGameObjects()} if it is called while debug mode is inactive.
-	 */
-	private static class DebugModeInactiveException extends RuntimeException {
-
-		DebugModeInactiveException() {
-			super("Debug mode must be enabled to access this list");
-		}
-	}
-
-	/**
-	 * 
-	 * @return A complete list of every {@code GameObject}, regardless of its current state.
-	 * @throws DebugModeInactiveException if this list is accessed while debug mode is disabled.
-	 */
-	public static List<GameObject> debugGameObjectList() throws DebugModeInactiveException {
-		
-		if (Globals.DEBUG_MODE) {
-			return debugObjects;
-		} else {
-			throw new DebugModeInactiveException();
-		}
 	}
 }

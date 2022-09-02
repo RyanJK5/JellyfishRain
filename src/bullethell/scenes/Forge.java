@@ -3,10 +3,10 @@ package bullethell.scenes;
 import static bullethell.Globals.DEFAULT_FONT;
 import static bullethell.Globals.eAction;
 
-import java.awt.Robot;
 import java.awt.AWTException;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Robot;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
@@ -23,7 +23,6 @@ import bullethell.Player;
 import bullethell.Trigger;
 import bullethell.items.Item;
 import bullethell.items.Recipe;
-import bullethell.items.StackableItem;
 import bullethell.ui.Container;
 import bullethell.ui.Inventory;
 import bullethell.ui.Text;
@@ -37,7 +36,7 @@ final class Forge implements Scene {
     private Inventory<Item> components;
     private Inventory<Item> availableComponents;
     private Container<Item> result;
-    private Inventory<Recipe> inv;
+    private Inventory<RecipeItem> inv;
     private Trigger craftButton;
     private Trigger exitTrigger;
     private StartTrigger startTrigger;
@@ -91,18 +90,18 @@ final class Forge implements Scene {
                     Item item = getItem();
                     Class<Item> itemClass = getItemClass();
 
-                    boolean stackable = item != null && item instanceof StackableItem;
+                    boolean stackable = item != null && item.canStack;
                     if (!stackable) {
                         stackable = stackable();
                     }
-                    boolean cursorStackable = player.getCursorSlot() instanceof StackableItem || player.getCursorSlot() == null;
+                    boolean cursorStackable = player.getCursorSlot() == null || player.getCursorSlot().canStack;
 
                     if (item != null) {
                         if (taking && stackable) {
                             if (player.getCursorSlot() != null && cursorStackable) {
-                                ((StackableItem) player.getCursorSlot()).addFrom(1, (StackableItem) item);
+                                (player.getCursorSlot()).addFrom(1, item);
                             } else if (player.getCursorSlot() == null) {
-                                player.select(((StackableItem) item).take(1));
+                                player.select(item.take(1));
                             }
                         } else if (player.getCursorSlot() == null) {
                             player.select(item);
@@ -110,7 +109,7 @@ final class Forge implements Scene {
                             player.getInventory().removeItem(item);
                         } else if (itemClass.isInstance(player.getCursorSlot())) {
                             if (stackable && cursorStackable && item.equals(player.getCursorSlot())) {
-                                ((StackableItem) item).addFrom(0, (StackableItem) player.getCursorSlot());
+                                item.addFrom(0, player.getCursorSlot());
                             }
                         }
                     }
@@ -128,7 +127,7 @@ final class Forge implements Scene {
             result.kill();
 
             inv = new Inventory<>(new Dimension(10, 8), 
-              ImageIO.read(new File("sprites/InventorySlot.png")), Recipe.class) {
+              ImageIO.read(new File("sprites/InventorySlot.png")), RecipeItem.class) {
                 
                 @Override
                 public void setLocation(int x, int y) {
@@ -147,15 +146,15 @@ final class Forge implements Scene {
 
                 @Override
                 public void sort() {
-                    List<Container<Recipe>> slots = getSlots();
+                    List<Container<RecipeItem>> slots = getSlots();
 
-                    for (Container<Recipe> cont : this) {
+                    for (Container<RecipeItem> cont : this) {
                         if (cont.getItem() != null && !cont.getItem().isAlive()) {
                             cont.setItem(null);
                         }
                     }
 
-                    slots.sort((Container<Recipe> o1, Container<Recipe> o2) -> {
+                    slots.sort((Container<RecipeItem> o1, Container<RecipeItem> o2) -> {
                         if (o1.getItem() == null && o2.getItem() == null) {
                             return 0;
                         }
@@ -166,8 +165,8 @@ final class Forge implements Scene {
                             return -1;
                         }
 
-                        boolean o1Craft = o1.getItem().canCraftFromInv();
-                        boolean o2Craft = o2.getItem().canCraftFromInv();
+                        boolean o1Craft = o1.getItem().recipe.canCraftFromInv();
+                        boolean o2Craft = o2.getItem().recipe.canCraftFromInv();
 
                         if (o1Craft && !o2Craft) {
                             return -1;
@@ -176,8 +175,8 @@ final class Forge implements Scene {
                             return 1;
                         }
 
-                        String str1 = o1.getItem().getName();
-                        String str2 = o2.getItem().getName();
+                        String str1 = o1.getItem().name;
+                        String str2 = o2.getItem().name;
                         for (int i = 0; i < str1.length(); i++) {
                             char char1 = Character.toUpperCase(str1.charAt(i));
                             char char2 = Character.toUpperCase(str2.charAt(i));
@@ -195,7 +194,7 @@ final class Forge implements Scene {
                     }
                     if (slots.subList(getSize(), slots.size())
                         .stream()
-                        .allMatch((Container<Recipe> container) -> container.getItem() == null)) {
+                        .allMatch(container -> container.getItem() == null)) {
                         slots = slots.subList(0, getSize());
                     }
                 }
@@ -212,8 +211,8 @@ final class Forge implements Scene {
                 protected void activate() {
                     if (getTarget() != player) {
                         @SuppressWarnings("unchecked")
-                        Container<Recipe> cont = (Container<Recipe>) getTarget();
-                        Item resultItem = cont.getItem().craftFromInv();
+                        Container<RecipeItem> cont = (Container<RecipeItem>) getTarget();
+                        Item resultItem = cont.getItem().recipe.craftFromInv();
                         if (resultItem != null) {
                             if (result.getItem() != null) {
                                 player.getInventory().addItem(result.getItem());
@@ -265,8 +264,8 @@ final class Forge implements Scene {
    
     private void setContSprites() {
         try {
-            for (Container<Recipe> cont : inv) {
-                if (cont.getItem() != null && !cont.getItem().canCraftFromInv()) {
+            for (Container<RecipeItem> cont : inv) {
+                if (cont.getItem() != null && !cont.getItem().recipe.canCraftFromInv()) {
                     cont.setSprite(ImageIO.read(new File("sprites/RedInventorySlot.png")));
                 } else {
                     cont.setSprite(ImageIO.read(new File("sprites/InventorySlot.png")));
@@ -297,14 +296,19 @@ final class Forge implements Scene {
         void start() {
             Player.get().showUI();
             Player.get().setTimeSinceUI(-1);
-            inv.setItems(player.getResearchedRecipes());
+            
+            inv.clear();
+            for (int i = 0; i < player.getResearchedRecipes().size(); i++) {
+                inv.addItem(new RecipeItem(player.getResearchedRecipes().get(i)));
+            }
+
             inv.revive();
             exitTrigger.revive();
             
             player.getInventory().kill();
             eAction.disable();
         
-            for (Container<Recipe> cont : inv) {
+            for (Container<RecipeItem> cont : inv) {
                 if (cont.getItem() == null) {
                     continue;
                 }
@@ -315,8 +319,14 @@ final class Forge implements Scene {
                         if (result.getItem() != null) {
                             result.setItem(null);
                         }
-                        components.setItems(cont.getItem().getComponentList());
-                        availableComponents.setItems(player.getInventory().hasItems(cont.getItem().getComponents()));
+                        
+                        components.clear();
+                        Recipe recipe = cont.getItem().recipe;
+                        for (int i = 0; i < recipe.getComponents().length; i++) {
+                            components.addItem(recipe.getComponents()[i].getItem().clone(recipe.getComponentCounts()[i]));
+                        }
+                        availableComponents.setItems(player.getInventory().hasItems(recipe.getComponents()));
+                        
                         components.revive();
                         componentsText.revive();
                         availableComponents.revive();
@@ -352,6 +362,26 @@ final class Forge implements Scene {
             inv.kill();
             eAction.enable();
         }
+    }
+
+    private class RecipeItem extends Item {
+
+        final Recipe recipe;
+        final Item resultItem;
+
+        public RecipeItem(Recipe recipe) {
+            this.recipe = recipe;
+            resultItem = recipe.getResult().getItem();
+        }
+
+        @Override
+        public void paint(java.awt.Graphics g) {
+            resultItem.setLocation(x, y);
+            resultItem.paint(g);
+        }
+
+        @Override
+        protected void setValues() { }
     }
 
     @Override

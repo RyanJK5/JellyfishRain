@@ -18,13 +18,12 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import bullethell.items.Ability;
-import bullethell.items.Accessory;
-import bullethell.items.Core;
+import bullethell.items.EquipType;
 import bullethell.items.Item;
+import bullethell.items.ItemID;
+import bullethell.items.PlayerModifiers;
 import bullethell.items.Recipe;
-import bullethell.items.StackableItem;
-import bullethell.items.Weapon;
+import bullethell.items.WeaponModifiers;
 import bullethell.movement.Direction;
 import bullethell.scenes.Bossfight;
 import bullethell.ui.Container;
@@ -45,8 +44,6 @@ public final class Player extends Entity {
 	public static final int DEFAULT_DASH_DELAY = 1000 / Globals.TIMER_DELAY;
 	public static final int UI_HIDE_COOLDOWN = 1500 / Globals.TIMER_DELAY;
 	
-	private static final float SLOW_CHARM_SPEED_MULTIPLIER = 1.5f;
-
 	protected List<Direction> lastDirections = new ArrayList<>();
 	
 	private static Player player;
@@ -110,8 +107,8 @@ public final class Player extends Entity {
 	 *  8 - SHOT SPEED
 	 *  9 - SPEED
 	 */
-	protected float[] multipliers = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-	protected int[] bonuses = new int[10];
+	public final WeaponModifiers modifiers;
+	public final PlayerModifiers playerMods;
 
 	public static Player get() {
 		if (player == null) {
@@ -148,6 +145,9 @@ public final class Player extends Entity {
 		cameraX = 0;
 		cameraY = 0;
 
+		modifiers = new WeaponModifiers();
+		playerMods = new PlayerModifiers();
+
 		setHitbox(new Rectangle(w / 5, (int) (h / 2 - (1f/6f) * h), (int) (w * 0.6f), (int) ((1f/3f) * h)));
 		setLayer(5);
 		setEssential(true);
@@ -183,10 +183,10 @@ public final class Player extends Entity {
 				if (player.getCursorSlot() == null) {
 					int count = 0;
 					rotDeg = -rotDeg;
-					if (item instanceof StackableItem oStack) {
-						count += oStack.getCount();
+					if (item.canStack) {
+						count += item.count;
 					}
-					txt.setText(item.getName() + (count > 0 ? " (" + count + ")" : ""));
+					txt.setText(item.name + (count > 0 ? " (" + count + ")" : ""));
 					txt.setLocation(get().getX() - 10, get().getY() - 10);
 					color = Globals.DEFAULT_COLOR;
 					timesPerformed = 0;
@@ -294,12 +294,7 @@ public final class Player extends Entity {
 		tpCooldown = new StatusWheel("timeSinceTP", DEFAULT_TP_COOLDOWN, Color.LIGHT_GRAY, Color.GRAY);
 		dashCooldown = new StatusWheel("timeSinceDash", DEFAULT_DASH_DELAY, new Color(255, 158, 250), 
 		  Color.MAGENTA);
-		healWheel = new StatusWheel("healNum", maxHealNum, Color.RED, new Color(122, 0, 0)) {
-			@Override
-			public void paint(Graphics g) {
-				
-			}
-		};
+		healWheel = new StatusWheel("healNum", maxHealNum, Color.RED, new Color(122, 0, 0));
 		
 		healthBar.setEssential(true);
 		adrenalineBar.setEssential(true);
@@ -369,24 +364,18 @@ public final class Player extends Entity {
 			if (regenDelay < minRegenDelay) regenDelay = minRegenDelay;
 		}
 
-		Weapon wep = getEquipmentInv().getWepSlot().getItem();
 		if (timeSinceHit > hitToAdrDelay && timeSinceHit % 3 == 0) {
 			if (Globals.getGameState().combat() && adren < maxAdr)	{
 				adren++;
 			} else if (!Globals.getGameState().combat() && adren > 0) {
 				adren = 0;
 			}
-			if (wep != null) {
-				wep.setWepDMG((int) ((1 + (float) adren / (float) maxAdr) * (wep.getDefaultWepDMG() * multipliers[1] + bonuses[1])));
-				wep.updateData();
-			}
-		} else if (timeSinceHit == 0 && wep != null) {
-			wep.updateData();
 		}
 		
 		if (!Globals.alwaysShowUI && 
 		  timeSinceUI >= UI_HIDE_COOLDOWN && 
-		  !Globals.getGameState().combat() && !inventory.isAlive()) {
+		  !Globals.getGameState().combat() && !inventory.isAlive() && 
+		  UI.allUI.stream().filter(ui -> ui instanceof Inventory).noneMatch(inv -> inv.isAlive())) {
 			GameObject[] objs = {healthBar, adrenalineBar, manaBar, tpCooldown, dashCooldown,
 			  loadouts.get(0), loadouts.get(1), loadouts.get(2)};
 			int numDone = 0;
@@ -447,36 +436,36 @@ public final class Player extends Entity {
 	
 	private boolean slowActivated = false;
 	public void activateAbility(int abilityNum, boolean activating) {
-		Ability.Type type = getEquipmentInv().getAbilityType(abilityNum);
+		ItemID type = getEquipmentInv().getAbilityType(abilityNum);
 		if (type == null) {
 			return;
 		}
 		switch (type) {
-			case DASH:
+			case DASH_ABILITY:
 				if (activating) {
 					dash();
 				}
 				break;
-			case HEAL:
+			case HEAL_ABILITY:
 				if (activating) {
 					heal();
 				}
 				break;
-			case SLOW:
+			case FOCUS_ABILITY:
 				if (activating && !slowActivated) {
-					multipliers[9] /= 2.5f;
-					applyStatChanges(multipliers, bonuses);
+					playerMods.mSpeed /= 2.5f;
 					slowActivated = true;
 				} else if (!activating && slowActivated) {
-					multipliers[9] *= 2.5f;
-					applyStatChanges(multipliers, bonuses);
+					playerMods.mSpeed *= 2.5f;
 					slowActivated = false;
 				}
 				break;
-			case TELEPORT:
+			case TP_ABILITY:
 				if (activating) {
 					tp(Player.cursorX() - w / 2, Player.cursorY() - h / 2);
 				}
+				break;
+			default:
 				break;
 		}
 	}
@@ -652,14 +641,23 @@ public final class Player extends Entity {
 	}
 	
 	public void fire() {
-		Weapon wep = getEquipmentInv().getWepSlot().getItem(); 
-		if (wep == null || currentFire < wep.getFireTime()) {
+		Item wep = getEquipmentInv().getWepSlot().getItem(); 
+		if (wep == null || currentFire < wep.fireTime) {
 			return;
 		} 
-		if (mana >= wep.getManaCost()) {
-			wep.attack();
-			mana -= wep.getManaCost();
+		if (mana >= wep.manaCost) {
+			wep.onUse();
+			mana -= wep.manaCost;
 		}
+	}
+
+	private void registerModifiers() {
+		maxHP = (int) (DEFAULT_MAX_HP * (1 + playerMods.mHP) + playerMods.pHP);
+		if (hp > maxHP) {
+			hp = maxHP;
+		}
+		invincTime = (int) (DEFAULT_INVINC_TIME * (1 + playerMods.mInvincTime) + playerMods.pInvincTime);
+		speed = (int) (DEFAULT_SPEED * (1 + playerMods.mSpeed) + playerMods.pSpeed);
 	}
 
 	public void registerDealtDMG(int dmg, GameSolid sender) {
@@ -714,67 +712,6 @@ public final class Player extends Entity {
 		}
 		
 		setLocation(newX, newY);
-	}
-
-	public void applyStatChanges(float[] newMultipliers, int[] newBonuses) {
-		Weapon wep = getEquipmentInv().getWepSlot().getItem();
-		
-		float[] stats = {DEFAULT_MAX_HP, 0, 0, 0, DEFAULT_INVINC_TIME, DEFAULT_MIN_REGEN_DELAY, DEFAULT_REGEN_DECREASE_RATE,
-		DEFAULT_HIT_TO_REGEN_DELAY, 0, DEFAULT_SPEED};
-		if (wep != null) {
-			stats[1] = wep.getDefaultWepDMG();
-			stats[2] = wep.getDefaultFireTime();
-			stats[3] = wep.getDefaultRange();
-			stats[8] = wep.getDefaultShotSpeed();
-		}
-
-		for (int i = 0; i < multipliers.length; i++) {
-			if (wep == null && (i == 1 || i == 2 || i == 3 || i == 8)) {
-				continue;
-			}
-			
-			float value = stats[i] * newMultipliers[i] + newBonuses[i];
-			switch(i) {
-				case 0:
-					if (hp > value) hp = (int) value;
-					maxHP = (int) value;
-					break;
-				case 1:
-					wep.setWepDMG((int) value);
-					break;
-				case 2:
-					wep.setFireTime((int) value);
-					break;
-				case 3:
-					wep.setRange((int) value);
-					break;
-				case 4:
-					invincTime = (int) value;
-					break;
-				case 5:
-					minRegenDelay = (int) value;
-					break;
-				case 6:
-					regenDecreaseRate = (int) value;
-					break;
-				case 7:
-					hitToRegenDelay = (int) value;
-					break;
-				case 8:
-					wep.setShotSpeed(value);
-					break;
-				case 9:
-					speed = value;
-					break;
-			}
-		}
-
-		multipliers = newMultipliers;
-		bonuses = newBonuses;
-
-		if (wep != null) {
-			wep.updateData();
-		}
 	}
 
 	public void incrementInvinc() {
@@ -871,9 +808,6 @@ public final class Player extends Entity {
 	public int getCurrentFire() { return currentFire; }
 	public void setCurrentFire(int currentFire) { this.currentFire = currentFire; }
 
-	public float[] getMultipliers() { return multipliers; }
-	public int[] getBonuses() { return bonuses; }
-	
 	public static class Equipment extends UI {
 		
 		public static final float 
@@ -891,11 +825,11 @@ public final class Player extends Entity {
 		  coreX, coreY;
 
 		@SuppressWarnings("unchecked")
-		private static Container<Accessory>[] accSlots = new EquipmentContainer[accSlotNum];
+		private static Container<Item>[] accSlots = new EquipmentContainer[accSlotNum];
 		@SuppressWarnings("unchecked")
-		private static Container<Ability>[] abilitySlots = new EquipmentContainer[abilitySlotNum];
-		private Container<Weapon> wepSlot;
-		private static Container<Core> coreSlot;
+		private static Container<Item>[] abilitySlots = new EquipmentContainer[abilitySlotNum];
+		private Container<Item> wepSlot;
+		private static Container<Item> coreSlot;
 
 		private static BufferedImage abilityBackground;
 		
@@ -916,7 +850,7 @@ public final class Player extends Entity {
 			wepSlot = new EquipmentContainer<>(
 				ui.getSubimage(wepBounds.x, wepBounds.y, wepBounds.width, wepBounds.height),
 				emptyUI.getSubimage(wepBounds.x, wepBounds.y, wepBounds.width, wepBounds.height),
-				Weapon.class);
+				Item.class);
 			
 			if (coreSlot != null) {
 				return;
@@ -926,18 +860,18 @@ public final class Player extends Entity {
 				accSlots[i] = new EquipmentContainer<>(
 					ui.getSubimage(charmBounds.x, charmBounds.y, charmBounds.width, charmBounds.height), 
 					emptyUI.getSubimage(charmBounds.x, charmBounds.y, charmBounds.width, charmBounds.height),
-					Accessory.class);
+					Item.class);
 			}
 			for (int i = 0; i < abilitySlotNum; i++) {
 				abilitySlots[i] = new EquipmentContainer<>(
 					ui.getSubimage(12 + i * 44, 6, 32, 32),
 					emptyUI.getSubimage(12 + i * 44, 6, 32, 32),
-					Ability.class);
+					Item.class);
 			}
 			coreSlot = new EquipmentContainer<>(
 				ui.getSubimage(coreBounds.x, coreBounds.y, coreBounds.width, coreBounds.height),
 				emptyUI.getSubimage(coreBounds.x, coreBounds.y, coreBounds.width, coreBounds.height),
-				Core.class);
+				Item.class);
 
 			setLocations();
 		}
@@ -949,14 +883,14 @@ public final class Player extends Entity {
 			g2.setComposite(java.awt.AlphaComposite.getInstance(java.awt.AlphaComposite.SRC_OVER, opacity));
 			
 			g2.drawImage(abilityBackground, armorX, armorY, null);
-			for (int i = 0; i < accSlotNum; i++) {
+			for (int i = accSlotNum - 1; i >= 0; i--) {
 				accSlots[i].paint(g2);
 			}
-			for (int i = 0; i < abilitySlotNum; i++) {
+			coreSlot.paint(g2);
+			wepSlot.paint(g2);
+			for (int i = abilitySlotNum - 1; i >= 0; i--) {
 				abilitySlots[i].paint(g2);
 			}
-			wepSlot.paint(g2);
-			coreSlot.paint(g2);
 
 			if (player.cursorSlot != null) {
 				player.cursorSlot.paint(g2);
@@ -1026,12 +960,12 @@ public final class Player extends Entity {
 			  coreSlot.equals(coreSlot);
 		}
 
-		public boolean hasAbility(Ability.Type abilityType) {
-			return Arrays.stream(abilitySlots).anyMatch(obj -> obj.getItem() != null && obj.getItem().getType() == abilityType);
+		public boolean hasAbility(ItemID abilityType) {
+			return Arrays.stream(abilitySlots).anyMatch(obj -> obj.getItem() != null && obj.getItem().id == abilityType);
 		}
 
-		public Ability.Type getAbilityType(int index) {
-			return abilitySlots[index].getItem() != null ? abilitySlots[index].getItem().getType() : null;
+		public ItemID getAbilityType(int index) {
+			return abilitySlots[index].getItem() != null ? abilitySlots[index].getItem().id : null;
 		}
 
 		public void setLocations() {
@@ -1057,10 +991,10 @@ public final class Player extends Entity {
 			coreSlot.setLocation(coreX, coreY);
 		}
 
-		public Container<Weapon> getWepSlot() { return wepSlot; }
-		public Container<Accessory>[] getAccSlots() { return accSlots; }
-		public Container<Ability>[] getAbilitySlots() { return abilitySlots; }
-		public Container<Core> getCoreSlot() { return coreSlot; }
+		public Container<Item> getWepSlot() { return wepSlot; }
+		public Container<Item>[] getAccSlots() { return accSlots; }
+		public Container<Item>[] getAbilitySlots() { return abilitySlots; }
+		public Container<Item> getCoreSlot() { return coreSlot; }
 		
 		public void clear() {
 			wepSlot.setItem(null);
@@ -1070,57 +1004,57 @@ public final class Player extends Entity {
 			updateModifiers();
 		}
 
-		public void setWepSlot(Weapon wepSlotItem) {
-			if (wepSlot.getItem() != null) {
-				wepSlot.getItem().resetStats();
-				wepSlot.getItem().updateData();
+		public boolean setWepSlot(Item wepSlotItem) {
+			if (wepSlotItem != null && wepSlotItem.equipType != EquipType.WEAPON) {
+				return false;
 			}
 			wepSlot.setItem(wepSlotItem);
 			updateModifiers();
+			return true;
 		}
 
-		public void setAccSlot(int index, Accessory accSlotItem) { 
+		public boolean setAccSlot(int index, Item accSlotItem) { 
+			if (accSlotItem != null && accSlotItem.equipType != EquipType.ACCESSORY) {
+				return false;
+			}
 			accSlots[index].setItem(accSlotItem);
 			updateModifiers();
+			return true;
 		}
 
-		public void setCoreSlot(Core newCoreItem) { 
+		public boolean setCoreSlot(Item newCoreItem) { 
+			if (newCoreItem != null && newCoreItem.equipType != EquipType.CORE) {
+				return false;
+			}
 			coreSlot.setItem(newCoreItem);
 			updateModifiers();
+			return true;
 		}
 
-		public void setAbilitySlot(int index, Ability abilitySlotItem) {
+		public boolean setAbilitySlot(int index, Item abilitySlotItem) {
+			if (abilitySlotItem != null && abilitySlotItem.equipType != EquipType.ABILITY) {
+				return false;
+			}
 			abilitySlots[index].setItem(abilitySlotItem);
 			updateModifiers();
+			return true;
 		}
 
 		public void updateModifiers() {
-			player.getEquipmentInv().setLocations();
-			
-			float[] multResult = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-			int[] bonusResult = new int[10];
-
-			for (int i = 0; i < multResult.length; i++) {
-				for (int j = 0; j < accSlotNum; j++) {
-					if (accSlots[j].getItem() != null) {
-						multResult[i] *= accSlots[j].getItem().getMultipliers()[i];
-						bonusResult[i] += accSlots[j].getItem().getBonuses()[i];
-					}
-				}
-
-				if (i == 9) {
-					for (int j = 0; j < abilitySlotNum; j++) {
-						if (abilitySlots[j].getItem() != null && abilitySlots[j].getItem().getType() == Ability.Type.SLOW) {
-							multResult[i] *= SLOW_CHARM_SPEED_MULTIPLIER;
-						}
-					}
-				}
-				if (coreSlot.getItem() != null) {
-					multResult[i] *= coreSlot.getItem().getMultipliers()[i];
-					bonusResult[i] += coreSlot.getItem().getBonuses()[i];
+			player.playerMods.reset();
+			player.modifiers.reset();
+			player.registerModifiers();
+			for (int i = 0; i < accSlotNum; i++) {
+				if (accSlots[i].getItem() != null) {
+					player.playerMods.apply(accSlots[i].getItem().playerModifiers);
+					player.modifiers.apply(accSlots[i].getItem().weaponModifiers);
 				}
 			}
-			player.applyStatChanges(multResult, bonusResult);
+			if (coreSlot.getItem() != null) {
+				player.playerMods.apply(coreSlot.getItem().playerModifiers);
+				player.modifiers.apply(coreSlot.getItem().weaponModifiers);
+			}
+			player.registerModifiers();
 		}
 
 		public int emptySlots() {
@@ -1158,7 +1092,6 @@ public final class Player extends Entity {
 			public boolean moveItem(boolean taking, Inventory<? super T> inventory) {
 				Player player = Player.get();
 				Class<T> itemClass = getItemClass();
-				
 				if (player.getCursorSlot() != null) {
 					for (int i = 0; i < accSlotNum; i++) {
 						if (this == accSlots[i]) {
@@ -1172,24 +1105,22 @@ public final class Player extends Entity {
 				}
 
 				if (getItem() != null) {
-					if (this == wepSlot) {
-						((Weapon) getItem()).resetStats();
-						((Weapon) getItem()).updateData();
-					}
-
 					if (player.getCursorSlot() == null) {
-						player.select(getItem());
-						setItem(null);
+						T temp = getItem();
+						if (trySetItem(null)) {
+							player.select(temp);
+						}
 					} else if (itemClass.isInstance(player.getCursorSlot())) {
-						T temp = (T) player.getCursorSlot();
-						player.select(getItem());
-						setItem(temp);
+						T temp = getItem();
+						if (trySetItem((T) player.getCursorSlot())) {
+							player.select(temp);
+						}
 					}
 				} else if (!taking && player.getCursorSlot() != null && itemClass.isInstance(player.getCursorSlot())) {
-					setItem((T) player.getCursorSlot());
-					player.select(null);
+					if (trySetItem((T) player.getCursorSlot())) {
+						player.select(null);
+					}
 				}
-				updateModifiers();
 
 				if (getItem() != null) {
 					setSprite(altSprite);
@@ -1207,6 +1138,29 @@ public final class Player extends Entity {
 				} else {
 					setSprite(mainSprite);
 				}
+			}
+
+			public boolean trySetItem(T item) {
+				boolean recursiveCall = false;
+				if (this == wepSlot) {
+					recursiveCall = setWepSlot(item);
+				}
+				else if (this == coreSlot) {
+					recursiveCall = setCoreSlot(item);
+				}
+				else {
+					for (int i = 0; i < accSlots.length; i++) {
+						if (this == accSlots[i]) {
+							recursiveCall = setAccSlot(i, item);
+						}
+					}
+					for (int i = 0; i < abilitySlots.length; i++) {
+						if (this == abilitySlots[i]) {
+							recursiveCall = setAbilitySlot(i, item);
+						}
+					}
+				}
+				return recursiveCall;
 			}
 		}
 	}
@@ -1245,7 +1199,7 @@ public final class Player extends Entity {
 				try {
 					int value = (Integer) wheel.field.get(player);
 	
-					if ((!player.getEquipmentInv().hasAbility(Ability.Type.HEAL) && wheel == player.healWheel) || 
+					if ((!player.getEquipmentInv().hasAbility(ItemID.HEAL_ABILITY) && wheel == player.healWheel) || 
 					  (value >= wheel.maxValue && wheel != player.healWheel)) {
 						continue;
 					}
@@ -1296,7 +1250,7 @@ public final class Player extends Entity {
 		@Override
 		public void paint(Graphics g) {
 			super.paint(g);
-			if (player.hp > 0) {
+			if (player.hp > 0 && player.hp <= player.maxHP) {
 				float slivWidth = (float) w / (float) player.maxHP;
 				int fullSlivWidth = (int) (slivWidth * player.hp);
 				if (fullSlivWidth < 1) fullSlivWidth++;

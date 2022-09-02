@@ -1,90 +1,170 @@
 package bullethell.items;
 
 import java.awt.Graphics;
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
-import java.util.Objects;
-
-import javax.imageio.ImageIO;
 
 import bullethell.GameObject;
 import bullethell.Globals;
 import bullethell.Player;
 
-public class Item extends GameObject {
-	protected String name;
-    private String[] data;
+public abstract class Item extends GameObject {
 
-    public Item(String name) throws IOException {
-        this(ImageIO.read(new File("sprites/Item.png")), name);
+    public ItemID id;
+    public EquipType equipType;
+
+	public String name;
+    public String description;
+
+    public Recipe[] recipes;
+
+    public boolean canStack;
+
+    public int dmg;
+    public int manaCost;
+    public int fireTime;
+    public int range;
+
+    public WeaponModifiers weaponModifiers;
+    public PlayerModifiers playerModifiers;
+    
+    public int count;
+
+    protected Item() {
+        super(null, true);
+        setSprite(new File("sprites\\items\\" + getClass().getSimpleName() + ".png").exists() ? Globals.getImage("items\\" + getClass().getSimpleName()) : 
+        Globals.getImage("items\\Default"));
+        
+        equipType = EquipType.NONE;
+        name = "Unnamed";
+        description = "";
+        recipes = new Recipe[0];
+        weaponModifiers = new WeaponModifiers();
+        playerModifiers = new PlayerModifiers();
+        count = 0;
+
+        setValues();
     }
 
-    public Item(BufferedImage sprite, String name) {
-        super(sprite, true);
-        Objects.requireNonNull(name);
-        this.name = name;
-        setData(new String[] {name});
+    static {
+        for (ItemID id : ItemID.values()) {
+            id.getItem().addRecipes();
+        }
     }
 
-    public void updateData() {
-        setData(new String[] {name});
+    protected abstract void setValues();
+    protected void addRecipes() { }
+
+    public void onUse() { }
+
+    public Item clone(int count) {
+        Item item = ItemID.getItem(id); 
+        if (canStack) {
+            item.count = count;
+        }
+        return item;
     }
 
-    public BufferedImage scaledSprite(float scale) {
-        BufferedImage newSprite = new BufferedImage((int) (w * scale), (int) (h * scale), BufferedImage.TYPE_INT_ARGB);
-        newSprite.getGraphics().drawImage(sprite, 0, 0, (int) (w * scale), (int) (h * scale), null);
-        return newSprite;
+    public final boolean equals(Item item) {
+        return item != null && id == item.id;
+    }
+    
+    public final Item take(int num) {
+        if (num < 0) {
+            throw new IllegalArgumentException("num must be >0");
+        }
+
+        if (num == 0 || num > count) {
+            int origCount = count;
+            count = 0;
+            kill();
+            return clone(origCount);
+        }
+
+        count -= num;
+        if (count <= 0) {
+            kill();
+        }
+        return clone(num);
+    }
+
+    public final void add(int num) {
+        count += num;
+    }
+
+    public final void addFrom(int num, Item item) {
+        int count = num == 0 ? item.count : num;
+        add(count);
+        item.take(count);
     }
 
     @Override
     public void paint(Graphics g) {
         super.paint(g);
-        if (Player.cursorX() >= x && Player.cursorX() <= x + w &&
-        Player.cursorY() >= y && Player.cursorY() <= y + h &&
-        Player.get().getCursorSlot() == null) {
-            for (int i = 0; i < data.length; i++) {
-                if (data[i] != null) {
-                    g.drawString(data[i].toString(), Player.cursorX() + 10, Player.cursorY() + 20 + i * Globals.DEFAULT_FONT.getSize());
-                }
+        if (count > 1) {
+            g.drawString(Integer.toString(count), x, y + h);
+        }
+        
+        if (Player.cursorOver(getBounds())) {
+            drawInfo(g);
+        }
+    }
+
+    public void drawInfo(Graphics g) {
+        if (Player.get().getCursorSlot() != null) {
+            return;
+        }
+
+        int index = 0;
+        final int spacing = 20;
+        final int x = Player.cursorX() + 10;
+        final int y = Player.cursorY() + 25;
+        for (int i = 0; i < 6; i++) {
+            switch (i) {
+                case 0:
+                    g.drawString(name, x, y);
+                    break;
+                case 1:
+                    if (equipType == EquipType.WEAPON) {
+                        g.drawString("    " + Globals.damageFormula(dmg) + " damage", x, y + index * spacing);
+                        break;
+                    } else {
+                        continue;
+                    }
+                case 2:
+                    if (equipType == EquipType.WEAPON && manaCost != 0) {
+                        g.drawString("    " + manaCost + " mana", x, y + index * spacing);
+                        break;
+                    } else {
+                        continue;
+                    }
+                case 3:
+                    if (equipType == EquipType.WEAPON) {    
+                        g.drawString("    " + fireTime + " fire time", x, y + index * spacing);
+                        break;
+                    } else {
+                        continue;
+                    }
+                case 4:
+                    if (equipType == EquipType.WEAPON && range > 0) {    
+                        g.drawString("    " + range + " range", x, y + index * spacing);
+                        break;
+                    } else {
+                        continue;
+                    }
+                case 5:
+                    if (description.length() > 0) {
+                        g.drawString("    " + description, x, y + index * spacing);
+                    } else {
+                        continue;
+                    }
+                    
             }
+            index++;
         }
-    }
-
-    public String[] getData() { return data;}
-    public void setData(String[] data) { this.data = data; }
-
-    public String getName() { return name; }
-    public void setName(String name) { 
-        this.name = name;
-        updateData();
-    }
-
-    public boolean equals(Item o) {
-        if (o == null) return false;
-        for (int i = 0; i < data.length; i++) {
-            if (!o.getData()[i].equals(getData()[i])) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    @Override
-    public Item clone() {
-        Item obj = new Item(sprite, name);
-		obj.setLocation(getLocation());
-		obj.setData(getData());
-        if (!isAlive()) {
-            obj.kill();
-        }
-		obj.setEssential(isEssential());
-        return obj;
     }
 
     @Override
     public void toGhost() { }
-
     @Override
     public void unghost() { }
 }

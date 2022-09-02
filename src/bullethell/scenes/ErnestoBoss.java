@@ -23,7 +23,6 @@ import java.io.IOException;
 
 import javax.swing.Timer;
 
-import bullethell.Enemy;
 import bullethell.Entity;
 import bullethell.GameObject;
 import bullethell.GameSolid;
@@ -32,7 +31,9 @@ import bullethell.Globals;
 import bullethell.Player;
 import bullethell.Projectile;
 import bullethell.Spritesheet;
-import bullethell.items.MeleeWeapon;
+import bullethell.enemies.EnemyID;
+import bullethell.enemies.JellyFishBoss;
+import bullethell.items.weapons.ExampleSword;
 import bullethell.movement.ChargePath;
 import bullethell.movement.CirclePath;
 import bullethell.movement.Direction;
@@ -41,15 +42,16 @@ import bullethell.movement.Path;
 import bullethell.movement.SeekingPath;
 import bullethell.movement.StraightPath;
 
-final class ErnestoBoss implements Scene, Bossfight {
+public final class ErnestoBoss implements Scene, Bossfight {
 
     private Timer switchTimer, secondSwitchTimer, switchToFirst, switchToUltimate, switchToFinal;
     private Timer slowGrid, sinkHole, bossDash, bossRadial, bossLaser, tpDash, tpSit, dashTrail, 
-    ultStar, ultTP;
+      ultStar, ultTP
+    ;
 
     private static final ErnestoBoss ERNESTO_BOSS = new ErnestoBoss();
 
-    private Ernesto boss;
+    private JellyFishBoss boss;
 
     private static final Player player = Player.get();
 
@@ -112,7 +114,7 @@ final class ErnestoBoss implements Scene, Bossfight {
 
             player.resetAdren();
 
-            boss = new Ernesto();
+            boss = (JellyFishBoss) EnemyID.getEnemy(EnemyID.JELLY_FISH_BOSS);
             boss.setLocation(WIDTH / 2 - boss.getWidth() / 2, HEIGHT / 2 - boss.getHeight() / 2);
             boss.setLayer(1);
             boss.kill();
@@ -180,7 +182,7 @@ final class ErnestoBoss implements Scene, Bossfight {
                     
                     if ((indicatorProjDelay != 0 && age < indicatorProjDelay) ||
                       (obj instanceof Projectile) ||
-                      (obj instanceof MeleeWeapon.AtkBox)) {
+                      (obj instanceof ExampleSword.AtkBox)) {
                         return false;
                     }
             
@@ -741,7 +743,7 @@ final class ErnestoBoss implements Scene, Bossfight {
                                 proj.setPath(new LinePath(new Line2D.Float(WIDTH / 2, HEIGHT / 2, proj.getCenterX(), proj.getCenterY()), true));
                                 projs[i] = proj;
                                 proj.setSpeed(10);
-                            } catch (IOException ioe) { }
+                            } catch (IOException ioe) { ioe.printStackTrace(); }
                         }
                     timesPerformed++;
                     if (timesPerformed >= maxTimes) {
@@ -911,65 +913,6 @@ final class ErnestoBoss implements Scene, Bossfight {
             rotate((float) (Math.toDegrees(Math.toRadians(360) - rotationDeg)));
             Point point = getPath().move(speed);
             rotate((float) -Math.toDegrees(Math.atan2(point.x, point.y)) + 180);
-        }
-    }
-
-    public class Ernesto extends Enemy {
-        int timesPerformed = 0;
-        float alpha = 0.2f;
-        BufferedImage origSprite = sprite;
-        boolean switchAlpha = false;
-
-        public Ernesto() throws IOException {
-            super(Spritesheet.getSpriteSheet("JellyFishBoss"),  
-              "Ernesto", 8500, 100, 20);
-            
-            setHitbox(new Rectangle(0,0,0,0));
-        }
-
-        @Override
-        public void update() {
-            move();
-            if (readyToKill()) {
-                permakill();
-                end();
-            }
-            timeSinceHit += GLOBAL_TIMER.getDelay();
-            if (timeSinceHit >= HealthBar.SHOW_TIME) {
-                healthBar.kill();
-            }
-        }
-
-        @Override
-        public void kill() {
-            super.kill();
-        }
-
-        public Ernesto clone() {
-            try {
-                return new Ernesto();
-            } catch (IOException e) {
-                return null;
-            }
-        }
-
-        boolean fade(float alphaDecr) {
-            if (timesPerformed % (1 / alphaDecr) == 0) {
-                switchAlpha = !switchAlpha;
-            }
-            if (switchAlpha) {
-                alphaDecr = -alphaDecr;
-            }
-            if (alpha - alphaDecr >= 0 && alpha - alphaDecr <= 1) {
-                alpha -= alphaDecr;
-            }
-            BufferedImage newSprite = new BufferedImage(sprite.getWidth(), sprite.getHeight(), BufferedImage.TYPE_INT_ARGB);
-            Graphics2D g2d = newSprite.createGraphics();
-            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
-            g2d.drawImage(origSprite, 0, 0, null);
-            setAnimations(Spritesheet.getSpriteSheet(newSprite));
-            timesPerformed++;
-            return timesPerformed % (1 / Math.abs(alphaDecr) * 2) == 0;
         }
     }
 
