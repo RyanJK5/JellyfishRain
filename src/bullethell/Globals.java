@@ -17,6 +17,7 @@ import javax.swing.JFrame;
 import javax.swing.Timer;
 
 import bullethell.GameDisplay.ToggleAction;
+import bullethell.items.ItemID;
 import bullethell.scenes.Scene;
 
 public final class Globals {
@@ -170,8 +171,11 @@ public final class Globals {
     }
 
     public static int damageFormula(int baseDMG) {
-        return (int) ((1 + (float) Player.get().adren / (float) Player.get().maxAdr) * 
-          (baseDMG * (1 + Player.get().modifiers.mDMG) + Player.get().modifiers.pDMG));
+        Player player = Player.get();
+        int adrenNum = player.getEquipmentInv().hasAbility(ItemID.ADRENALINE_ABILITY) ? player.abilityAdren : player.adren;
+        return (int) (
+          (1 + ((float) adrenNum / (float) player.maxAdr)) * 
+          (baseDMG * (1 + player.modifiers.mDMG) + player.modifiers.pDMG));
     }
 
     public static void changeKeybind(int action, int keyBind, boolean keyEvent) {

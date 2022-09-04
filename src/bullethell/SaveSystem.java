@@ -243,7 +243,7 @@ public final class SaveSystem {
                     continue;
                 }
                 try {
-                    if (solid instanceof Enemy enemy) {
+                    if (solid instanceof Enemy enemy && !enemy.bossEnemy) {
                         writer.write(EnemyID.getID(enemy) + "(" + getData(enemy) + ")" + (enemy.isAlive() ? 1 : 0) + "\n");
                         continue;
                     }

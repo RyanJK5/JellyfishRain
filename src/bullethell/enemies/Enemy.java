@@ -26,15 +26,17 @@ import bullethell.items.ItemLoot;
 
 public abstract class Enemy extends Entity {
     
-    protected EnemyID id;
+    public EnemyID id;
 	protected HealthBar healthBar;    
-    protected String name;
-    protected int timeSinceHit = 0;
-    protected int dmgTaken;
-    protected int groupID = -1;
+    public String name;
+    public int timeSinceHit = 0;
+    public int dmgTaken;
+    public int groupID = -1;
+
+    public boolean bossEnemy;
+    protected ItemLoot[] lootTable;
 
     private final List<Hit> hits = new ArrayList<>();
-    protected ItemLoot[] lootTable;
 
     protected Enemy() {
         super();

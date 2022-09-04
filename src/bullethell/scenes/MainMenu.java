@@ -95,7 +95,7 @@ public final class MainMenu implements Scene {
 
     @Override
     public void end() {
-        Globals.setGameState(GameState.DEFAULT);
+        Globals.setGameState(GameState.ENCOUNTER);
         Globals.freezeHotkeys = false;
         Player.get().revive();
         if (!Globals.alwaysShowUI) {

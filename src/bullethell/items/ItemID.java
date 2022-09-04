@@ -5,6 +5,7 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
 import bullethell.Globals;
+import bullethell.items.abilities.AdrenalineAbility;
 import bullethell.items.abilities.DashAbility;
 import bullethell.items.abilities.FocusAbility;
 import bullethell.items.abilities.HealAbility;
@@ -29,9 +30,10 @@ public enum ItemID {
     MAGIC_DUST(MagicDust.class),
     METAL(Metal.class),
     STRANGE_SIGIL(StrangeSigil.class),
-    CUSTOM_CORE(CustomCore.class);
+    CUSTOM_CORE(CustomCore.class),
+    ADRENALINE_ABILITY(AdrenalineAbility.class);
 
-    private Class<? extends Item> itemClass;
+    private final Class<? extends Item> itemClass;
 
     private ItemID(Class<? extends Item> itemClass) {
         this.itemClass = itemClass;

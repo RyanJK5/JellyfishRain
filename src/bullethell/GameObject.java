@@ -13,8 +13,6 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import bullethell.enemies.JellyFishBoss;
-
 public class GameObject implements Cloneable {
 	
 	/**

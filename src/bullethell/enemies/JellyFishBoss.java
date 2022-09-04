@@ -16,6 +16,7 @@ public class JellyFishBoss extends Enemy {
         hp = 8500;
         dmg = 100;
         speed = 20;
+        bossEnemy = true;
         setHitbox(new Rectangle(0, 0, 0, 0));
         
         setAnimations(new Spritesheet(Globals.getImage("enemies\\JellyFishBoss"), 11, 2, 

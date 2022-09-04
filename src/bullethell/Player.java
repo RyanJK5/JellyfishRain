@@ -70,8 +70,10 @@ public final class Player extends Entity {
 	protected boolean firing;
 	
 	protected int adren;
+	protected int abilityAdren;
 	protected int maxAdr = 1000;
 	protected int hitToAdrDelay = 100;
+	protected int timeSinceAdren = 0;
 
 	protected int mana;
 	protected int maxMana = 1000;
@@ -269,7 +271,9 @@ public final class Player extends Entity {
 					if (fullSlivWidth < 1) fullSlivWidth++;
 					g2.drawImage(frontSprite.getSubimage(0, 0, fullSlivWidth, h), x, y, null);
 				}
-				g2.drawString("+" + (int) (((float) adren / (float) maxAdr) * 100) + "%", x, y);
+				int adrenNum = adrenAbilityActive ? abilityAdren : adren;
+				boolean activeAdrenItem = getEquipmentInv().hasAbility(ItemID.ADRENALINE_ABILITY) == adrenAbilityActive;
+				g2.drawString((activeAdrenItem ? "+" : "") + (int) (((float) adrenNum / (float) maxAdr) * 100) + "%", x + (!activeAdrenItem ? 12 : 0), y);
 				g2.dispose();
 			}
 		 };
@@ -364,11 +368,20 @@ public final class Player extends Entity {
 			if (regenDelay < minRegenDelay) regenDelay = minRegenDelay;
 		}
 
-		if (timeSinceHit > hitToAdrDelay && timeSinceHit % 3 == 0) {
-			if (Globals.getGameState().combat() && adren < maxAdr)	{
-				adren++;
+		if ((getEquipmentInv().hasAbility(ItemID.ADRENALINE_ABILITY) ? timeSinceAdren % 6 < 3 : timeSinceAdren % 3 == 0)) {
+			if (Globals.getGameState().combat() )	{
+				if (adrenAbilityActive) {
+					adren--;
+					if (adren <= 0) {
+						abilityAdren = 0;
+						timeSinceAdren = 0;
+						adrenAbilityActive = false;
+					}
+				} else if (timeSinceAdren >= hitToAdrDelay && adren < maxAdr) {
+					adren++;
+				}
 			} else if (!Globals.getGameState().combat() && adren > 0) {
-				adren = 0;
+				adren -= 10;
 			}
 		}
 		
@@ -400,6 +413,7 @@ public final class Player extends Entity {
 
 		currentFire++;
 		timeSinceHit++;
+		timeSinceAdren++;
 		timeSinceTP++;
 		timeSinceDash++;
 		if (timeSinceUI >= 0) {
@@ -453,16 +467,22 @@ public final class Player extends Entity {
 				break;
 			case FOCUS_ABILITY:
 				if (activating && !slowActivated) {
-					playerMods.mSpeed /= 2.5f;
+					playerMods.mSpeed += -1.3f;
 					slowActivated = true;
 				} else if (!activating && slowActivated) {
-					playerMods.mSpeed *= 2.5f;
+					playerMods.mSpeed += 1.3f;
 					slowActivated = false;
 				}
+				registerModifiers();
 				break;
 			case TP_ABILITY:
 				if (activating) {
 					tp(Player.cursorX() - w / 2, Player.cursorY() - h / 2);
+				}
+				break;
+			case ADRENALINE_ABILITY:
+				if (activating) {
+					useAdren();
 				}
 				break;
 			default:
@@ -474,6 +494,20 @@ public final class Player extends Entity {
 		if (timeSinceTP > DEFAULT_TP_COOLDOWN) {
 			setLocation(x, y);
 			timeSinceTP = 0;
+		}
+	}
+
+	private boolean adrenAbilityActive = false;
+	private void useAdren() {
+		if (adren == 0) {
+			return;
+		}
+		adrenAbilityActive = !adrenAbilityActive;
+		if (adrenAbilityActive) {
+			abilityAdren = adren;
+		} else {
+			abilityAdren = 0;
+			timeSinceAdren = 0;
 		}
 	}
 
@@ -531,6 +565,7 @@ public final class Player extends Entity {
 		for (GameObject obj : objs) {
 			obj.kill();
 		}
+		StatusWheel.instances.forEach(obj -> obj.kill());
 	}
 
 	public void showUI() {
@@ -679,7 +714,10 @@ public final class Player extends Entity {
 		setInvincible(true);
 		timeSinceHit = 0;
 		regenDelay = maxRegenDelay;
-		adren = 0;
+		if (!adrenAbilityActive) {
+			adren = 0;
+			timeSinceAdren = 0;
+		}
 	}
 
 	public void move(List<Direction> dir) {
@@ -768,7 +806,12 @@ public final class Player extends Entity {
 	
 	public HealthBar getHealthBar() { return healthBar; }
 	public HealthBar getAdrenalineBar() { return adrenalineBar; }
-	public void resetAdren() { this.adren = 0; }
+	public void resetAdren() {
+		adrenAbilityActive = false; 
+		adren = 0;
+		abilityAdren = 0;
+		timeSinceAdren = 0;
+	}
 
 	public Inventory<Item> getInventory() { return inventory; }
 	public List<Recipe> getResearchedRecipes() { return researchedRecipes; }
@@ -1035,6 +1078,10 @@ public final class Player extends Entity {
 			if (abilitySlotItem != null && abilitySlotItem.equipType != EquipType.ABILITY) {
 				return false;
 			}
+			if ((abilitySlotItem != null && abilitySlotItem.id == ItemID.ADRENALINE_ABILITY) ||
+			  abilitySlots[index].getItem() != null && abilitySlots[index].getItem().id == ItemID.ADRENALINE_ABILITY) {
+				player.resetAdren();
+			}
 			abilitySlots[index].setItem(abilitySlotItem);
 			updateModifiers();
 			return true;
@@ -1048,11 +1095,14 @@ public final class Player extends Entity {
 				if (accSlots[i].getItem() != null) {
 					player.playerMods.apply(accSlots[i].getItem().playerModifiers);
 					player.modifiers.apply(accSlots[i].getItem().weaponModifiers);
-				}
+				} 
 			}
 			if (coreSlot.getItem() != null) {
 				player.playerMods.apply(coreSlot.getItem().playerModifiers);
 				player.modifiers.apply(coreSlot.getItem().weaponModifiers);
+			}
+			if (hasAbility(ItemID.FOCUS_ABILITY)) {
+				player.playerMods.mSpeed += 1f;
 			}
 			player.registerModifiers();
 		}
