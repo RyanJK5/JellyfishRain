@@ -37,6 +37,17 @@ public class Animation implements ActionListener {
         }
     }
 
+    public void removeFrame(int index) {
+        List<BufferedImage> newFrames = new ArrayList<>();
+        for (int i = 0; i < frames.size(); i++) {
+            if (i == index) {
+                continue;
+            }
+            newFrames.add(frames.get(i));
+        }
+        frames = newFrames;
+    }
+
     private void add() {
         if (!Globals.contains(Globals.GLOBAL_TIMER.getActionListeners(), this)) {
             Globals.GLOBAL_TIMER.addActionListener(this);
@@ -91,6 +102,10 @@ public class Animation implements ActionListener {
             BufferedImage[] frames = new BufferedImage[spritesheet.getWidth()];
             for (int j = 0; j < spritesheet.getWidth(); j++) {
                 frames[j] = spritesheet.getSprite(i, j);
+                if (frames[j] == null) {
+                    frames = new BufferedImage[j];
+                    break;
+                }
             }
             result[i] = new Animation(frames, 0);
         }

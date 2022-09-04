@@ -116,7 +116,6 @@ public final class ErnestoBoss implements Scene, Bossfight {
 
             boss = (JellyFishBoss) EnemyID.getEnemy(EnemyID.JELLY_FISH_BOSS);
             boss.setLocation(WIDTH / 2 - boss.getWidth() / 2, HEIGHT / 2 - boss.getHeight() / 2);
-            boss.setLayer(1);
             boss.kill();
     
             class LaserProj extends Projectile {
@@ -125,7 +124,7 @@ public final class ErnestoBoss implements Scene, Bossfight {
                 static int animation = 0;
 
                 static BufferedImage baseSprite = Globals.getImage("LaserBlue");
-                static BufferedImage resultSprite = new BufferedImage(baseSprite.getWidth(), WIDTH, BufferedImage.TYPE_INT_ARGB);
+                static BufferedImage resultSprite = new BufferedImage(baseSprite.getWidth(), 5000, BufferedImage.TYPE_INT_ARGB);
                 static {
                     resultSprite.getGraphics().drawImage(baseSprite, 0, 0, resultSprite.getWidth(), resultSprite.getHeight(), null);
                 }
@@ -137,7 +136,7 @@ public final class ErnestoBoss implements Scene, Bossfight {
                     rotateIncr = 0.03f;
                     setLocation(boss.getCenterX(), boss.getCenterY());
                     rotate(rotationDegrees);
-    
+
                     setAlwaysDraw(true);
                     setDrawIndicator(true);
                     setPierce(Integer.MAX_VALUE);
@@ -146,7 +145,7 @@ public final class ErnestoBoss implements Scene, Bossfight {
 
                     setAnimation(animation);
                     getCurrentAnimation().start();
-                    getCurrentAnimation().setFrameRate(animation == 0 ? 3 : 6);
+                    getCurrentAnimation().setFrameRate(3);
                 }
 
                 @Override
@@ -601,7 +600,6 @@ public final class ErnestoBoss implements Scene, Bossfight {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     if (timesPerformed == 0 || boss.outOfBounds()) {
-                        boss.setAnimations(Spritesheet.getSpriteSheet(boss.origSprite));
                         boss.setPath(new SeekingPath(boss, player));
                         boss.setSpeed(0);
                         boss.setDrawIndicator(true);
@@ -653,9 +651,8 @@ public final class ErnestoBoss implements Scene, Bossfight {
                 bossLaser.start();
                 switchToFirst.stop();
     
+                boss.setOpacity(1);
                 ErnestoProj.animation = 0;
-
-                boss.setAnimations(Spritesheet.getSpriteSheet(boss.origSprite));
             });
             switchToFirst.start();
     
@@ -676,8 +673,8 @@ public final class ErnestoBoss implements Scene, Bossfight {
                 boss.timesPerformed = 0;
                 boss.setSpeed(20);
                 boss.setPath(new LinePath(new Line2D.Float(boss.getX(), boss.getY(), WIDTH / 2 - boss.getWidth() / 2, HEIGHT / 2 - boss.getHeight() / 2), false));
-                boss.setAnimations(Spritesheet.getSpriteSheet("ErnestoUltimate"));
-                boss.origSprite = boss.getCurrentAnimation().getFrame(0);
+                boss.setAnimation(1);
+                boss.getCurrentAnimation().start();
                 switchTimer.stop();
                 ultStar.start();
             });

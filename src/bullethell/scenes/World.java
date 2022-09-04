@@ -39,8 +39,6 @@ public final class World implements Scene, ActionListener {
     @WorldData
     private boolean chestOpened = false;
 
-    private boolean inBossFight = false;
-
     private int timeSinceSave = 0;
 
     private ItemDrop casty;
@@ -125,9 +123,10 @@ public final class World implements Scene, ActionListener {
                             return;
                         }
                         Player.get().getInventory().addItem(ItemID.STRANGE_SIGIL.getItem());
-                        inBossFight = true;
                         Player.get().setLocation(sigilPedestal.getX() - 200, sigilPedestal.getY());
+                        
                         SaveSystem.writeData(false);
+                        
                         sigilPedestal.setItem(null);
                         sigilPedestal.permakill();
                         Globals.main.setScene(ErnestoBoss.get(), 0, 0);
@@ -161,7 +160,7 @@ public final class World implements Scene, ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (inBossFight) {
+        if (GameState.BOSS == Globals.getGameState()) {
             return;
         }
 

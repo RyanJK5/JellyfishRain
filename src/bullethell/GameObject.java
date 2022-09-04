@@ -13,6 +13,8 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
+import bullethell.enemies.JellyFishBoss;
+
 public class GameObject implements Cloneable {
 	
 	/**
@@ -208,9 +210,7 @@ public class GameObject implements Cloneable {
 			layers.add(new ArrayList<>());
 		}
 		for (int i = 0; i < layers.size(); i++) {
-			if (layers.get(i).remove(this)) {
-				break;
-			}
+			layers.get(i).remove(this);
 		}
 
 		layers.get(layerNum).add(this);

@@ -38,7 +38,6 @@ public abstract class Enemy extends Entity {
 
     protected Enemy() {
         super();
-        
         Dimension dimensions = getSpritesheetDimensions();
 
         if (new File("sprites\\enemies\\" + getClass().getSimpleName() + ".png").exists()) {
@@ -56,6 +55,7 @@ public abstract class Enemy extends Entity {
 
         setValues();
         createLootTable();
+        Globals.GLOBAL_TIMER.addActionListener(this);
     }
 
     protected abstract void setValues();
@@ -64,7 +64,7 @@ public abstract class Enemy extends Entity {
 
     protected Dimension getSpritesheetDimensions() {
         return new Dimension(1, 1);
-    };
+    }
 
     @Override  
     public void update() {
@@ -147,7 +147,9 @@ public abstract class Enemy extends Entity {
     @Override
     public void kill() {
     	isAlive = false;
-    	healthBar.kill();
+        if (healthBar != null) {
+            healthBar.kill();
+        }
         if (groupID >= 0 && !groupIsAlive()) {
             Globals.setGameState(GameState.DEFAULT);
         }

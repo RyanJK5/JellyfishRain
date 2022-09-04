@@ -47,7 +47,6 @@ public non-sealed abstract class Entity extends GameSolid implements ActionListe
     protected Entity() {
         super(Globals.getImage("enemies\\Default"));
         animations = Animation.getAnimations(Spritesheet.getSpriteSheet(sprite));
-        Globals.GLOBAL_TIMER.addActionListener(this);
         path = Path.DEFAULT_PATH;
     }
 
@@ -144,7 +143,8 @@ public non-sealed abstract class Entity extends GameSolid implements ActionListe
 	}
 
     public Path getPath() { return path; }
-    public void setPath(Path path) { this.path = path; }
+    public void setPath(Path path) { 
+        this.path = path; }
 
     public int getDMG() { return dmg; }
     public void setDMG(int dmg) { this.dmg = dmg; }

@@ -19,6 +19,21 @@ public class Spritesheet {
             } 
         }
     }
+
+    public Spritesheet(BufferedImage spritesheet, int width, int height, int[] rowWidths, int[] rowHeights) {
+        sprites = new BufferedImage[width][height];
+        
+        spriteHeight = spritesheet.getHeight() / height;
+        int yPos = 0;
+        for (int i = 0; i < rowWidths.length; i++) {
+            spriteWidth = rowWidths[i];
+            spriteHeight = rowHeights[i];
+            for (int j = 0; j < width; j++) {
+                sprites[j][i] = spritesheet.getSubimage(j * spriteWidth, yPos, spriteWidth, spriteHeight);
+            }
+            yPos += spriteHeight;
+        }
+    }
     
     public BufferedImage getSprite(int row, int column) {
         return sprites[column][row];
