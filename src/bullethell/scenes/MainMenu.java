@@ -61,7 +61,6 @@ public final class MainMenu implements Scene {
                 }
             };
             newGame.setLocation(Globals.SCREEN_WIDTH / 2 - newGame.getWidth() / 2, Globals.SCREEN_HEIGHT / 2);
-            newGame.setLoop(false);
 
             boolean firstTime = !new File("data\\PlayerData.dat").exists();
             BufferedImage trig2 = titleScreenButtons.getSubimage(0, titleScreenButtons.getHeight() / 3, 
@@ -72,14 +71,12 @@ public final class MainMenu implements Scene {
                     if (firstTime) {
                         return;
                     }
-                    
                     end();
                     SaveSystem.readData(false);
                 }
             };
             continueGame.setLocation(newGame.getX(), newGame.getY() + newGame.getHeight());
             continueGame.setAltCondition(() -> firstTime);
-            continueGame.setLoop(false);
 
             saveExitButton = new Button(titleScreenButtons.getSubimage(0, (int) (titleScreenButtons.getHeight() * (2f/3f)),
             titleScreenButtons.getWidth(), titleScreenButtons.getHeight() / 3)) {
@@ -95,7 +92,7 @@ public final class MainMenu implements Scene {
 
     @Override
     public void end() {
-        Globals.setGameState(GameState.ENCOUNTER);
+        Globals.setGameState(GameState.DEFAULT);
         Globals.freezeHotkeys = false;
         Player.get().revive();
         if (!Globals.alwaysShowUI) {

@@ -36,8 +36,7 @@ public final class Player extends Entity {
 	public static final float DEFAULT_SPEED = 10;
 	public static final int DEFAULT_MAX_HP = 300;
 	public static final int DEFAULT_INVINC_TIME = 1000 / Globals.TIMER_DELAY;
-	public static final int DEFAULT_MIN_REGEN_DELAY = 25;
-	public static final int DEFAULT_REGEN_DECREASE_RATE = 2;
+	public static final int DEFAULT_REGEN_DELAY = 20;
 	public static final int DEFAULT_HIT_TO_REGEN_DELAY = 3000 / Globals.TIMER_DELAY;
 	public static final int DEFAULT_TP_COOLDOWN = 10 * 1000 / Globals.TIMER_DELAY;
 	public static final int DEFAULT_HEAL_AMOUNT = (int) (DEFAULT_MAX_HP * 0.3f);
@@ -78,11 +77,9 @@ public final class Player extends Entity {
 	protected int mana;
 	protected int maxMana = 1000;
 
-	protected int maxRegenDelay = 400 / Globals.TIMER_DELAY;
-	protected int minRegenDelay = DEFAULT_MIN_REGEN_DELAY;
-	protected int regenDelay = maxRegenDelay;
+	protected int regenDelay = DEFAULT_REGEN_DELAY;
+	protected int timeSinceRegen = regenDelay;
 	protected int hitToRegenDelay = DEFAULT_HIT_TO_REGEN_DELAY;
-	protected int regenDecreaseRate = DEFAULT_REGEN_DECREASE_RATE;
 	
 	protected int currentFire = 0;
 	protected int currentInvinc = 0;
@@ -362,10 +359,9 @@ public final class Player extends Entity {
 		
 		if (cursorSlot != null) cursorSlot.setLocation(cursorX(), cursorY());
 
-		if (timeSinceHit >= hitToRegenDelay && hp < maxHP && timeSinceHit % regenDelay == 0) {
+		if (timeSinceHit >= hitToRegenDelay && hp < maxHP && timeSinceRegen >= regenDelay) {
+			timeSinceRegen = 0;
 			hp++;
-			if (regenDelay > minRegenDelay) regenDelay -= regenDecreaseRate;
-			if (regenDelay < minRegenDelay) regenDelay = minRegenDelay;
 		}
 
 		if ((getEquipmentInv().hasAbility(ItemID.ADRENALINE_ABILITY) ? timeSinceAdren % 6 < 3 : timeSinceAdren % 3 == 0)) {
@@ -413,6 +409,7 @@ public final class Player extends Entity {
 
 		currentFire++;
 		timeSinceHit++;
+		timeSinceRegen++;
 		timeSinceAdren++;
 		timeSinceTP++;
 		timeSinceDash++;
@@ -693,6 +690,7 @@ public final class Player extends Entity {
 		}
 		invincTime = (int) (DEFAULT_INVINC_TIME * (1 + playerMods.mInvincTime) + playerMods.pInvincTime);
 		speed = (int) (DEFAULT_SPEED * (1 + playerMods.mSpeed) + playerMods.pSpeed);
+		regenDelay = (int) (DEFAULT_REGEN_DELAY * (1 + playerMods.mRegen) + playerMods.pSpeed);
 	}
 
 	public void registerDealtDMG(int dmg, GameSolid sender) {
@@ -713,7 +711,7 @@ public final class Player extends Entity {
 		hp -= dmg;
 		setInvincible(true);
 		timeSinceHit = 0;
-		regenDelay = maxRegenDelay;
+		timeSinceRegen = 0;
 		if (!adrenAbilityActive) {
 			adren = 0;
 			timeSinceAdren = 0;

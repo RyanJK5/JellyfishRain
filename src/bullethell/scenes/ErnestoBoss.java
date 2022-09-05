@@ -18,11 +18,11 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 
 import javax.swing.Timer;
 
+import bullethell.Audio;
 import bullethell.Entity;
 import bullethell.GameObject;
 import bullethell.GameSolid;
@@ -78,7 +78,7 @@ public final class ErnestoBoss implements Scene, Bossfight {
     public void start(int x, int y) {
         Globals.setGameState(GameState.CUTSCENE);
         Globals.main.setBackground(new java.awt.Color(22, 22, 22));
-        Scene.playsound(new File("audio\\Switch.wav"));
+        Globals.playsound(Audio.SWITCH);
         Globals.GLOBAL_TIMER.removeActionListener(World.get());
         Thread lightfx = new Thread(() -> {
             GameObject obj = new GameObject(null, 105) {
@@ -110,7 +110,7 @@ public final class ErnestoBoss implements Scene, Bossfight {
         try {
             lightfx.join(0);
             Globals.setGameState(GameState.BOSS);
-            Scene.playsound(new File("audio\\AtTheSpeedOfLight.wav"));
+            Globals.playsound(Audio.JELLY_SONG);
 
             player.resetAdren();
 
@@ -830,7 +830,7 @@ public final class ErnestoBoss implements Scene, Bossfight {
         Globals.main.setBackground(java.awt.Color.WHITE);
         Globals.GLOBAL_TIMER.addActionListener(World.get());
         Entity.removeAll(obj -> obj instanceof Projectile);
-        Scene.stopsound(new File("audio\\AtTheSpeedOfLight.wav"));
+        Globals.stopsound(Audio.JELLY_SONG);
         stopTimers();
     }
 

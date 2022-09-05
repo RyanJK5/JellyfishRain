@@ -10,21 +10,11 @@ import static bullethell.Globals.main;
 import java.awt.Color;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-import javax.sound.sampled.FloatControl;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JTextField;
 
 import bullethell.GameState;
-import bullethell.Globals;
 import bullethell.ui.Text;
 
 /** 
@@ -84,33 +74,5 @@ public sealed interface Scene
 		main.remove(textField);
 		label.kill();
 		return textField.getText();
-	}
-
-	static HashMap<File, Clip> sounds = new HashMap<>();
-	static void playsound(File file) {
-		try {
-			AudioInputStream audioStream = AudioSystem.getAudioInputStream(file);
-			Clip clip = AudioSystem.getClip();
-			clip.open(audioStream);
-			FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-			gainControl.setValue(20f * (float) Math.log10(Globals.getVolume()));
-
-			clip.start();
-			sounds.put(file, clip);
-		} catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
-			e.printStackTrace();
-		}
-	}
-
-	static void stopsound(File file) {
-		sounds.get(file).stop();
-		sounds.get(file).close();
-	}
-
-	static void changeSoundVolume() {
-		for (Clip clip : sounds.values()) {
-			FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-			gainControl.setValue(20f * (float) Math.log10(Globals.getVolume()));
-		}
 	}
 }

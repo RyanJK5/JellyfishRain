@@ -64,11 +64,9 @@ public final class SaveSystem {
             + obj.hitToAdrDelay + "," 
             + (!onDeath ? obj.mana : 0) + "," 
             + obj.maxMana + "," 
-            + obj.maxRegenDelay + "," 
-            + obj.minRegenDelay + "," 
             + obj.regenDelay + "," 
+            + obj.timeSinceRegen + "," 
             + obj.hitToRegenDelay + "," 
-            + obj.regenDecreaseRate + "," 
             + (!onDeath ? obj.timeSinceTP : Player.DEFAULT_TP_COOLDOWN) + "," 
             + obj.invincTime + ","
             + (!onDeath ? obj.hp : obj.maxHP) + "," 
@@ -134,7 +132,7 @@ public final class SaveSystem {
 
             int pX = 0;
             int pY = 0;
-            for (int i = 0; i < 20; i++) {
+            for (int i = 0; i < 18; i++) {
                 String str = scanner.next();
                 switch (i) {
                     case 0:
@@ -171,30 +169,24 @@ public final class SaveSystem {
                         obj.maxMana = Integer.parseInt(str);
                         break;
                     case 11:
-                        obj.maxRegenDelay = Integer.parseInt(str);
-                        break;
-                    case 12:
-                        obj.minRegenDelay = Integer.parseInt(str);
-                        break;
-                    case 13:
                         obj.regenDelay = Integer.parseInt(str);
                         break;
-                    case 14:
+                    case 12:
+                        obj.timeSinceRegen = Integer.parseInt(str);
+                        break;
+                    case 13:
                         obj.hitToRegenDelay = Integer.parseInt(str);
                         break;
-                    case 15:
-                        obj.regenDecreaseRate = Integer.parseInt(str);
-                        break;
-                    case 16:
+                    case 14:
                         obj.timeSinceTP = Integer.parseInt(str);
                         break;
-                    case 17:
+                    case 15:
                         obj.invincTime = Integer.parseInt(str);
                         break;
-                    case 18:
+                    case 16:
                         obj.hp = Integer.parseInt(str);
                         break;
-                    case 19:
+                    case 17:
                         obj.maxHP = Integer.parseInt(str);
                         break;
                 }
@@ -308,7 +300,9 @@ public final class SaveSystem {
             }
             writer.write((Globals.lockScreen ? 1 : 0) + "\n");
             writer.write((Globals.alwaysShowUI ? 1 : 0) + "\n");
-            writer.write(Globals.getVolume() + "\n");
+            for (AudioType aType : AudioType.values()) {
+                writer.write(aType.getVolume() + "\n");
+            }
         }
     }
 
@@ -328,7 +322,9 @@ public final class SaveSystem {
             }
             Globals.lockScreen = Integer.parseInt(scanner.nextLine()) == 1;
             Globals.alwaysShowUI = Integer.parseInt(scanner.nextLine()) == 1;
-            Globals.setVolume(Float.parseFloat(scanner.nextLine()));
+            for (int i = 0; i < AudioType.values().length && scanner.hasNextLine(); i++) {
+                AudioType.values()[i].setVolume(Float.parseFloat(scanner.nextLine()));
+            }
         }
         Globals.makeKeyMap(keySet.toArray(new Integer[0]), values.toArray(new Boolean[0]));
     }

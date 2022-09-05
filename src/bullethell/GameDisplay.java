@@ -77,6 +77,11 @@ public final class GameDisplay extends JPanel {
 		if (scene != null) {
 			scene.end();
 		}
+		for (Audio audio : Audio.values()) {
+			if (audio.getClip().isOpen()) {
+				Globals.stopsound(audio);
+			}
+		}
 
 		eAction.turningOn = true;
 	}

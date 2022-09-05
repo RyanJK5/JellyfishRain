@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import bullethell.AudioType;
 import bullethell.GameState;
 import bullethell.Globals;
 import bullethell.Player;
@@ -44,7 +45,7 @@ public final class OptionsMenu extends KeyAdapter implements Scene {
     private Button[] videoButtons = new Button[2];
 
     //Options audio screen
-    private Button[] audioButtons = new Button[1];
+    private Button[] audioButtons = new Button[3];
 
     public static OptionsMenu get() {
         return OPTIONS_MENU;
@@ -193,9 +194,14 @@ public final class OptionsMenu extends KeyAdapter implements Scene {
             }
         };
 
-        audioButtons[0] = new SliderOptionsButton(Globals.getImage("VolumeButtons"), 
-          Globals::setVolume, Globals::getVolume);
-        audioButtons[0].kill();
+        BufferedImage img = Globals.getImage("VolumeButtons");
+        for (int i = 0; i < AudioType.values().length; i++) {
+            AudioType aType = AudioType.values()[i];
+            audioButtons[i] = new SliderOptionsButton(img.getSubimage(0, i * img.getHeight() / 3, img.getWidth(), img.getHeight() / 3), 
+                aType::setVolume, aType::getVolume)
+            ;
+            audioButtons[i].kill();
+        }
     }
 
     private void exitSetup() {
@@ -203,9 +209,9 @@ public final class OptionsMenu extends KeyAdapter implements Scene {
           buttons.getWidth(), buttons.getHeight() / 4)) {
             @Override
             protected void activate() {
+                Globals.main.setScene(MainMenu.get(), 0, 0);
                 World.get().end();
                 end();
-                MainMenu.get().start(0, 0);
             }
         };
     }
@@ -243,7 +249,10 @@ public final class OptionsMenu extends KeyAdapter implements Scene {
 
         audioButton.revive();
         audioButton.setLocation(videoButton.getX(), videoButton.getY() + videoButton.getHeight());
-        audioButtons[0].setLocation(controlsButton.getX(), controlsButton.getY());
+
+        for (int i = 0; i < audioButtons.length; i++) {
+            audioButtons[i].setLocation(controlsButton.getX(), controlsButton.getY() + audioButtons[i].getHeight() * i);
+        }
 
         saveExitButton.revive();
         saveExitButton.setLocation(audioButton.getX(), audioButton.getY() + audioButton.getHeight());
@@ -251,10 +260,11 @@ public final class OptionsMenu extends KeyAdapter implements Scene {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if ((e.getKeyCode() == KeyEvent.VK_ESCAPE) && (keyBindButtons[0] != null && keyBindButtons[0].isAlive() && 
-          Arrays.stream(keyBindButtons).noneMatch(obj -> obj.code < 0 && obj.previousCode != obj.code)) ||
+        if ((e.getKeyCode() == KeyEvent.VK_ESCAPE) && (
+          (keyBindButtons[0] != null && keyBindButtons[0].isAlive() && 
+            Arrays.stream(keyBindButtons).noneMatch(obj -> obj.code < 0 && obj.previousCode != obj.code)) ||
           (videoButtons[0] != null && videoButtons[0].isAlive()) ||
-          (audioButtons[0] != null && audioButtons[0].isAlive())) {
+          (audioButtons[0] != null && audioButtons[0].isAlive()))) {
             end();
             start(0, 0);
         }

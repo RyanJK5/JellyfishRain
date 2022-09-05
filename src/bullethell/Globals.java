@@ -13,12 +13,15 @@ import java.util.Map;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JFrame;
 import javax.swing.Timer;
 
 import bullethell.GameDisplay.ToggleAction;
 import bullethell.items.ItemID;
-import bullethell.scenes.Scene;
 
 public final class Globals {
 
@@ -48,7 +51,6 @@ public final class Globals {
 
     public static boolean lockScreen = false;
     public static boolean alwaysShowUI = false;
-    private static float volume = 1f;
 
 	public static final boolean PAINT_QUADTREE = false;
 
@@ -74,18 +76,6 @@ public final class Globals {
         WEAPON_2_ACTION = 9,
         WEAPON_3_ACTION = 10
     ;
-
-    public static void setVolume(float value) {
-        if (value < 0 || value > 1) {
-            throw new IllegalArgumentException();
-        }
-        volume = value;
-        Scene.changeSoundVolume();
-    }
-
-    public static float getVolume() {
-        return volume;
-    }
 
     public static void setGameState(GameState state) {
         switch (state) {
@@ -169,6 +159,23 @@ public final class Globals {
             return null;
         }
     }
+
+	public static void playsound(Audio audio) {
+        Clip clip = audio.getClip();
+        try {
+            if (!clip.isOpen()) {
+                clip.open(AudioSystem.getAudioInputStream(audio.srcFile));
+            }
+        } catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
+            e.printStackTrace();
+        }
+        clip.start();
+	}
+
+	public static void stopsound(Audio audio) {
+		audio.getClip().stop();
+		audio.getClip().close();
+	}
 
     public static int damageFormula(int baseDMG) {
         Player player = Player.get();
