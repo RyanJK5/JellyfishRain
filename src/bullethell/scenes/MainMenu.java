@@ -39,7 +39,6 @@ public final class MainMenu implements Scene {
         try {
             SaveSystem.readSettingsData();
             Globals.setGameState(GameState.MENU);
-            Globals.freezeHotkeys = true;
             Player.get().kill();
             Player.setCameraPos(0, 0);
             final int titleWidth = 1184;
@@ -53,8 +52,15 @@ public final class MainMenu implements Scene {
                 @Override
                 protected void activate() {
                     try {
+                        World.get().setEvents(false);
+                        Player.get().getEquipmentInv().clear();
+                        Player.get().getInventory().clear();
                         Globals.main.gameStart();
-                        SaveSystem.writeData(false);
+                        for (File file : new File("data").listFiles()) {
+                            if (file.getName() != "SettingsData.dat") {
+                                file.delete();
+                            }
+                        }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -62,13 +68,12 @@ public final class MainMenu implements Scene {
             };
             newGame.setLocation(Globals.SCREEN_WIDTH / 2 - newGame.getWidth() / 2, Globals.SCREEN_HEIGHT / 2);
 
-            boolean firstTime = !new File("data\\PlayerData.dat").exists();
             BufferedImage trig2 = titleScreenButtons.getSubimage(0, titleScreenButtons.getHeight() / 3, 
               titleScreenButtons.getWidth(), titleScreenButtons.getHeight() / 3);
             continueGame = new Button(trig2) {
                 @Override
                 protected void activate() {
-                    if (firstTime) {
+                    if (!new File("data\\PlayerData.dat").exists()) {
                         return;
                     }
                     end();
@@ -76,7 +81,7 @@ public final class MainMenu implements Scene {
                 }
             };
             continueGame.setLocation(newGame.getX(), newGame.getY() + newGame.getHeight());
-            continueGame.setAltCondition(() -> firstTime);
+            continueGame.setAltCondition(() -> !new File("data\\PlayerData.dat").exists());
 
             saveExitButton = new Button(titleScreenButtons.getSubimage(0, (int) (titleScreenButtons.getHeight() * (2f/3f)),
             titleScreenButtons.getWidth(), titleScreenButtons.getHeight() / 3)) {
@@ -93,7 +98,6 @@ public final class MainMenu implements Scene {
     @Override
     public void end() {
         Globals.setGameState(GameState.DEFAULT);
-        Globals.freezeHotkeys = false;
         Player.get().revive();
         if (!Globals.alwaysShowUI) {
             Player.get().killUI();

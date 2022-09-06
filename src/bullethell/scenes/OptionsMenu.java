@@ -209,9 +209,10 @@ public final class OptionsMenu extends KeyAdapter implements Scene {
           buttons.getWidth(), buttons.getHeight() / 4)) {
             @Override
             protected void activate() {
-                Globals.main.setScene(MainMenu.get(), 0, 0);
-                World.get().end();
                 end();
+                Globals.main.setScene(MainMenu.get(), 0, 0);
+                SaveSystem.writeData(false);
+                World.get().end();
             }
         };
     }
@@ -279,7 +280,7 @@ public final class OptionsMenu extends KeyAdapter implements Scene {
         }
         Globals.freezeHotkeys = false;
         endHub();
-        for (Button button : keyBindButtons) {
+        for (OptionsButton button : keyBindButtons) {
             button.kill();
         }
         for (Button button : videoButtons) {
@@ -432,6 +433,7 @@ public final class OptionsMenu extends KeyAdapter implements Scene {
             super.mousePressed(e);
         }
 
+        int i;
         @Override
         public void kill() {
             super.kill();
@@ -440,7 +442,9 @@ public final class OptionsMenu extends KeyAdapter implements Scene {
 
         @Override
         public void mouseReleased(MouseEvent e) {
-            released = true;
+            if (isAlive) {
+                released = true;
+            }
         }
     }
 
@@ -468,7 +472,9 @@ public final class OptionsMenu extends KeyAdapter implements Scene {
 
         @Override
         public void mouseReleased(MouseEvent e) {
-            released = true;
+            if (isAlive) {
+                released = true;
+            }
         }
     }
 
@@ -496,7 +502,9 @@ public final class OptionsMenu extends KeyAdapter implements Scene {
 
         @Override
         public void mouseReleased(MouseEvent e) {
-            released = true;
+            if (isAlive) {
+                released = true;
+            }
         }
     }
 }

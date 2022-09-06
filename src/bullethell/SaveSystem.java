@@ -283,7 +283,11 @@ public final class SaveSystem {
                 String str = scanner.nextLine();
                 result.add(Integer.parseInt(str) == 1);
             }
-            World.get().setEvents(result.toArray(new Boolean[0]));
+            boolean[] resultArr = new boolean[result.size()];
+            for (int i = 0; i < resultArr.length; i++) {
+                resultArr[i] = result.get(i);
+            }
+            World.get().setEvents(resultArr);
         }
 
         World.get().start(0, 0);

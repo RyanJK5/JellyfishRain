@@ -15,6 +15,7 @@ import java.util.List;
 import javax.imageio.ImageIO;
 
 import bullethell.Entity;
+import bullethell.GameObject;
 import bullethell.GameSolid;
 import bullethell.GameState;
 import bullethell.Globals;
@@ -35,19 +36,15 @@ public final class World implements Scene, ActionListener {
     private static final World WORLD = new World();
 
     @WorldData
-    private boolean castyTaken = false;
+    private boolean castyBool = false;
     @WorldData
-    private boolean chestOpened = false;
+    private boolean chestBool = false;
 
     private int timeSinceSave = 0;
 
     private ItemDrop casty;
     private GameSolid chest;
     private SolidContainer<Item> sigilPedestal;
-
-    private World() {
-        Globals.GLOBAL_TIMER.addActionListener(this);
-    }
 
     public static World get() {
         return WORLD;
@@ -61,12 +58,13 @@ public final class World implements Scene, ActionListener {
     @Override
     public void start(int x, int y) {
         try {
+            Globals.GLOBAL_TIMER.addActionListener(this);
 
-            if (!castyTaken) {
+            if (!castyBool) {
                 casty = new ItemDrop(ItemID.EXAMPLE_STAFF, 1, 1000, 200);
             }
             
-            if (!chestOpened) {
+            if (!chestBool) {
                 chest = new GameSolid(Globals.getImage("chest"));
                 chest.addTrigger(new Trigger(null, new Trigger.Type[] {
                     Trigger.CURSOR_OVER, Trigger.TARGET_IN_RANGE, Trigger.ON_CLICK, Trigger.RIGHT_CLICK
@@ -156,6 +154,7 @@ public final class World implements Scene, ActionListener {
         if (sigilPedestal != null) {
             sigilPedestal.kill();
         }
+        Globals.GLOBAL_TIMER.removeActionListener(this);
     }
 
     @Override
@@ -169,42 +168,62 @@ public final class World implements Scene, ActionListener {
             timeSinceSave = 0;
         }
         
-        if (!castyTaken) {
-            castyTaken = casty != null && !casty.isAlive();
+        for (Field field : World.class.getDeclaredFields()) {
+            if (field.isAnnotationPresent(WorldData.class)) {
+                Field corresField;
+                try {
+                    corresField = World.class.getDeclaredField(field.getName().substring(0, field.getName().indexOf('B')));
+                    GameObject obj = (GameObject) corresField.get(get());
+                    if (obj != null && !obj.isAlive()) {
+                        field.setBoolean(get(), true);
+                    }
+                } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e1) {
+                    e1.printStackTrace();
+                }
+            }
         }
-        if (!chestOpened) {
-            chestOpened = chest != null && !chest.isAlive();
-        }
+
         timeSinceSave++;
     }
 
-    public Boolean[] getEvents() {
+    public boolean[] getEvents() {
         List<Boolean> result = new ArrayList<>();
         for (Field field : World.class.getDeclaredFields()) {
             if (field.isAnnotationPresent(WorldData.class)) {
                 try {
-                    result.add((boolean) field.get(get()));
+                    result.add(field.getBoolean(get()));
                 } catch (IllegalArgumentException | IllegalAccessException e) {
                     e.printStackTrace();
                 }
             }
         }
-        return result.toArray(new Boolean[0]);
+        boolean[] resultArr = new boolean[result.size()];
+        for (int i = 0; i < result.size(); i++) {
+            resultArr[i] = result.get(i);
+        }
+        return resultArr;
     }
 
-    public void setEvents(Boolean[] events) {
+    public void setEvents(boolean[] events) {
         Field[] fields = World.class.getDeclaredFields();
-        List<Field> annotatedFields = new ArrayList<>();
+        int index = 0;
         for (Field field : fields) {
             if (field.isAnnotationPresent(WorldData.class)) {
-                annotatedFields.add(field);
+                try {
+                    field.setBoolean(get(), events[index]);
+                    index++;
+                } catch (IllegalArgumentException | IllegalAccessException e) {
+                    e.printStackTrace();
+                }
             }
         }
-        for (int i = 0; i < events.length; i++) {
-            Field field = annotatedFields.get(i);
+    }
+
+    public void setEvents(boolean allEvents) {
+        for (Field field : World.class.getDeclaredFields()) {
             if (field.isAnnotationPresent(WorldData.class)) {
                 try {
-                    field.set(get(), events[i]);
+                    field.setBoolean(get(), false);
                 } catch (IllegalArgumentException | IllegalAccessException e) {
                     e.printStackTrace();
                 }
@@ -214,7 +233,7 @@ public final class World implements Scene, ActionListener {
 
     @Target(ElementType.FIELD)
     @Retention(RetentionPolicy.RUNTIME)
-    private @interface WorldData {}
+    private @interface WorldData { }
 
     @Override
     public boolean isActive() {
