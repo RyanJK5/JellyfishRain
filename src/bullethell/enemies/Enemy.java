@@ -40,9 +40,9 @@ public abstract class Enemy extends Entity {
 
     protected Enemy() {
         super();
-        Dimension dimensions = getSpritesheetDimensions();
-
+        
         if (new File("sprites\\enemies\\" + getClass().getSimpleName() + ".png").exists()) {
+            Dimension dimensions = getSpritesheetDimensions();
             setAnimations(new Spritesheet(Globals.getImage("enemies\\" + getClass().getSimpleName()), dimensions.width, dimensions.height)); 
         } else {
             setAnimations(new Spritesheet(Globals.getImage("enemies\\Default"), 1, 1));

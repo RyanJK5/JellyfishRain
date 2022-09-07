@@ -418,7 +418,7 @@ public final class Player extends Entity {
 		}
 	}
 	
-	private static void translateCamera(int dx, int dy) {
+	private static void translateCamera(int dx, int dy, boolean corrective) {
 		cameraX += dx;
 		cameraY += dy;
 
@@ -426,23 +426,27 @@ public final class Player extends Entity {
 			ui.setLocation(ui.x + dx, ui.y + dy);
 		}
 		setCursorPos(cursorX + dx, cursorY + dy);
+		Parallax.updateParallaxes(dx, dy, corrective);
 	}
 
-	@Override
-	public void setLocation(int newX, int newY) {
+	private void setLocation(int newX, int newY, boolean corrective) {
 		Point point = new Point(newX - x, newY - y); 
 		if (Globals.getGameState() == GameState.BOSS && Globals.main.getScene() instanceof Bossfight bossfight &&
 		  Globals.lockScreen) {
 			if (bossfight.getAnchorX() != cameraX && bossfight.getAnchorY() != cameraY) {
-				translateCamera(-cameraX + bossfight.getAnchorX(), -cameraY + bossfight.getAnchorY());
+				translateCamera(-cameraX + bossfight.getAnchorX(), -cameraY + bossfight.getAnchorY(), corrective);
 				getEquipmentInv().setLocations();
 			}
 		} else {
-			translateCamera(-cameraX + getCenterX() - Globals.SCREEN_WIDTH / 2 + point.x,
-			  -cameraY + getCenterY() - Globals.SCREEN_HEIGHT / 2 + point.y);
+			translateCamera(point.x, point.y, corrective);
 			getEquipmentInv().setLocations();
 		}
 		super.setLocation(newX, newY);
+	}
+
+	@Override
+	public void setLocation(int newX, int newY) {
+		setLocation(newX, newY, false);
 	}
 	
 	private boolean slowActivated = false;
@@ -664,14 +668,14 @@ public final class Player extends Entity {
 
 
 			while (collidedWith(obj)) {
-				setLocation(x - xDif, y - yDif);
+				setLocation(x - xDif, y - yDif, true);
 			}
 
 			return true;
 		}
 		return false;
 	}
-	
+
 	public void fire() {
 		Item wep = getEquipmentInv().getWepSlot().getItem(); 
 		if (wep == null || currentFire < wep.fireTime) {
@@ -731,7 +735,7 @@ public final class Player extends Entity {
 			yDif /= 1.25f;
 		}
 
-		double localSpeed = speed;
+		float localSpeed = speed;
 		int newX = (int) (x + xDif * localSpeed);
 		int newY = (int) (y + yDif * localSpeed);
 
@@ -746,7 +750,7 @@ public final class Player extends Entity {
 		} else if (newY > Globals.HEIGHT - h) {
 			newY = Globals.HEIGHT - h;
 		}
-		
+
 		setLocation(newX, newY);
 	}
 
@@ -829,7 +833,7 @@ public final class Player extends Entity {
 	}
 
 	public static void setCameraPos(int x, int y) {
-		translateCamera(x - cameraX, y - cameraY);
+		translateCamera(x - cameraX, y - cameraY, false);
 	}
 
 	public static int cameraX() { return cameraX; }

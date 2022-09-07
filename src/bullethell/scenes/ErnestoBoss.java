@@ -28,6 +28,7 @@ import bullethell.GameObject;
 import bullethell.GameSolid;
 import bullethell.GameState;
 import bullethell.Globals;
+import bullethell.Parallax;
 import bullethell.Player;
 import bullethell.Projectile;
 import bullethell.Spritesheet;
@@ -81,7 +82,7 @@ public final class ErnestoBoss implements Scene, Bossfight {
         Globals.playsound(Audio.SWITCH);
         Globals.GLOBAL_TIMER.removeActionListener(World.get());
         Thread lightfx = new Thread(() -> {
-            GameObject obj = new GameObject(null, 105) {
+            GameObject obj = new GameObject(null, 101) {
                 int timesPerformed = 0;
                 int alpha = 255;
                 @Override
@@ -98,8 +99,9 @@ public final class ErnestoBoss implements Scene, Bossfight {
                     timesPerformed++;
                 }
             };
-            obj.setLayer(101);
             obj.setAlwaysDraw(true);
+
+            new Parallax("JellyBG");
             try {
                 Thread.sleep(1500);
             } catch (Exception e) {

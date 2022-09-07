@@ -19,6 +19,7 @@ import bullethell.GameObject;
 import bullethell.GameSolid;
 import bullethell.GameState;
 import bullethell.Globals;
+import bullethell.Parallax;
 import bullethell.Player;
 import bullethell.SaveSystem;
 import bullethell.SolidContainer;
@@ -58,6 +59,7 @@ public final class World implements Scene, ActionListener {
     @Override
     public void start(int x, int y) {
         try {
+            new Parallax("JellyBG");
             Globals.GLOBAL_TIMER.addActionListener(this);
 
             if (!castyBool) {

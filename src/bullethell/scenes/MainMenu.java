@@ -52,15 +52,12 @@ public final class MainMenu implements Scene {
                 @Override
                 protected void activate() {
                     try {
+                        Player.setCameraPos(Player.get().getCenterX() - Globals.SCREEN_WIDTH / 2, Player.get().getCenterY() - Globals.SCREEN_HEIGHT / 2);
                         World.get().setEvents(false);
                         Player.get().getEquipmentInv().clear();
                         Player.get().getInventory().clear();
                         Globals.main.gameStart();
-                        for (File file : new File("data").listFiles()) {
-                            if (file.getName() != "SettingsData.dat") {
-                                file.delete();
-                            }
-                        }
+                        SaveSystem.writeData(false);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
