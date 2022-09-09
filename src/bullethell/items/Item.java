@@ -132,7 +132,7 @@ public abstract class Item extends GameObject {
                     }
                 case 2:
                     if (equipType == EquipType.WEAPON && manaCost != 0) {
-                        g.drawString("    " + manaCost + " mana", x, y + index * spacing);
+                        g.drawString("    " + (int) ((float) manaCost / Player.get().getMaxMana() * 100) + "% mana", x, y + index * spacing);
                         break;
                     } else {
                         continue;

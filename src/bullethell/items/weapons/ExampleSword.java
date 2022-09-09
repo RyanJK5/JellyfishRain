@@ -62,6 +62,7 @@ public final class ExampleSword extends Item {
         public AtkBox(Spritesheet sprite, Rectangle bounds) {
             super(sprite, null, getWepDMG(), 0, 0, true);
             setHitbox(new Rectangle(bounds.x, bounds.y, bounds.width, bounds.height));
+            setLayer(99);
         }
 
         private double theta = 0;

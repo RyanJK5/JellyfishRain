@@ -61,7 +61,6 @@ public final class GameDisplay extends JPanel {
 		mouseMoveListener.locationChange(java.awt.MouseInfo.getPointerInfo().getLocation());
 
 		SaveSystem.loadWorld(true);
-		setScene(null, 0, 0);
 		player.setLocation(Globals.SCREEN_WIDTH / 2, Globals.SCREEN_HEIGHT / 2);
 		player.setLocation(Globals.WIDTH / 2, 100);
 		player.getInventory().addItem(ItemID.DASH_ABILITY.getItem());

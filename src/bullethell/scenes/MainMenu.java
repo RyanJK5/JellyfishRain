@@ -54,6 +54,7 @@ public final class MainMenu implements Scene {
                     try {
                         World.get().setEvents(false);
                         Globals.main.gameStart();
+                		Globals.main.setScene(null, 0, 0);
                         SaveSystem.writeData(false);
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -70,7 +71,7 @@ public final class MainMenu implements Scene {
                     if (!new File("data\\PlayerData.dat").exists()) {
                         return;
                     }
-                    end();
+            		Globals.main.setScene(null, 0, 0);
                     SaveSystem.readData(false);
                 }
             };

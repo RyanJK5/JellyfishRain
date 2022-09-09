@@ -191,6 +191,11 @@ public final class Player extends Entity {
 			}
 
 			@Override
+			public void clear() {
+				super.clear();
+			}
+
+			@Override
 			public void actionPerformed(java.awt.event.ActionEvent e) {
 				txt.rotate(rotDeg);
 				if (timesPerformed >= 20) {
@@ -749,6 +754,8 @@ public final class Player extends Entity {
 	public GameObject getDeathScreen() { return deathScreen; }
 	
 	public List<Direction> getLastDirections() { return lastDirections; }
+
+	public int getMaxMana() { return maxMana; }
 
 	public HealthBar getHealthBar() { return healthBar; }
 	public HealthBar getAdrenalineBar() { return adrenalineBar; }

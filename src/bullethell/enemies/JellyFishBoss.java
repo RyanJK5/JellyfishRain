@@ -27,7 +27,7 @@ public class JellyFishBoss extends Enemy {
         getAnimation(1).setFrameRate(5);
         getCurrentAnimation().start();
         
-        setLayer(4);
+        setLayer(3);
     }
     
     @Override
