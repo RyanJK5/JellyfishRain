@@ -133,8 +133,8 @@ final class CoreForge implements Scene {
                 }
             
                 @Override
-                public void paint(Graphics g) {
-                    super.paint(g);
+                public void update(Graphics g) {
+                    super.update(g);
                     if (!Player.cursorOver(toRect())) return;
 
                     int activePedestals = 0;

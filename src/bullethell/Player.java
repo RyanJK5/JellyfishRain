@@ -24,6 +24,9 @@ import bullethell.items.ItemID;
 import bullethell.items.PlayerModifiers;
 import bullethell.items.Recipe;
 import bullethell.items.WeaponModifiers;
+import bullethell.items.abilities.DashAbility;
+import bullethell.items.abilities.HealAbility;
+import bullethell.items.abilities.TeleportAbility;
 import bullethell.movement.Direction;
 import bullethell.scenes.Bossfight;
 import bullethell.ui.Container;
@@ -58,11 +61,8 @@ public final class Player extends Entity {
 	protected final GameObject deathScreen;
 	protected Item cursorSlot;
 	protected List<Equipment> loadouts;
-	protected final List<Recipe> researchedRecipes;
+	protected static final List<Recipe> researchedRecipes = new ArrayList<>();
 	
-	protected int maxHealNum = 3;
-	protected int healNum = maxHealNum;
-
 	private static int cameraX, cameraY;
 	private static int cursorX, cursorY;
 	
@@ -84,15 +84,10 @@ public final class Player extends Entity {
 	protected int currentFire = 0;
 	protected int currentInvinc = 0;
 	protected int timeSinceHit = 0;
-	protected int timeSinceTP = DEFAULT_TP_COOLDOWN;
 	private int timeSinceUI = -1;
 
 	protected int invincTime = DEFAULT_INVINC_TIME;
-
-	protected int dashLength = 5;
-	protected int timeSinceDash = DEFAULT_DASH_DELAY;
-	protected int dashDelay = DEFAULT_DASH_DELAY;
-	protected boolean dashInvinc = false;
+	public boolean dashInvinc = false;
 
 	/* list of player stat multipliers in the following order: 
 	 *  0 - HP
@@ -110,12 +105,12 @@ public final class Player extends Entity {
 	public final PlayerModifiers playerMods;
 
 	public static Player get() {
-		if (player == null) {
-			try {
+		try {
+			if (player == null) {
 				player = new Player(Spritesheet.getSpriteSheet("PlayerSprite"));
-			} catch (IOException e) {
-				e.printStackTrace();
 			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		return player;
 	}
@@ -219,8 +214,6 @@ public final class Player extends Entity {
 		inventory.kill();
 		Globals.GLOBAL_TIMER.addActionListener((PlayerInventory) inventory);
 
-		researchedRecipes = new ArrayList<>();
-
 		BufferedImage redTint = new BufferedImage(Globals.SCREEN_WIDTH, 
 		Globals.SCREEN_HEIGHT, 
 		  BufferedImage.TYPE_INT_ARGB);
@@ -257,7 +250,7 @@ public final class Player extends Entity {
 		 ImageIO.read(new File("sprites/AdrenalineBarFront.png"))) {
 			
 			@Override
-			public void paint(Graphics g) {
+			public void update(Graphics g) {
 				Graphics2D g2 = (Graphics2D) g.create();
 				g2.setComposite(java.awt.AlphaComposite.getInstance(java.awt.AlphaComposite.SRC_OVER, opacity));
 				g2.drawImage(sprite, x, y, null);
@@ -276,7 +269,7 @@ public final class Player extends Entity {
 		 };
 		manaBar = new HealthBar(empty.getSubimage(161, 80, 34, 128), ui.getSubimage(161, 80, 34, 128)) {
 			@Override
-			public void paint(Graphics g) {
+			public void update(Graphics g) {
 				Graphics2D g2 = (Graphics2D) g.create();
 				g2.setComposite(java.awt.AlphaComposite.getInstance(java.awt.AlphaComposite.SRC_OVER, opacity));
 				g2.drawImage(sprite, x, y, null);
@@ -292,10 +285,21 @@ public final class Player extends Entity {
 			}
 		 };
 	
-		tpCooldown = new StatusWheel("timeSinceTP", DEFAULT_TP_COOLDOWN, Color.LIGHT_GRAY, Color.GRAY);
-		dashCooldown = new StatusWheel("timeSinceDash", DEFAULT_DASH_DELAY, new Color(255, 158, 250), 
-		  Color.MAGENTA);
-		healWheel = new StatusWheel("healNum", maxHealNum, Color.RED, new Color(122, 0, 0));
+		try {
+			Field tpAbility = TeleportAbility.class.getDeclaredField("timeSinceTP");
+			tpAbility.setAccessible(true);
+			tpCooldown = new StatusWheel(tpAbility, null, DEFAULT_TP_COOLDOWN, Color.LIGHT_GRAY, Color.GRAY);
+
+			Field dashAbility = DashAbility.class.getDeclaredField("timeSinceDash");
+			dashAbility.setAccessible(true);
+			dashCooldown = new StatusWheel(dashAbility, null, DEFAULT_DASH_DELAY, new Color(255, 158, 250), Color.MAGENTA);
+
+			healWheel = new StatusWheel(HealAbility.class.getDeclaredField("healNum"), null, HealAbility.maxHealNum, Color.RED, 
+			  new Color(122, 0, 0))
+			;
+		} catch (NoSuchFieldException | SecurityException e) {
+			e.printStackTrace();
+		}
 		
 		healthBar.setEssential(true);
 		adrenalineBar.setEssential(true);
@@ -305,9 +309,9 @@ public final class Player extends Entity {
 	}
 
 	@Override
-	public void paint(Graphics g) {
+	public void update(Graphics g) {
 		if (currentInvinc % 5 == 0) {
-			super.paint(g);
+			super.update(g);
 		}
 	}
 	
@@ -365,19 +369,20 @@ public final class Player extends Entity {
 		}
 
 		if ((getEquipmentInv().hasAbility(ItemID.ADRENALINE_ABILITY) ? timeSinceAdren % 6 < 3 : timeSinceAdren % 3 == 0)) {
-			if (Globals.getGameState().combat() )	{
+			if (Globals.getGameState().combat())	{
 				if (adrenAbilityActive) {
 					adren--;
 					if (adren <= 0) {
-						abilityAdren = 0;
-						timeSinceAdren = 0;
-						adrenAbilityActive = false;
+						resetAdren();
 					}
 				} else if (timeSinceAdren >= hitToAdrDelay && adren < maxAdr) {
 					adren++;
 				}
 			} else if (!Globals.getGameState().combat() && adren > 0) {
 				adren -= 10;
+				if (adren < 0) {
+					resetAdren();
+				}
 			}
 		}
 		
@@ -411,8 +416,6 @@ public final class Player extends Entity {
 		timeSinceHit++;
 		timeSinceRegen++;
 		timeSinceAdren++;
-		timeSinceTP++;
-		timeSinceDash++;
 		if (timeSinceUI >= 0) {
 			timeSinceUI++;
 		}
@@ -449,57 +452,18 @@ public final class Player extends Entity {
 		setLocation(newX, newY, false);
 	}
 	
-	private boolean slowActivated = false;
 	public void activateAbility(int abilityNum, boolean activating) {
 		ItemID type = getEquipmentInv().getAbilityType(abilityNum);
 		if (type == null) {
 			return;
 		}
-		switch (type) {
-			case DASH_ABILITY:
-				if (activating) {
-					dash();
-				}
-				break;
-			case HEAL_ABILITY:
-				if (activating) {
-					heal();
-				}
-				break;
-			case FOCUS_ABILITY:
-				if (activating && !slowActivated) {
-					playerMods.mSpeed += -1.3f;
-					slowActivated = true;
-				} else if (!activating && slowActivated) {
-					playerMods.mSpeed += 1.3f;
-					slowActivated = false;
-				}
-				registerModifiers();
-				break;
-			case TP_ABILITY:
-				if (activating) {
-					tp(Player.cursorX() - w / 2, Player.cursorY() - h / 2);
-				}
-				break;
-			case ADRENALINE_ABILITY:
-				if (activating) {
-					useAdren();
-				}
-				break;
-			default:
-				break;
-		}
-	}
-
-	private void tp(int x, int y) {
-		if (timeSinceTP > DEFAULT_TP_COOLDOWN) {
-			setLocation(x, y);
-			timeSinceTP = 0;
+		if (activating || type == ItemID.FOCUS_ABILITY) {
+			getEquipmentInv().getAbilitySlots()[abilityNum].getItem().onUse();
 		}
 	}
 
 	private boolean adrenAbilityActive = false;
-	private void useAdren() {
+	public void useAdren() {
 		if (adren == 0) {
 			return;
 		}
@@ -509,43 +473,6 @@ public final class Player extends Entity {
 		} else {
 			abilityAdren = 0;
 			timeSinceAdren = 0;
-		}
-	}
-
-	private void dash() {
-		if (timeSinceDash < dashDelay) {
-			return;
-		}
-		timeSinceDash = 0;
-		dashInvinc = true;
-
-		Globals.GLOBAL_TIMER.addActionListener(new ActionListener() {
-			int timesPerformed = 0;
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (timesPerformed == dashLength) {
-					dashInvinc = false;
-					Globals.GLOBAL_TIMER.removeActionListener(this);
-					return;
-				}
-				if (lastDirections.size() > 0) {
-					speed *= 5;
-					move(lastDirections);
-					speed /= 5;
-				}
-				timesPerformed++;
-			}
-		});
-	}
-
-	private void heal() {
-		if (healNum > 0) {
-			this.hp += DEFAULT_HEAL_AMOUNT;
-			if (hp > maxHP || hp < 0) {
-				hp = maxHP;
-			}
-			healNum--;
 		}
 	}
 
@@ -601,15 +528,12 @@ public final class Player extends Entity {
 	public void kill() {
 		killUI();
 
-		timeSinceDash = DEFAULT_DASH_DELAY;
 		timeSinceHit = 0;
-		timeSinceTP = DEFAULT_TP_COOLDOWN;
 		currentFire = 0;
 		currentInvinc = 0;
 		invincible = false;
 		isAlive = false;
 		firing = false;
-		slowActivated = false;
 		
 		for (Direction dir : Globals.main.directionMap.keySet()) {
 			Globals.main.directionMap.put(dir, false);
@@ -687,7 +611,7 @@ public final class Player extends Entity {
 		}
 	}
 
-	private void registerModifiers() {
+	public void registerModifiers() {
 		maxHP = (int) (DEFAULT_MAX_HP * (1 + playerMods.mHP) + playerMods.pHP);
 		if (hp > maxHP) {
 			hp = maxHP;
@@ -722,6 +646,10 @@ public final class Player extends Entity {
 		}
 	}
 
+	public void move() {
+		move(lastDirections);
+	}
+
 	public void move(List<Direction> dir) {
 		float xDif = 0;
 		float yDif = 0;
@@ -751,6 +679,20 @@ public final class Player extends Entity {
 			newY = Globals.HEIGHT - h;
 		}
 
+		List<GameSolid> returnObjects = new ArrayList<>();
+		quadtree.retrieve(returnObjects, this);
+		setHitbox(new Rectangle(x, y, w, h));
+		for (GameSolid solid : returnObjects) {
+			if (solid == this || !solid.isAlive || solid instanceof Entity) {
+				continue;
+			}
+			if (collidedWith(solid)) {
+				setHitbox(new Rectangle(x + w / 5, y + (int) (h / 2 - (1f/6f) * h), (int) (w * 0.6f), (int) ((1f/3f) * h)));
+				return;
+			}
+		}
+		setHitbox(new Rectangle(x + w / 5, y + (int) (h / 2 - (1f/6f) * h), (int) (w * 0.6f), (int) ((1f/3f) * h)));
+
 		setLocation(newX, newY);
 	}
 
@@ -764,17 +706,17 @@ public final class Player extends Entity {
 		}
 	}
 	
-	public boolean hasRecipe(Recipe recipe) {
+	public static boolean hasRecipe(Recipe recipe) {
 		return researchedRecipes.contains(recipe);
 	}
 
-	public void addRecipe(Recipe recipe) {
+	public static void addRecipe(Recipe recipe) {
 		if (!researchedRecipes.contains(recipe)) {
 			researchedRecipes.add(recipe);
 		}
 	}
 
-	public void addRecipes(Recipe[] recipes) {
+	public static void addRecipes(Recipe[] recipes) {
 		for (Recipe recipe : recipes) {
 			addRecipe(recipe);
 		}
@@ -806,6 +748,8 @@ public final class Player extends Entity {
 	
 	public GameObject getDeathScreen() { return deathScreen; }
 	
+	public List<Direction> getLastDirections() { return lastDirections; }
+
 	public HealthBar getHealthBar() { return healthBar; }
 	public HealthBar getAdrenalineBar() { return adrenalineBar; }
 	public void resetAdren() {
@@ -824,8 +768,9 @@ public final class Player extends Entity {
 
 	public List<Equipment> getLoadouts() { return loadouts; }
 
-	public int getHealNum() { return healNum; }
-	public void resetHeals() { healNum = maxHealNum; }
+	public void resetHeals() {
+		HealAbility.healNum = HealAbility.maxHealNum;
+	}
 
 	public static void setCursorPos(int x, int y) {
 		cursorX = x;
@@ -922,23 +867,23 @@ public final class Player extends Entity {
 		}
 
 		@Override
-		public void paint(Graphics g) {
+		public void update(Graphics g) {
 			if (this != player.getEquipmentInv()) return;
 			Graphics2D g2 = (Graphics2D) g.create();
 			g2.setComposite(java.awt.AlphaComposite.getInstance(java.awt.AlphaComposite.SRC_OVER, opacity));
 			
 			g2.drawImage(abilityBackground, armorX, armorY, null);
 			for (int i = accSlotNum - 1; i >= 0; i--) {
-				accSlots[i].paint(g2);
+				accSlots[i].update(g2);
 			}
-			coreSlot.paint(g2);
-			wepSlot.paint(g2);
+			coreSlot.update(g2);
+			wepSlot.update(g2);
 			for (int i = abilitySlotNum - 1; i >= 0; i--) {
-				abilitySlots[i].paint(g2);
+				abilitySlots[i].update(g2);
 			}
 
 			if (player.cursorSlot != null) {
-				player.cursorSlot.paint(g2);
+				player.cursorSlot.update(g2);
 			}
 		}
 
@@ -1223,6 +1168,7 @@ public final class Player extends Entity {
 		private static int numActive;
 		
 		private Field field;
+		private Object accessObj;
 		private int maxValue;
 		private Color fColor;
 		private Color bColor;
@@ -1231,6 +1177,7 @@ public final class Player extends Entity {
 			super(null, 99);
 			
 			this.maxValue = maxValue;
+			this.accessObj = player;
 
 			try {
 				field = Player.class.getDeclaredField(fieldName);
@@ -1243,13 +1190,23 @@ public final class Player extends Entity {
 			instances.add(this);
 		}
 
+		public StatusWheel(Field field, Object accessObj, int maxValue, Color frontColor, Color backColor) {
+			super(null, 99);
+			this.maxValue = maxValue;
+			this.field = field;
+			this.accessObj = accessObj;
+			fColor = frontColor;
+			bColor = backColor;
+			instances.add(this);
+		}
+
 		public static void staticPaint(Graphics2D g2d) {
 			numActive = 0;
 			for (StatusWheel wheel : instances) {
 				wheel.setLocation(player.manaBar.x, player.manaBar.y);
 				
 				try {
-					int value = (Integer) wheel.field.get(player);
+					int value = wheel.field.getInt(wheel.accessObj);
 	
 					if ((!player.getEquipmentInv().hasAbility(ItemID.HEAL_ABILITY) && wheel == player.healWheel) || 
 					  (value >= wheel.maxValue && wheel != player.healWheel)) {
@@ -1267,7 +1224,7 @@ public final class Player extends Entity {
 						String result = healTime.substring(0, healTime.indexOf('.') + 2);
 						g2d.drawString(result + "s", wheel.x + numActive * 75, wheel.y + player.manaBar.h + 85);
 					} else {
-						g2d.drawString(Integer.toString(player.healNum), 
+						g2d.drawString(Integer.toString(HealAbility.healNum), 
 						  wheel.x + numActive * 75 + 19, wheel.y + player.manaBar.h + 80);
 					}
 
@@ -1279,7 +1236,7 @@ public final class Player extends Entity {
 		}
 
 		@Override
-		public void paint(Graphics g) {
+		public void update(Graphics g) {
 			staticPaint((Graphics2D) g);
 		}
 
@@ -1300,8 +1257,8 @@ public final class Player extends Entity {
 		}
 
 		@Override
-		public void paint(Graphics g) {
-			super.paint(g);
+		public void update(Graphics g) {
+			super.update(g);
 			if (player.hp > 0 && player.hp <= player.maxHP) {
 				float slivWidth = (float) w / (float) player.maxHP;
 				int fullSlivWidth = (int) (slivWidth * player.hp);

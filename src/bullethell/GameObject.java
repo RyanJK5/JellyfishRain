@@ -109,7 +109,7 @@ public class GameObject implements Cloneable {
 						GameSolid.quadtree.insert(solid);
 					}
 					if (!obj.outOfScreenBounds() || obj.alwaysDraw()) {
-						obj.paint(g);
+						obj.update(g);
 					}
 					g.setFont(Globals.DEFAULT_FONT);
 					g.setColor(Globals.DEFAULT_COLOR);
@@ -118,7 +118,7 @@ public class GameObject implements Cloneable {
 		}
 	}
 
-	public void paint(Graphics g) {
+	public void update(Graphics g) {
 		if (rotationDeg > 0 || opacity != 1f) {
 			Graphics2D g2 = (Graphics2D) g.create();
 			g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));

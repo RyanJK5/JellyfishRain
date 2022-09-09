@@ -41,7 +41,7 @@ public non-sealed abstract class Entity extends GameSolid implements ActionListe
         this.speed = speed;
         this.friendly = friendly;
 
-        Globals.GLOBAL_TIMER.addActionListener(this);
+        // Globals.GLOBAL_TIMER.addActionListener(this);
     }
 
     protected Entity() {
@@ -68,7 +68,7 @@ public non-sealed abstract class Entity extends GameSolid implements ActionListe
         setSprite(animations[0].getFrame());
         setHitbox(new java.awt.Rectangle(x, y, w, h));
 
-        Globals.GLOBAL_TIMER.addActionListener(this);
+        // Globals.GLOBAL_TIMER.addActionListener(this);
     }
 
     public void move() {
@@ -89,7 +89,7 @@ public non-sealed abstract class Entity extends GameSolid implements ActionListe
     }
 
     @Override
-	public void paint(Graphics g) {
+	public void update(Graphics g) {
         if (drawIndicator) path.drawIndicator(g, getLocation());
 		if (rotationDeg > 0 || opacity != 1f) {
 			Graphics2D g2 = (Graphics2D) g.create();
@@ -139,7 +139,7 @@ public non-sealed abstract class Entity extends GameSolid implements ActionListe
                 return;
             }
         }
-        Globals.GLOBAL_TIMER.addActionListener(this);
+        // Globals.GLOBAL_TIMER.addActionListener(this);
 	}
 
     public Path getPath() { return path; }

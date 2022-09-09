@@ -98,8 +98,8 @@ public abstract class Item extends GameObject {
     }
 
     @Override
-    public void paint(Graphics g) {
-        super.paint(g);
+    public void update(Graphics g) {
+        super.update(g);
         if (count > 1) {
             g.drawString(Integer.toString(count), x, y + h);
         }

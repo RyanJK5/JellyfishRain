@@ -21,7 +21,7 @@ public class Recipe {
         this.componentCounts = componentCounts;
         this.result = result;
         this.resultCount = resultCount;
-        Player.get().addRecipe(this);
+        Player.addRecipe(this);
     }
 
     public Item craft(Item[] items) {

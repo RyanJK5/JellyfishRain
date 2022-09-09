@@ -43,8 +43,8 @@ public class ToggleButton extends Button {
     }
 
     @Override
-    public void paint(Graphics g) {
-        super.paint(g);
+    public void update(Graphics g) {
+        super.update(g);
         g.drawImage(active ? ON_SWITCH : OFF_SWITCH, x + w - ON_SWITCH.getWidth() - 20, y + h / 2 - ON_SWITCH.getHeight() / 2, null);
     }
 

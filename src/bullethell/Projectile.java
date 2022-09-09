@@ -153,7 +153,7 @@ public class Projectile extends Entity {
 	}
 	
 	@Override
-	public void paint(Graphics g) {
+	public void update(Graphics g) {
 		if (drawIndicator && (age < indicatorLifespan || indicatorLifespan == 0)) {
 			g.setColor(new Color(128,128,128,50));
 			if (range > 0) {

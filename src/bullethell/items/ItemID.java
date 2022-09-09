@@ -62,7 +62,7 @@ public enum ItemID {
 
     public static Item getItem(ItemID id) {
         try {
-            return id.itemClass.getDeclaredConstructor(new Class<?>[0]).newInstance(new Object[0]);
+            return id.itemClass.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
                 | NoSuchMethodException | SecurityException e) {
             e.printStackTrace();

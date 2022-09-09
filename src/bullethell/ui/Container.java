@@ -120,15 +120,15 @@ public class Container<T extends Item> extends GameObject {
     }
 
     @Override
-    public void paint(Graphics g) {
-        super.paint(g);
+    public void update(Graphics g) {
+        super.update(g);
         if (item != null) {
             if (item.isAlive()) {
                 final float scaleFactor = (float) w / (float) item.getWidth();
                 ItemDrawing drawing = new ItemDrawing(item, scaleFactor);
                 drawing.setLocation((int) (x + w / 2 - scaleFactor * (item.getWidth() / 2)),
                     (int) (y + h / 2 - scaleFactor * (item.getHeight() / 2)));
-                drawing.paint(g);
+                drawing.update(g);
             } else {
                 item = null;
             }
@@ -157,11 +157,11 @@ public class Container<T extends Item> extends GameObject {
         }
         
         @Override
-        public void paint(Graphics g) {
+        public void update(Graphics g) {
             BufferedImage temp = item.getSprite();
             item.setSprite(getSprite());
             item.setLocation(x, y);
-            item.paint(g);
+            item.update(g);
             item.setSprite(temp);
 
         }

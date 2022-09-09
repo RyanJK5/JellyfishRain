@@ -52,10 +52,7 @@ public final class MainMenu implements Scene {
                 @Override
                 protected void activate() {
                     try {
-                        Player.setCameraPos(Player.get().getCenterX() - Globals.SCREEN_WIDTH / 2, Player.get().getCenterY() - Globals.SCREEN_HEIGHT / 2);
                         World.get().setEvents(false);
-                        Player.get().getEquipmentInv().clear();
-                        Player.get().getInventory().clear();
                         Globals.main.gameStart();
                         SaveSystem.writeData(false);
                     } catch (IOException e) {
@@ -95,6 +92,9 @@ public final class MainMenu implements Scene {
     @Override
     public void end() {
         Globals.setGameState(GameState.DEFAULT);
+        Player.setCameraPos(Player.get().getCenterX() - Globals.SCREEN_WIDTH / 2, Player.get().getCenterY() - Globals.SCREEN_HEIGHT / 2);
+        Player.get().getEquipmentInv().clear();
+        Player.get().getInventory().clear();
         Player.get().revive();
         if (!Globals.alwaysShowUI) {
             Player.get().killUI();

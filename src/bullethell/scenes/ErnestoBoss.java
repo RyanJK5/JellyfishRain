@@ -86,7 +86,7 @@ public final class ErnestoBoss implements Scene, Bossfight {
                 int timesPerformed = 0;
                 int alpha = 255;
                 @Override
-                public void paint(Graphics g) {
+                public void update(Graphics g) {
                     g.setColor(new Color(0, 0, 0, alpha));
                     g.fillRect(Player.cameraX(), Player.cameraY(), Globals.SCREEN_WIDTH, Globals.SCREEN_HEIGHT);
                  
@@ -151,7 +151,7 @@ public final class ErnestoBoss implements Scene, Bossfight {
                 }
 
                 @Override
-                public void paint(Graphics g) {
+                public void update(Graphics g) {
                     if (drawIndicator && (age < indicatorLifespan || indicatorLifespan == 0)) {
                         g.setColor(new Color(128,128,128,50));
                         new StraightPath((int) Math.toDegrees(rotationDeg)).drawIndicator(g, new Point(boss.getCenterX(), boss.getCenterY()));
@@ -710,7 +710,7 @@ public final class ErnestoBoss implements Scene, Bossfight {
                         }
     
                         @Override
-                        public void paint(Graphics g) { 
+                        public void update(Graphics g) { 
                             g.setColor(new Color(128,128,128,50));
                             
                             if (i > 0) {
@@ -719,7 +719,7 @@ public final class ErnestoBoss implements Scene, Bossfight {
                                 g.drawLine(getCenterX(), getCenterY(), 
                                   projs[projs.length - 1].getCenterX(), projs[projs.length - 1].getCenterY());
                             }
-                            super.paint(g);
+                            super.update(g);
                             g.setColor(DEFAULT_COLOR);
                         }
                     }

@@ -12,6 +12,7 @@ import bullethell.enemies.Enemy;
 import bullethell.enemies.EnemyID;
 import bullethell.items.Item;
 import bullethell.items.ItemID;
+import bullethell.items.abilities.HealAbility;
 import bullethell.movement.AngledPath;
 import bullethell.movement.ChargePath;
 import bullethell.movement.CirclePath;
@@ -58,7 +59,7 @@ public final class SaveSystem {
             + obj.rotationDeg + ","
             + obj.getLayer() + ","
             + obj.equipmentInvIndex + "," 
-            + (!onDeath ? obj.healNum : obj.maxHealNum) + "," 
+            + (!onDeath ? HealAbility.healNum : HealAbility.maxHealNum) + "," 
             + (!onDeath ? obj.adren : 0) + "," 
             + obj.maxAdr + "," 
             + obj.hitToAdrDelay + "," 
@@ -67,7 +68,6 @@ public final class SaveSystem {
             + obj.regenDelay + "," 
             + obj.timeSinceRegen + "," 
             + obj.hitToRegenDelay + "," 
-            + (!onDeath ? obj.timeSinceTP : Player.DEFAULT_TP_COOLDOWN) + "," 
             + obj.invincTime + ","
             + (!onDeath ? obj.hp : obj.maxHP) + "," 
             + obj.maxHP + ",\n");
@@ -128,11 +128,10 @@ public final class SaveSystem {
             Player obj = Player.get();
             obj.getInventory().clear();
             obj.getEquipmentInv().clear();
-            obj.getResearchedRecipes().clear();
 
             int pX = 0;
             int pY = 0;
-            for (int i = 0; i < 18; i++) {
+            for (int i = 0; i < 17; i++) {
                 String str = scanner.next();
                 switch (i) {
                     case 0:
@@ -151,7 +150,7 @@ public final class SaveSystem {
                         obj.changeLoadout(Integer.parseInt(str));
                         break;
                     case 5:
-                        obj.healNum = Integer.parseInt(str);
+                        HealAbility.healNum = Integer.parseInt(str);
                         break;
                     case 6:
                         obj.adren = Integer.parseInt(str);
@@ -178,15 +177,12 @@ public final class SaveSystem {
                         obj.hitToRegenDelay = Integer.parseInt(str);
                         break;
                     case 14:
-                        obj.timeSinceTP = Integer.parseInt(str);
-                        break;
-                    case 15:
                         obj.invincTime = Integer.parseInt(str);
                         break;
-                    case 16:
+                    case 15:
                         obj.hp = Integer.parseInt(str);
                         break;
-                    case 17:
+                    case 16:
                         obj.maxHP = Integer.parseInt(str);
                         break;
                 }

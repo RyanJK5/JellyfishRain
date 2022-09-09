@@ -67,8 +67,8 @@ public sealed class GameSolid extends GameObject permits Entity {
 	}
 	
 	@Override
-	public void paint(Graphics g) {
-		super.paint(g);
+	public void update(Graphics g) {
+		super.update(g);
 		if (showHitboxes) paintHitbox(g);
 	}
 
@@ -100,8 +100,13 @@ public sealed class GameSolid extends GameObject permits Entity {
 	}
 	
 	public static void quadtreeCheck() {
+		
+		for (int i = 0; i < solids.size(); i++) {
+			if (solids.get(i) instanceof Entity ent) {
+				ent.update();
+			}
+		}
 		List<GameSolid> returnObjects = new ArrayList<>();
-
 		for (int i = 0; i < solids.size(); i++) {
 			GameSolid obj = solids.get(i);
 			if (!obj.isAlive()) {

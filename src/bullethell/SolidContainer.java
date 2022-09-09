@@ -88,8 +88,8 @@ public class SolidContainer<T extends Item> extends Container<T> {
     }
 
     @Override
-    public void paint(Graphics g) {
-        super.paint(g);
+    public void update(Graphics g) {
+        super.update(g);
         if (GameSolid.showHitboxes) shadowSolid.paintHitbox(g);
     }
 

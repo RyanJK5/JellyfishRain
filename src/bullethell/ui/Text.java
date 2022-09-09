@@ -39,7 +39,7 @@ public class Text extends GameObject {
     public void setColor(Color color) { this.color = color; }
 
     @Override
-    public void paint(Graphics g) {
+    public void update(Graphics g) {
         g.setColor(color);
         g.setFont(font);
         if (rotationDeg > 0) {

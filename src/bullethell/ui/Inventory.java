@@ -203,7 +203,7 @@ public class Inventory<T extends Item> extends UI implements Iterable<Container<
     }
 
     @Override
-    public void paint(Graphics g) {
+    public void update(Graphics g) {
         int j = -1;
         for (int i = currentStartIndex; i < currentStartIndex + size; i++) {
             Container<T> currentSlot = displayedSlots.get(currentStartIndex * 2 + size - 1 - i);
@@ -215,7 +215,7 @@ public class Inventory<T extends Item> extends UI implements Iterable<Container<
                 currentSlot.setLocation(
                     x + (currentStartIndex * 2 + size - 1 - i) % width * w, 
                     y + (height - 1 - j) * h);
-                currentSlot.paint(g);
+                currentSlot.update(g);
             }
         }
 
@@ -224,8 +224,8 @@ public class Inventory<T extends Item> extends UI implements Iterable<Container<
             forwardButton.setLocation(x + fullWidth / 2 - forwardButton.getWidth() / 2 + 30, y + fullHeight);
             searchBar.setLocation(-Player.cameraX() + x, -Player.cameraY() +  y + fullHeight);
             
-            backButton.paint(g);
-            forwardButton.paint(g);
+            backButton.update(g);
+            forwardButton.update(g);
         }
     }
 

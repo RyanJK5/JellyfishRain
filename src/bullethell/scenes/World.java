@@ -156,6 +156,7 @@ public final class World implements Scene, ActionListener {
         if (sigilPedestal != null) {
             sigilPedestal.kill();
         }
+        Entity.removeAll(e -> true);
         Globals.GLOBAL_TIMER.removeActionListener(this);
     }
 
@@ -168,6 +169,14 @@ public final class World implements Scene, ActionListener {
         if (timeSinceSave >= 10 * 1000 / Globals.TIMER_DELAY) {
             SaveSystem.writeData(false);
             timeSinceSave = 0;
+        }
+
+        if (Globals.getGameState() != GameState.ENCOUNTER) {
+            for (int i = 0; i <= Enemy.getHighestGroupID(); i++) {
+                if (Enemy.groupIsAlive(i)) {
+                    Globals.setGameState(GameState.ENCOUNTER);
+                }
+            }
         }
         
         for (Field field : World.class.getDeclaredFields()) {

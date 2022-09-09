@@ -3,10 +3,8 @@ package bullethell.scenes;
 import static bullethell.Globals.DEFAULT_FONT;
 import static bullethell.Globals.eAction;
 
-import java.awt.AWTException;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Robot;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
@@ -238,13 +236,7 @@ final class Forge implements Scene {
                     if (inv.isAlive()) {
                         startTrigger.end();
                         kill();
-                    }
-                    try {
-                        Robot robot = new Robot();
-                        robot.keyPress(KeyEvent.VK_ESCAPE);
-                        robot.keyRelease(KeyEvent.VK_ESCAPE);
-                    } catch (AWTException e) {
-                        e.printStackTrace();
+                        OptionsMenu.get().end();
                     }
                 }
             };
@@ -375,9 +367,9 @@ final class Forge implements Scene {
         }
 
         @Override
-        public void paint(java.awt.Graphics g) {
+        public void update(java.awt.Graphics g) {
             resultItem.setLocation(x, y);
-            resultItem.paint(g);
+            resultItem.update(g);
         }
 
         @Override

@@ -7,6 +7,9 @@ import bullethell.items.ItemID;
 
 public final class HealAbility extends Item {
 
+    public static int maxHealNum = 3;
+    public static int healNum = maxHealNum;
+
     @Override
     protected void setValues() {
         id = ItemID.HEAL_ABILITY;
@@ -19,11 +22,23 @@ public final class HealAbility extends Item {
     }
 
     @Override
-    public void paint(java.awt.Graphics g) {
-        super.paint(g);
-        g.drawString(Integer.toString(Player.get().getHealNum()), x, y + h);
+    public void update(java.awt.Graphics g) {
+        super.update(g);
+        g.drawString(Integer.toString(healNum), x, y + h);
         if (Player.cursorOver(getBounds())) {
             drawInfo(g);
         }
+    }
+
+    @Override
+    public void onUse() {
+        if (healNum > 0) {
+			Player player = Player.get();
+            player.setHP(player.getHP() + Player.DEFAULT_HEAL_AMOUNT);
+			if (player.getHP() > player.getMaxHP() || player.getHP() < 0) {
+				player.setHP(player.getMaxHP());
+			}
+			healNum--;
+		} 
     }
 }

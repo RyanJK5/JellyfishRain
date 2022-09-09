@@ -33,6 +33,8 @@ public abstract class Enemy extends Entity {
     public int dmgTaken;
     public int groupID = -1;
 
+    private static int highestGroupID;
+
     public boolean bossEnemy;
     protected ItemLoot[] lootTable;
 
@@ -40,7 +42,7 @@ public abstract class Enemy extends Entity {
 
     protected Enemy() {
         super();
-        
+        toGhost();
         if (new File("sprites\\enemies\\" + getClass().getSimpleName() + ".png").exists()) {
             Dimension dimensions = getSpritesheetDimensions();
             setAnimations(new Spritesheet(Globals.getImage("enemies\\" + getClass().getSimpleName()), dimensions.width, dimensions.height)); 
@@ -53,11 +55,12 @@ public abstract class Enemy extends Entity {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        lootTable = new ItemLoot[0];
         name = "Unnamed";
 
         setValues();
         createLootTable();
-        Globals.GLOBAL_TIMER.addActionListener(this);
+        unghost();
     }
 
     protected abstract void setValues();
@@ -121,8 +124,8 @@ public abstract class Enemy extends Entity {
     }
     
     @Override
-    public void paint(Graphics g) {
-        super.paint(g);
+    public void update(Graphics g) {
+        super.update(g);
         
         if (Player.cursorX() >= x && Player.cursorY() >= y &&
             Player.cursorX() <= x + w && Player.cursorY() <= y + w) {
@@ -160,6 +163,10 @@ public abstract class Enemy extends Entity {
     private void gameKill() {
         permakill();
 
+        if (lootTable == null) {
+            return;
+        }
+
         for (ItemLoot item : lootTable) {
             float chance = Globals.rand.nextFloat();
             if (item.chance >= chance) {
@@ -177,15 +184,26 @@ public abstract class Enemy extends Entity {
 
     public void addToGroup(int id) {
         groupID = id;
+        if (groupID > highestGroupID) {
+            highestGroupID = groupID;
+        }
     }
 
     public boolean groupIsAlive() {
+        return groupIsAlive(groupID);
+    }
+
+    public static boolean groupIsAlive(int groupID) {
         for (GameSolid solid : solids) {
             if (solid instanceof Enemy enemy && enemy.groupID == groupID && enemy.isAlive()) {
                 return true;
             }
         }
         return false;
+    }
+
+    public static int getHighestGroupID() {
+        return highestGroupID;
     }
     
     private class Hit {
@@ -232,9 +250,9 @@ public abstract class Enemy extends Entity {
     	}
     	
     	@Override
-		public void paint(Graphics g) {
+		public void update(Graphics g) {
 			try {
-				super.paint(g);
+				super.update(g);
                 BufferedImage frontSprite = ImageIO.read(new File("sprites/HealthBarFrontSmall.png"));
 				if (getHP() > 0) {
 					float slivWidth;

@@ -329,8 +329,8 @@ public final class OptionsMenu extends KeyAdapter implements Scene {
         }
 
         @Override
-        public void paint(Graphics g) {
-            super.paint(g);
+        public void update(Graphics g) {
+            super.update(g);
             
             g.setFont(new Font(null, Globals.DEFAULT_FONT.getStyle(), 40));
             g.setColor(Color.BLACK);

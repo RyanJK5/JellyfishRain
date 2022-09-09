@@ -32,8 +32,8 @@ public abstract class Button extends Trigger {
     }
 
     @Override
-    public void paint(Graphics g) {
-        super.paint(g);
+    public void update(Graphics g) {
+        super.update(g);
         
         if (altCondition != null && altCondition.get()) {
             g.setColor(new Color(0, 0, 0, 0.5f));

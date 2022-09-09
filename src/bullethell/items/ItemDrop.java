@@ -47,8 +47,8 @@ public final class ItemDrop extends Trigger {
     }
 
     @Override
-    public void paint(Graphics g) {
+    public void update(Graphics g) {
         item.setLocation(x, y);
-        item.paint(g);
+        item.update(g);
     }
 }
