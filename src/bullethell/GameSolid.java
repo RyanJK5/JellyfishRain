@@ -87,7 +87,8 @@ public sealed class GameSolid extends GameObject permits Entity {
 		super.rotate(rotationDegrees);
 		Area area = new Area(hitbox);
 		AffineTransform rotation = AffineTransform.getRotateInstance(
-			Math.toRadians(rotationDegrees), getCenterX(), getCenterY());
+			Math.toRadians(rotationDegrees), rotationAnchor != null ? rotationAnchor.x : getCenterX(), 
+			rotationAnchor != null ? rotationAnchor.y : getCenterY());
 		setHitbox(area.createTransformedArea(rotation));
 	}
 

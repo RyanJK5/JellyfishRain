@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Animation implements ActionListener {
@@ -11,15 +12,17 @@ public class Animation implements ActionListener {
     private List<BufferedImage> frames = new ArrayList<>();
     private int currentFrame;
     private int startFrame;
+    private Animated[] listeners;
 
     private int frameRate = 0;
     private int timeSinceLastFrame;
     
-    public Animation(BufferedImage[] frames, int startFrame) {
+    public Animation(BufferedImage[] frames, int startFrame, Animated[] listeners) {
         for (int i = 0; i < frames.length; i++) {
             this.frames.add(frames[i]);
         }
         this.startFrame = startFrame;
+        this.listeners = listeners;
         currentFrame = startFrame;
     }
     
@@ -28,6 +31,7 @@ public class Animation implements ActionListener {
             timeSinceLastFrame++;
             return;
         }
+        
         timeSinceLastFrame = 0;
         
         if (currentFrame != frames.size() - 1) {
@@ -35,6 +39,7 @@ public class Animation implements ActionListener {
         } else {
             currentFrame = 0;
         }
+        notifyListeners();
     }
 
     public void removeFrame(int index) {
@@ -74,9 +79,16 @@ public class Animation implements ActionListener {
 
     public boolean active() { return Globals.contains(Globals.GLOBAL_TIMER.getActionListeners(), this); }
 
-    public void setToFrame(int frame) { this.currentFrame = frame; }
+    public void setToFrame(int frame) {
+        this.currentFrame = frame;
+        notifyListeners();
+    }
     public int getNumOfFrames() { return frames.size(); }
     
+    private void notifyListeners() {
+        Arrays.stream(listeners).forEach(l -> l.onFrameChange());
+    }
+
     /**
      * @param frameRate the number of 12 millisecond intervals between each frame update
      */
@@ -96,7 +108,7 @@ public class Animation implements ActionListener {
         return "{" + "moving=" + active() + ", currentFrame=" + currentFrame + "}";
     }
 
-    public static Animation[] getAnimations(Spritesheet spritesheet) {
+    public static Animation[] getAnimations(Spritesheet spritesheet, Animated... listeners) {
         Animation[] result = new Animation[spritesheet.getHeight()];
         for (int i = 0; i < spritesheet.getHeight(); i++) {
             BufferedImage[] frames = new BufferedImage[spritesheet.getWidth()];
@@ -107,7 +119,7 @@ public class Animation implements ActionListener {
                     break;
                 }
             }
-            result[i] = new Animation(frames, 0);
+            result[i] = new Animation(frames, 0, listeners);
         }
         return result;
     }

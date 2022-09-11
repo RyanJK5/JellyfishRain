@@ -44,8 +44,8 @@ public class Text extends GameObject {
         g.setFont(font);
         if (rotationDeg > 0) {
 			Graphics2D g2 = (Graphics2D) g.create();
-			g2.rotate(rotationDeg, getCenterX(), getCenterY());
-			g2.drawString(str, x, y);
+			g2.rotate(rotationDeg, rotationAnchor != null ? rotationAnchor.x : getCenterX(), rotationAnchor != null ? rotationAnchor.y : getCenterY());
+            g2.drawString(str, x, y);
 			g2.dispose();
 			return;
 		}

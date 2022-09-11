@@ -16,6 +16,7 @@ import bullethell.items.weapons.ExampleMagicWeapon;
 import bullethell.items.weapons.ExampleScepter;
 import bullethell.items.weapons.ExampleStaff;
 import bullethell.items.weapons.ExampleSword;
+import bullethell.items.weapons.TripleKnife;
 
 public enum ItemID {
     EXAMPLE_SCEPTER(ExampleScepter.class),
@@ -31,7 +32,8 @@ public enum ItemID {
     METAL(Metal.class),
     STRANGE_SIGIL(StrangeSigil.class),
     CUSTOM_CORE(CustomCore.class),
-    ADRENALINE_ABILITY(AdrenalineAbility.class);
+    ADRENALINE_ABILITY(AdrenalineAbility.class),
+    TRIPLE_KNIFE(TripleKnife.class);
 
     private final Class<? extends Item> itemClass;
 

@@ -1,6 +1,7 @@
 package bullethell.enemies;
 
 import java.awt.Rectangle;
+import java.awt.Dimension;
 
 import bullethell.Globals;
 import bullethell.Spritesheet;
@@ -19,8 +20,14 @@ public class JellyFishBoss extends Enemy {
         bossEnemy = true;
         setHitbox(new Rectangle(0, 0, 0, 0));
         
-        setAnimations(new Spritesheet(Globals.getImage("enemies\\JellyFishBoss"), 11, 2, 
-        new int[] {308, 308}, new int[] {293, 277}));
+        Dimension[][] dimensions = new Dimension[11][2];
+        for (int i = 0; i < dimensions.length; i++) {
+            for (int j = 0; j < dimensions[0].length; j++) {
+                dimensions[i][j] = new Dimension(308, j == 0 ? 293 : 277);
+            }
+        }
+
+        setAnimations(new Spritesheet(Globals.getImage("enemies\\JellyFishBoss"), dimensions));
         for (int i = 1; i < 11; i++) {
             getAnimation(0).removeFrame(i);
         }

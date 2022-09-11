@@ -53,8 +53,8 @@ public final class MainMenu implements Scene {
                 protected void activate() {
                     try {
                         World.get().setEvents(false);
-                        Globals.main.gameStart();
                 		Globals.main.setScene(null, 0, 0);
+                        Globals.main.gameStart();
                         SaveSystem.writeData(false);
                     } catch (IOException e) {
                         e.printStackTrace();

@@ -1,8 +1,6 @@
 package bullethell;
 
-import java.awt.AlphaComposite;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,7 +12,7 @@ import java.util.function.Predicate;
 
 import bullethell.movement.Path;
 
-public non-sealed abstract class Entity extends GameSolid implements ActionListener {
+public non-sealed abstract class Entity extends GameSolid implements ActionListener, Animated {
 
 	protected boolean drawIndicator;
     protected Path path;
@@ -32,7 +30,7 @@ public non-sealed abstract class Entity extends GameSolid implements ActionListe
     protected Entity(Spritesheet spritesheet, Path path, int dmg, int maxHP, float speed, boolean friendly) {
         super(spritesheet.getSprite(0, 0));
 
-        animations = Animation.getAnimations(spritesheet);
+        animations = Animation.getAnimations(spritesheet, this);
 
         this.path = path;
         this.dmg = dmg;
@@ -40,13 +38,11 @@ public non-sealed abstract class Entity extends GameSolid implements ActionListe
         hp = maxHP;
         this.speed = speed;
         this.friendly = friendly;
-
-        // Globals.GLOBAL_TIMER.addActionListener(this);
     }
 
     protected Entity() {
         super(Globals.getImage("enemies\\Default"));
-        animations = Animation.getAnimations(Spritesheet.getSpriteSheet(sprite));
+        animations = Animation.getAnimations(Spritesheet.getSpriteSheet(sprite), this);
         path = Path.DEFAULT_PATH;
     }
 
@@ -64,11 +60,7 @@ public non-sealed abstract class Entity extends GameSolid implements ActionListe
         drawIndicator = entity.drawIndicator;
         ignoreSolids = entity.ignoreSolids;
 
-
-        setSprite(animations[0].getFrame());
         setHitbox(new java.awt.Rectangle(x, y, w, h));
-
-        // Globals.GLOBAL_TIMER.addActionListener(this);
     }
 
     public void move() {
@@ -81,7 +73,11 @@ public non-sealed abstract class Entity extends GameSolid implements ActionListe
     public abstract boolean onCollision(GameSolid obj);
     public abstract void update();
     public abstract void registerDMG(int dmg);
-    public abstract Entity clone();
+
+    @Override
+    public void onFrameChange() {
+        setSprite(getCurrentAnimation().getFrame());
+    }
 
 	@Override
     public final void actionPerformed(ActionEvent e) {
@@ -91,19 +87,10 @@ public non-sealed abstract class Entity extends GameSolid implements ActionListe
     @Override
 	public void update(Graphics g) {
         if (drawIndicator) path.drawIndicator(g, getLocation());
-		if (rotationDeg > 0 || opacity != 1f) {
-			Graphics2D g2 = (Graphics2D) g.create();
-			g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
-			g2.rotate(rotationDeg, getCenterX(), getCenterY());
-			g2.drawImage(animations[currentAnimation].getFrame(), x, y, null);
-			g2.dispose();
-			return;
-		}
-        g.drawImage(animations[currentAnimation].getFrame(), x, y, null);
+        super.update(g);
 	}
 
     @Override
-    @Deprecated
     public BufferedImage getSprite() { return getCurrentAnimation().getFrame(); }
 
     public void setAnimation(int index) {
@@ -121,8 +108,7 @@ public non-sealed abstract class Entity extends GameSolid implements ActionListe
     }
 
     public void setAnimations(Spritesheet spritesheet) {
-        animations = Animation.getAnimations(spritesheet);
-        setSprite(spritesheet.getSprite(0, 0));
+        animations = Animation.getAnimations(spritesheet, this);
     }
 
     @Override

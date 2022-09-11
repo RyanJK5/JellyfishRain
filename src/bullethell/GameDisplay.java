@@ -68,6 +68,7 @@ public final class GameDisplay extends JPanel {
 		player.getInventory().addItem(ItemID.TP_ABILITY.getItem());
 		player.getInventory().addItem(ItemID.FOCUS_ABILITY.getItem());
 		player.getInventory().addItem(ItemID.ADRENALINE_ABILITY.getItem());
+		player.getInventory().addItem(ItemID.TRIPLE_KNIFE.getItem());
 	}
 	
 	protected void endGame() {

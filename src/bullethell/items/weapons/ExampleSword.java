@@ -2,23 +2,21 @@ package bullethell.items.weapons;
 
 import java.awt.Rectangle;
 
-import bullethell.Entity;
-import bullethell.GameSolid;
 import bullethell.Globals;
 import bullethell.Player;
 import bullethell.Spritesheet;
-import bullethell.enemies.Enemy;
 import bullethell.items.EquipType;
 import bullethell.items.Item;
 import bullethell.items.ItemID;
+import bullethell.items.MeleeHitbox;
 import bullethell.items.Recipe;
 
 public final class ExampleSword extends Item {
 
-    private AtkBox atkBox;
+    private ExampleSwordHitbox atkBox;
     private float coverage;
 
-    public AtkBox getAtkBox() { return atkBox; }
+    public ExampleSwordHitbox getAtkBox() { return atkBox; }
 
     @Override
     protected void setValues() {
@@ -43,71 +41,29 @@ public final class ExampleSword extends Item {
         if (!(player.getCurrentFire() >= fireTime && player.isAlive())) {
             return;
         }
-        (new AtkBox(Spritesheet.getSpriteSheet("Slash"), new Rectangle(140, 0, 43, 162))).update();
+        new ExampleSwordHitbox().update();
         player.setCurrentFire(0);
     }
 
-    private int getWepDMG() { return dmg; }
-
-    public final class AtkBox extends Entity {
+    public final class ExampleSwordHitbox extends MeleeHitbox {
 		
-        private final int lifeSpan = 15;
-        private final int maxHits = 2;
-        private final int hitDelay = lifeSpan / maxHits;        
-
-        private int age = 1;
-        private int numHits = 0;
-        private int lastHit = 0;
-
-        public AtkBox(Spritesheet sprite, Rectangle bounds) {
-            super(sprite, null, getWepDMG(), 0, 0, true);
-            setHitbox(new Rectangle(bounds.x, bounds.y, bounds.width, bounds.height));
-            setLayer(99);
+        public ExampleSwordHitbox() {
+            super(Spritesheet.getSpriteSheet("Slash"), new Rectangle(140, 0, 43, 162), 
+              ExampleSword.this.dmg, 15, 2);
         }
 
         private double theta = 0;
         @Override
         public void update() {
-            Player player = Player.get();
-            if (readyToKill()) permakill();
-
-            if (age == 1) {
-                theta = Math.atan2(player.getCenterX() - Player.cursorX(), player.getCenterY() - Player.cursorY());
-                double angle = Math.toDegrees(theta);
-                angle = -angle;
-                rotate((float) (angle - coverage / 2));
+            if (getAge() == 0) {
+                rotate((float) (-coverage / 2));
             }
+            
             double angle = Math.toDegrees(theta);
-
             angle = -angle;
-            rotate((float) (coverage / lifeSpan));
+            rotate((float) (coverage / getLifeSpan()));
 
-            setLocation(player.getCenterX() - w / 2, player.getCenterY() - h / 2);
-
-            age += 1;
+            super.update();
         }
-
-        @Override
-        public boolean readyToKill() {
-            return age > lifeSpan;
-        }
-
-        @Override
-        public boolean onCollision(GameSolid obj) {
-            if (!(obj instanceof Enemy enem && !enem.friendly())) return false;
-            if (numHits < maxHits && age - hitDelay >= lastHit && !enem.isInvicible()) {
-                enem.registerDMG(dmg);
-                Player.get().registerDealtDMG(dmg, this);
-                numHits++;
-                lastHit = age;
-                return true;
-            }
-            return false;
-        }
-
-        @Override
-        public void registerDMG(int dmg) { }
-        @Override
-        public Entity clone() { return null; }
     }
 }

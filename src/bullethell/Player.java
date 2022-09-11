@@ -191,11 +191,6 @@ public final class Player extends Entity {
 			}
 
 			@Override
-			public void clear() {
-				super.clear();
-			}
-
-			@Override
 			public void actionPerformed(java.awt.event.ActionEvent e) {
 				txt.rotate(rotDeg);
 				if (timesPerformed >= 20) {

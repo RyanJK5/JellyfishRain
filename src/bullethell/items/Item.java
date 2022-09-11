@@ -26,7 +26,7 @@ public abstract class Item extends GameObject {
 
     public WeaponModifiers weaponModifiers;
     public PlayerModifiers playerModifiers;
-    
+
     public int count;
 
     protected Item() {

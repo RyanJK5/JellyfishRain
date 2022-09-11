@@ -20,14 +20,19 @@ public class GameObject implements Cloneable {
 	 * must be added to this list for proper serialization to occur.
 	 */
 	protected BufferedImage sprite;
+	
 	protected int lastX, lastY;
 	protected int x, y, w, h;
+	
 	protected boolean isAlive = true;
 	protected boolean essential = false;
 	protected boolean alwaysDraw = false;
+	
 	protected int layerNumber;
 	protected float rotationDeg;
 	protected float opacity = 1;
+	protected Point rotationAnchor;
+	
 	private List<Trigger> triggers = new ArrayList<>();
 
 	protected static final List<List<GameObject>> layers = new ArrayList<>();
@@ -122,7 +127,7 @@ public class GameObject implements Cloneable {
 		if (rotationDeg > 0 || opacity != 1f) {
 			Graphics2D g2 = (Graphics2D) g.create();
 			g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
-			g2.rotate(rotationDeg, getCenterX(), getCenterY());
+			g2.rotate(rotationDeg, rotationAnchor != null ? rotationAnchor.x : getCenterX(), rotationAnchor != null ? rotationAnchor.y : getCenterY());
 			g2.drawImage(sprite, x, y, null);
 			g2.dispose();
 			return;
@@ -157,6 +162,10 @@ public class GameObject implements Cloneable {
 			rotationDegrees += 360;
 		}
 		rotationDeg += Math.toRadians(rotationDegrees);
+	}
+
+	public void setRotationAnchor(int x, int y) {
+		this.rotationAnchor = new Point(x, y);
 	}
 
 	public void setOpacity(float opacity) {

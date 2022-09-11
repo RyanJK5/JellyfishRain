@@ -117,7 +117,7 @@ public class Projectile extends Entity {
 		
 		if ((indicatorProjDelay != 0 && age < indicatorProjDelay) ||
 		  (obj instanceof Projectile) ||
-		  (obj instanceof ExampleSword.AtkBox)) {
+		  (obj instanceof ExampleSword.ExampleSwordHitbox)) {
 			return false;
 		}
 
@@ -166,7 +166,7 @@ public class Projectile extends Entity {
 			if (rotationDeg > 0 || opacity != 1f) {
 				Graphics2D g2 = (Graphics2D) g.create();
 				g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
-				g2.rotate(rotationDeg, getCenterX(), getCenterY());
+				g2.rotate(rotationDeg, rotationAnchor != null ? rotationAnchor.x : getCenterX(), rotationAnchor != null ? rotationAnchor.y : getCenterY());
 				g2.drawImage(animations[currentAnimation].getFrame(), x, y, null);
 				g2.dispose();
 				return;
