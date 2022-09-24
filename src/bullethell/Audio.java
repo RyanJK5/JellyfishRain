@@ -34,8 +34,8 @@ public enum Audio {
     }
 
     public void setVolume(float volume) {
-        if (volume < 0 || volume > 1) {
-            throw new IllegalArgumentException("volume + (" + volume + ") must be between 0 and 1");
+        if (volume < 0) {
+            throw new IllegalArgumentException("volume + (" + volume + ") must be greater than or equal to 0");
         }
     }
 }

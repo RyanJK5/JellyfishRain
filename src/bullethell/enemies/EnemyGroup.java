@@ -56,7 +56,7 @@ public class EnemyGroup implements ActionListener {
     }
 
     public static EnemyGroup getGroup(int groupID) {
-        return groups.get(groupID);
+        return groups.size() > groupID ? groups.get(groupID) : null;
     }
 
     public static Enemy[] getEnemies(int groupID) {

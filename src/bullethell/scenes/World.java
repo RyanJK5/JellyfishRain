@@ -25,6 +25,7 @@ import bullethell.SaveSystem;
 import bullethell.SolidContainer;
 import bullethell.Trigger;
 import bullethell.enemies.Enemy;
+import bullethell.enemies.EnemyGroup;
 import bullethell.enemies.EnemyID;
 import bullethell.items.Item;
 import bullethell.items.ItemDrop;
@@ -78,6 +79,7 @@ public final class World implements Scene, ActionListener {
                         
                         permakill();
                         chest.permakill();
+                        EnemyGroup group = new EnemyGroup();
                         for (int i = 0; i < 6; i++) {
                             Entity ent = EnemyID.PIXIE.getEnemy();
                             Point start = new Point(900, 200);
@@ -87,7 +89,7 @@ public final class World implements Scene, ActionListener {
                                 ent.move();
                             }
                             ent.setPath(new SeekingPath(ent, Player.get()));
-                            ((Enemy) ent).addToGroup(1);
+                            group.add((Enemy) ent);
                         }
                     }
                 });
@@ -171,12 +173,10 @@ public final class World implements Scene, ActionListener {
             timeSinceSave = 0;
         }
 
-        if (Globals.getGameState() != GameState.ENCOUNTER) {
-            for (int i = 0; i <= Enemy.getHighestGroupID(); i++) {
-                if (Enemy.groupIsAlive(i)) {
-                    Globals.setGameState(GameState.ENCOUNTER);
-                }
-            }
+        if (EnemyGroup.anyGroupAlive()) {
+            Globals.setGameState(GameState.ENCOUNTER);
+        } else {
+            Globals.setGameState(GameState.DEFAULT);
         }
         
         for (Field field : World.class.getDeclaredFields()) {

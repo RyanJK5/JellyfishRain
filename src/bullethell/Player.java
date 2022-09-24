@@ -246,8 +246,7 @@ public final class Player extends Entity {
 		BufferedImage ui = Globals.getImage("UI");
 		BufferedImage empty = Globals.getImage("UIEmpty");
 		healthBar = new HealthBar(empty.getSubimage(0, 332, 300, 54), ui.getSubimage(0, 332, 300, 54));
-		adrenalineBar = new HealthBar(ImageIO.read(new File("sprites/AdrenalineBarBack.png")),
-		 ImageIO.read(new File("sprites/AdrenalineBarFront.png"))) {
+		adrenalineBar = new HealthBar(empty.getSubimage(128, 301, 125, 31), ui.getSubimage(128, 301, 125, 31)) {
 			
 			@Override
 			public void update(Graphics g) {

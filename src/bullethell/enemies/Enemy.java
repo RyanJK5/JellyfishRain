@@ -17,7 +17,6 @@ import javax.imageio.ImageIO;
 import bullethell.Entity;
 import bullethell.GameObject;
 import bullethell.GameSolid;
-import bullethell.GameState;
 import bullethell.Globals;
 import bullethell.Player;
 import bullethell.Spritesheet;
@@ -31,18 +30,18 @@ public abstract class Enemy extends Entity {
     public String name;
     public int timeSinceHit = 0;
     public int dmgTaken;
-    public int groupID = -1;
-
-    private static int highestGroupID;
-
     public boolean bossEnemy;
     protected ItemLoot[] lootTable;
+    
+    public Area provocationArea;
+    public Area provokedArea;
+    public int groupID = -1;
 
     private final List<Hit> hits = new ArrayList<>();
 
     protected Enemy() {
         super();
-        toGhost();
+        
         if (new File("sprites\\enemies\\" + getClass().getSimpleName() + ".png").exists()) {
             Dimension dimensions = getSpritesheetDimensions();
             setAnimations(new Spritesheet(Globals.getImage("enemies\\" + getClass().getSimpleName()), dimensions.width, dimensions.height)); 
@@ -60,7 +59,9 @@ public abstract class Enemy extends Entity {
 
         setValues();
         createLootTable();
-        unghost();
+
+        provocationArea = EnemyGroup.getAreaFromEnemy(this, EnemyGroup.DEFAULT_DETECTION_RADIUS);
+        provokedArea = EnemyGroup.getAreaFromEnemy(this, EnemyGroup.DEFAULT_DETECTION_RADIUS * 2);
     }
 
     protected abstract void setValues();
@@ -73,10 +74,15 @@ public abstract class Enemy extends Entity {
 
     @Override  
     public void update() {
-        move();
-		if (readyToKill()) {
+        if (readyToKill()) {
             gameKill();
         } 
+
+        if (groupID >= 0 && !EnemyGroup.getGroup(groupID).anyDetectPlayer()) {
+            return;
+        }
+        
+        move();
         timeSinceHit++;
         if (timeSinceHit >= HealthBar.SHOW_TIME) {
     		healthBar.kill();
@@ -105,6 +111,10 @@ public abstract class Enemy extends Entity {
     public boolean onCollision(GameSolid obj) {
         if (!(obj instanceof Entity)) {
             if (!ignoreSolids) {
+                if (groupID >= 0) {
+                    EnemyGroup.getGroup(groupID).notifyHit();
+                }
+                    
                 Point p = path.move(speed);
                 while (obj.getHitbox().intersects(x + p.x, y + p.y, w, h)) {
                     p = path.move(speed);
@@ -123,16 +133,28 @@ public abstract class Enemy extends Entity {
         return false;
     }
     
+    public Area getTranslatedArea(Area area) {
+        return area.createTransformedArea(AffineTransform.getTranslateInstance(
+            getCenterX() - area.getBounds().width / 2, 
+            getCenterY() - area.getBounds().height / 2));
+    }
+
     @Override
     public void update(Graphics g) {
         super.update(g);
-        
+
+        g.setColor(new Color(1f, 0, 0, 0.2f));
+        if (groupID >= 0 && EnemyGroup.getGroup(groupID).anyDetectPlayer()) {
+            ((java.awt.Graphics2D) g).fill(getTranslatedArea(provokedArea));
+        } else {
+            ((java.awt.Graphics2D) g).fill(getTranslatedArea(provocationArea));
+        }
         if (Player.cursorX() >= x && Player.cursorY() >= y &&
             Player.cursorX() <= x + w && Player.cursorY() <= y + w) {
                 g.setColor(Color.WHITE);
                 g.drawString(name, Player.cursorX(), Player.cursorY() - 5);
                 g.drawString(getHP() + " / " + getMaxHP(), Player.cursorX(), Player.cursorY() - 5 - g.getFont().getSize());
-            }
+        }
 
         for (int i = 0; i < hits.size(); i++) {
             Hit hit = hits.get(i);
@@ -154,9 +176,6 @@ public abstract class Enemy extends Entity {
     	isAlive = false;
         if (healthBar != null) {
             healthBar.kill();
-        }
-        if (groupID >= 0 && !groupIsAlive()) {
-            Globals.setGameState(GameState.DEFAULT);
         }
     }
 
@@ -182,30 +201,6 @@ public abstract class Enemy extends Entity {
         resetHP();
     } 
 
-    public void addToGroup(int id) {
-        groupID = id;
-        if (groupID > highestGroupID) {
-            highestGroupID = groupID;
-        }
-    }
-
-    public boolean groupIsAlive() {
-        return groupIsAlive(groupID);
-    }
-
-    public static boolean groupIsAlive(int groupID) {
-        for (GameSolid solid : solids) {
-            if (solid instanceof Enemy enemy && enemy.groupID == groupID && enemy.isAlive()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static int getHighestGroupID() {
-        return highestGroupID;
-    }
-    
     private class Hit {
         String text;
         int x, y;
@@ -275,7 +270,9 @@ public abstract class Enemy extends Entity {
         if (dmg <= 0) {
             return;
         }
-        
+        if (groupID >= 0) {
+            EnemyGroup.getGroup(groupID).notifyHit();
+        }
         dmgTaken = Globals.damageFormula(dmg);
         hp -= dmgTaken;
         timeSinceHit = 0;
