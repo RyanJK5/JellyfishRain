@@ -42,12 +42,15 @@ public non-sealed abstract class Entity extends GameSolid implements ActionListe
 
     protected Entity() {
         super(Globals.getImage("enemies\\Default"));
+
         animations = Animation.getAnimations(Spritesheet.getSpriteSheet(sprite), this);
         path = Path.DEFAULT_PATH;
     }
 
     protected Entity(Entity entity) {
         super(entity);
+        solids.remove(this);
+
         path = entity.path;
         dmg = entity.dmg;
         maxHP = entity.maxHP;

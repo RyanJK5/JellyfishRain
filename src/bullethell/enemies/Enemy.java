@@ -41,6 +41,7 @@ public abstract class Enemy extends Entity {
 
     protected Enemy() {
         super();
+        solids.remove(this);
         
         if (new File("sprites\\enemies\\" + getClass().getSimpleName() + ".png").exists()) {
             Dimension dimensions = getSpritesheetDimensions();
@@ -62,6 +63,8 @@ public abstract class Enemy extends Entity {
 
         provocationArea = EnemyGroup.getAreaFromEnemy(this, EnemyGroup.DEFAULT_DETECTION_RADIUS);
         provokedArea = EnemyGroup.getAreaFromEnemy(this, EnemyGroup.DEFAULT_DETECTION_RADIUS * 2);
+
+        solids.add(this);
     }
 
     protected abstract void setValues();

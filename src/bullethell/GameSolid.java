@@ -103,7 +103,7 @@ public sealed class GameSolid extends GameObject permits Entity {
 	public static void quadtreeCheck() {
 		
 		for (int i = 0; i < solids.size(); i++) {
-			if (solids.get(i) instanceof Entity ent) {
+			if (solids.get(i).isAlive() && solids.get(i) instanceof Entity ent) {
 				ent.update();
 			}
 		}

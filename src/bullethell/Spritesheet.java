@@ -39,21 +39,26 @@ public class Spritesheet {
         int xPos = 0;
         int yPos = 0;
         for (int i = 0; i < bounds.length; i++) {
-            int largestHeight = 0;
+            int largestWidth = 0;
             for (int j = 0; j < bounds[i].length; j++) {
-                if (bounds[i][j].height > largestHeight) {
-                    largestHeight = bounds[i][j].height;
+                if (bounds[i][j].width > largestWidth) {
+                    largestWidth = bounds[i][j].width;
                 }
                 try {
                     sprites[i][j] = spritesheet.getSubimage(xPos, yPos, bounds[i][j].width, bounds[i][j].height);
                 } catch (java.awt.image.RasterFormatException e) {
-                    throw new IllegalArgumentException("in bounds[" + i + "][" + j + "], current x position (" + xPos +  ") + " + 
-                    bounds[i][j].width + " is out of bounds (" + spritesheet.getWidth() + ")");
+                    if (xPos + bounds[i][j].width >= spritesheet.getWidth()) {
+                        throw new IllegalArgumentException("in bounds[" + i + "][" + j + "], current x position (" + xPos +  ") + " + 
+                        bounds[i][j].width + " is out of bounds (" + spritesheet.getWidth() + ")");
+                    } else {
+                        throw new IllegalArgumentException("in bounds[" + i + "][" + j + "], current y position (" + yPos +  ") + " + 
+                        bounds[i][j].height + " is out of bounds (" + spritesheet.getHeight() + ")");
+                    }
                 }
-                xPos += bounds[i][j].width;
+                yPos += bounds[i][j].height;
             }
-            xPos = 0;
-            yPos += largestHeight;
+            yPos = 0;
+            xPos += largestWidth;
         }
     }
 
@@ -62,14 +67,14 @@ public class Spritesheet {
     }
     
     public BufferedImage getSprite(int row, int column) {
-        return sprites[row][column];
+        return sprites[column][row];
     }
 
     public int getSpriteWidth() { return spriteWidth; }
     public int getSpriteHeight() { return spriteHeight; }
 
-    public int getWidth() { return sprites[0].length; }
-    public int getHeight() { return sprites.length; }
+    public int getWidth() {  return sprites.length; }
+    public int getHeight() { return sprites[0].length; }
 
     public static Spritesheet getSpriteSheet(String fileName) {
         return new Spritesheet(Globals.getImage(fileName), 1, 1);

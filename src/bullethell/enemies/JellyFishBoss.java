@@ -1,11 +1,10 @@
 package bullethell.enemies;
 
-import java.awt.Rectangle;
 import java.awt.Dimension;
+import java.awt.Rectangle;
 
 import bullethell.Globals;
 import bullethell.Spritesheet;
-import bullethell.scenes.ErnestoBoss;
 
 public class JellyFishBoss extends Enemy {
     
@@ -43,9 +42,9 @@ public class JellyFishBoss extends Enemy {
     @Override
     public void update() {
         super.update();
-        if (readyToKill()) {
-            ErnestoBoss.get().end();
-        }
+        // if (readyToKill()) {
+        //     ErnestoBoss.get().end();
+        // }
     }
     
     public int timesPerformed = 0;

@@ -41,10 +41,10 @@ public class TripleKnife extends Item {
     public void onUse() {
         fireTime = 15;
         timeSinceLastAttack = 0;
-        Spritesheet sheet = new Spritesheet(slashSprite, new Dimension[] {
-            new Dimension(127, 100),
-            new Dimension(127, 100),
-            new Dimension(77, 100),
+        Spritesheet sheet = new Spritesheet(slashSprite, new Dimension[][] {
+            new Dimension[] {new Dimension(127, 100)},
+            new Dimension[] {new Dimension(127, 100)},
+            new Dimension[] {new Dimension(77, 100)}
         });
         Rectangle bounds = new Rectangle(0, 0, sheet.getSprite(0, strikeNum).getWidth(), sheet.getSprite(0, strikeNum).getHeight());
         MeleeHitbox hitbox = new MeleeHitbox(sheet, bounds, dmg, 10, 1);
