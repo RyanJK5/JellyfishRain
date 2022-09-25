@@ -199,6 +199,18 @@ public final class Globals {
         makeKeyMap(keys, values);
     }
 
+    public static double playerToCursorAngle() {
+        return pointToCursorAngle(Player.get().getCenterX(), Player.get().getCenterY());
+    }
+
+    public static double pointToCursorAngle(int x, int y) {
+        double angle = Math.atan2(x - Player.cursorX(), y - Player.cursorY());
+        angle = Math.toDegrees(angle);
+        angle += 180;
+        if (angle < 0) angle += 360;
+        return angle;
+    }
+
     public static <T> boolean contains(T[] arr, T obj) {
         return Arrays.stream(arr).anyMatch(o -> o.equals(obj));
     }

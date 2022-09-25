@@ -38,6 +38,8 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import bullethell.enemies.Enemy;
+import bullethell.enemies.EnemyID;
 import bullethell.items.ItemID;
 import bullethell.movement.Direction;
 import bullethell.scenes.MainMenu;
@@ -69,6 +71,10 @@ public final class GameDisplay extends JPanel {
 		player.getInventory().addItem(ItemID.FOCUS_ABILITY.getItem());
 		player.getInventory().addItem(ItemID.ADRENALINE_ABILITY.getItem());
 		player.getInventory().addItem(ItemID.TRIPLE_KNIFE.getItem());
+
+		Enemy ent = EnemyID.getEnemy(EnemyID.PIXIE);
+		ent.setLocation(500, 200);
+		ent.addStatusEffect(new StatusEffect(10, 500, 2000));
 	}
 	
 	protected void endGame() {

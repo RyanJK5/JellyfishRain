@@ -11,7 +11,6 @@ import bullethell.items.Item;
 import bullethell.items.ItemID;
 import bullethell.items.Recipe;
 import bullethell.movement.AngledPath;
-import bullethell.movement.Path;
 
 public class ExampleMagicWeapon extends Item {
 
@@ -37,21 +36,12 @@ public class ExampleMagicWeapon extends Item {
         Player player = Player.get();
         BufferedImage projSprite = Globals.getImage("TriangleBullet");
         
-        if (!(player.getCurrentFire() >= fireTime && player.isAlive())) return;
-        int centerX = player.getCenterX() - projSprite.getWidth(null) / 2;
-        int centerY = player.getCenterY() - projSprite.getHeight(null) / 2;
-    
-        centerX = player.getX() + player.getWidth() / 2 - projSprite.getWidth(null) / 2;
-        centerY = player.getY() + player.getHeight() / 2 - projSprite.getHeight(null) / 2;
-        
-        double angle = Math.atan2(centerX - Player.cursorX(), centerY - Player.cursorY());
-        angle = Math.toDegrees(angle);
-        angle += 180;
-        if (angle < 0) angle += 360;
-        
-        Path path = new AngledPath(angle);
+        int centerX = player.getCenterX() - projSprite.getWidth() / 2;
+        int centerY = player.getCenterY() - projSprite.getHeight() / 2;
+        double angle = Globals.pointToCursorAngle(centerX, centerY);
 
-        Projectile proj = new Projectile(Spritesheet.getSpriteSheet(projSprite), path, false, 0, 20, dmg);
+        Projectile proj = new Projectile(Spritesheet.getSpriteSheet(projSprite), new AngledPath(angle), false, 0, 20, 
+          getCritDMG());
         proj.rotate((float) -angle + 180);
         proj.setRange(range);
         proj.setLocation(centerX, centerY);

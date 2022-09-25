@@ -42,14 +42,13 @@ public final class ExampleSword extends Item {
             return;
         }
         new ExampleSwordHitbox().update();
-        player.setCurrentFire(0);
     }
 
     public final class ExampleSwordHitbox extends MeleeHitbox {
 		
         public ExampleSwordHitbox() {
             super(Spritesheet.getSpriteSheet("Slash"), new Rectangle(140, 0, 43, 162), 
-              ExampleSword.this.dmg, 15, 2);
+              getCritDMG(), 15, 2);
         }
 
         private double theta = 0;

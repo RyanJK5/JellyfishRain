@@ -20,6 +20,7 @@ import bullethell.GameSolid;
 import bullethell.Globals;
 import bullethell.Player;
 import bullethell.Spritesheet;
+import bullethell.StatusEffect;
 import bullethell.items.ItemDrop;
 import bullethell.items.ItemLoot;
 
@@ -31,7 +32,9 @@ public abstract class Enemy extends Entity {
     public int timeSinceHit = 0;
     public int dmgTaken;
     public boolean bossEnemy;
+    
     protected ItemLoot[] lootTable;
+    protected List<StatusEffect> activeEffects;
     
     public Area provocationArea;
     public Area provokedArea;
@@ -56,6 +59,7 @@ public abstract class Enemy extends Entity {
             e.printStackTrace();
         }
         lootTable = new ItemLoot[0];
+        activeEffects = new ArrayList<>();
         name = "Unnamed";
 
         setValues();
@@ -75,6 +79,10 @@ public abstract class Enemy extends Entity {
         return new Dimension(1, 1);
     }
 
+    public void addStatusEffect(StatusEffect effect) {
+        activeEffects.add(effect);
+    }
+
     @Override  
     public void update() {
         if (readyToKill()) {
@@ -84,6 +92,16 @@ public abstract class Enemy extends Entity {
         if (groupID >= 0 && !EnemyGroup.getGroup(groupID).anyDetectPlayer()) {
             return;
         }
+
+        List<StatusEffect> toRemove = new ArrayList<>();
+        for (StatusEffect effect : activeEffects) {
+            if (!effect.active()) {
+                toRemove.add(effect);
+                continue;
+            }
+            effect.update(this);
+        }
+        activeEffects.removeAll(toRemove);
         
         move();
         timeSinceHit++;
@@ -146,12 +164,6 @@ public abstract class Enemy extends Entity {
     public void update(Graphics g) {
         super.update(g);
 
-        g.setColor(new Color(1f, 0, 0, 0.2f));
-        if (groupID >= 0 && EnemyGroup.getGroup(groupID).anyDetectPlayer()) {
-            ((java.awt.Graphics2D) g).fill(getTranslatedArea(provokedArea));
-        } else {
-            ((java.awt.Graphics2D) g).fill(getTranslatedArea(provocationArea));
-        }
         if (Player.cursorX() >= x && Player.cursorY() >= y &&
             Player.cursorX() <= x + w && Player.cursorY() <= y + w) {
                 g.setColor(Color.WHITE);
@@ -268,7 +280,6 @@ public abstract class Enemy extends Entity {
         return name;
     }
 
-    @Override
     public void registerDMG(int dmg) {
         if (dmg <= 0) {
             return;

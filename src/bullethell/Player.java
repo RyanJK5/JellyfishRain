@@ -607,6 +607,7 @@ public final class Player extends Entity {
 		if (mana >= wep.manaCost) {
 			wep.onUse();
 			mana -= wep.manaCost;
+			currentFire = 0;
 		}
 	}
 

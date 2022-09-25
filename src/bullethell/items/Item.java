@@ -2,6 +2,7 @@ package bullethell.items;
 
 import java.awt.Graphics;
 import java.io.File;
+import java.util.function.Supplier;
 
 import bullethell.GameObject;
 import bullethell.Globals;
@@ -19,6 +20,8 @@ public abstract class Item extends GameObject {
 
     public boolean canStack;
 
+    public Supplier<Boolean> critCondition;
+    public float critMultiplier;
     public int dmg;
     public int manaCost;
     public int fireTime;
@@ -38,6 +41,8 @@ public abstract class Item extends GameObject {
         name = "Unnamed";
         description = "";
         recipes = new Recipe[0];
+        critCondition = () -> false;
+        critMultiplier = 1.5f;
         weaponModifiers = new WeaponModifiers();
         playerModifiers = new PlayerModifiers();
         count = 0;
@@ -161,6 +166,10 @@ public abstract class Item extends GameObject {
             }
             index++;
         }
+    }
+
+    public int getCritDMG() {
+        return critCondition.get() ? (int) (dmg * critMultiplier) : dmg;
     }
 
     @Override
