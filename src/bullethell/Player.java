@@ -263,7 +263,7 @@ public final class Player extends Entity {
 					g2.drawImage(frontSprite.getSubimage(0, 0, fullSlivWidth, h), x, y, null);
 				}
 				int adrenNum = adrenAbilityActive ? abilityAdren : adren;
-				boolean activeAdrenItem = getEquipmentInv().hasAbility(ItemID.ADRENALINE_ABILITY) == adrenAbilityActive;
+				boolean activeAdrenItem = Equipment.hasAbility(ItemID.ADRENALINE_ABILITY) == adrenAbilityActive;
 				g2.drawString((activeAdrenItem ? "+" : "") + (int) (((float) adrenNum / (float) maxAdr) * 100) + "%", x + (!activeAdrenItem ? 12 : 0), y);
 				g2.dispose();
 			}
@@ -369,7 +369,7 @@ public final class Player extends Entity {
 			hp++;
 		}
 
-		if ((getEquipmentInv().hasAbility(ItemID.ADRENALINE_ABILITY) ? timeSinceAdren % 6 < 3 : timeSinceAdren % 3 == 0)) {
+		if ((Equipment.hasAbility(ItemID.ADRENALINE_ABILITY) ? timeSinceAdren % 6 < 3 : timeSinceAdren % 3 == 0)) {
 			if (Globals.getGameState().combat())	{
 				if (adrenAbilityActive) {
 					adren--;
@@ -454,12 +454,12 @@ public final class Player extends Entity {
 	}
 	
 	public void activateAbility(int abilityNum, boolean activating) {
-		ItemID type = getEquipmentInv().getAbilityType(abilityNum);
+		ItemID type = Equipment.getAbilityType(abilityNum);
 		if (type == null) {
 			return;
 		}
 		if (activating || type == ItemID.FOCUS_ABILITY) {
-			getEquipmentInv().getAbilitySlots()[abilityNum].getItem().onUse();
+			Equipment.getAbilitySlots()[abilityNum].getItem().onUse();
 		}
 	}
 
@@ -954,11 +954,11 @@ public final class Player extends Entity {
 			  coreSlot.equals(coreSlot);
 		}
 
-		public boolean hasAbility(ItemID abilityType) {
+		public static boolean hasAbility(ItemID abilityType) {
 			return Arrays.stream(abilitySlots).anyMatch(obj -> obj.getItem() != null && obj.getItem().id == abilityType);
 		}
 
-		public ItemID getAbilityType(int index) {
+		public static ItemID getAbilityType(int index) {
 			return abilitySlots[index].getItem() != null ? abilitySlots[index].getItem().id : null;
 		}
 
@@ -986,9 +986,9 @@ public final class Player extends Entity {
 		}
 
 		public Container<Item> getWepSlot() { return wepSlot; }
-		public Container<Item>[] getAccSlots() { return accSlots; }
-		public Container<Item>[] getAbilitySlots() { return abilitySlots; }
-		public Container<Item> getCoreSlot() { return coreSlot; }
+		public static Container<Item>[] getAccSlots() { return accSlots; }
+		public static Container<Item>[] getAbilitySlots() { return abilitySlots; }
+		public static Container<Item> getCoreSlot() { return coreSlot; }
 		
 		public void clear() {
 			wepSlot.setItem(null);
@@ -1007,7 +1007,7 @@ public final class Player extends Entity {
 			return true;
 		}
 
-		public boolean setAccSlot(int index, Item accSlotItem) { 
+		public static boolean setAccSlot(int index, Item accSlotItem) { 
 			if (accSlotItem != null && accSlotItem.equipType != EquipType.ACCESSORY) {
 				return false;
 			}
@@ -1016,7 +1016,7 @@ public final class Player extends Entity {
 			return true;
 		}
 
-		public boolean setCoreSlot(Item newCoreItem) { 
+		public static boolean setCoreSlot(Item newCoreItem) { 
 			if (newCoreItem != null && newCoreItem.equipType != EquipType.CORE) {
 				return false;
 			}
@@ -1025,7 +1025,7 @@ public final class Player extends Entity {
 			return true;
 		}
 
-		public boolean setAbilitySlot(int index, Item abilitySlotItem) {
+		public static boolean setAbilitySlot(int index, Item abilitySlotItem) {
 			if (abilitySlotItem != null && abilitySlotItem.equipType != EquipType.ABILITY) {
 				return false;
 			}
@@ -1038,7 +1038,7 @@ public final class Player extends Entity {
 			return true;
 		}
 
-		public void updateModifiers() {
+		public static void updateModifiers() {
 			player.playerMods.reset();
 			player.modifiers.reset();
 			player.registerModifiers();
@@ -1212,7 +1212,7 @@ public final class Player extends Entity {
 				try {
 					int value = wheel.field.getInt(wheel.accessObj);
 	
-					if ((!player.getEquipmentInv().hasAbility(ItemID.HEAL_ABILITY) && wheel == player.healWheel) || 
+					if ((!Equipment.hasAbility(ItemID.HEAL_ABILITY) && wheel == player.healWheel) || 
 					  (value >= wheel.maxValue && wheel != player.healWheel)) {
 						continue;
 					}

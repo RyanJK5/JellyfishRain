@@ -1,5 +1,7 @@
 package bullethell.combat;
 
+import bullethell.Globals;
+
 public enum StatusEffectType {
     POISON(3, 500, 250);
 
@@ -11,6 +13,14 @@ public enum StatusEffectType {
         this.defaultDPH = defaultDPH;
         this.defaultMiliDuration = defaultMiliDuration;
         this.defaultMiliHitDelay = defaultMiliHitDelay;
+    }
+
+    public static int getID(StatusEffectType type) {
+        return Globals.indexOf(values(), type);
+    }
+
+    public static StatusEffectType getEffect(int id) {
+        return values()[id];
     }
 
     public String futureTense() {

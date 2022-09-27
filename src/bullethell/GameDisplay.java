@@ -66,11 +66,12 @@ public final class GameDisplay extends JPanel {
 	public void gameStart() throws IOException {
 		mouseMoveListener.locationChange(java.awt.MouseInfo.getPointerInfo().getLocation());
 
-		SaveSystem.loadWorld(true);
+		SaveSystem.readWorldData(true);
 		player.setLocation(Globals.WIDTH / 2, 100);
 
 		Item sword = ItemID.EXAMPLE_SWORD.getItem();
 		sword.enchantments.add(new Enchantment(0.5f, StatusEffectType.POISON));
+		sword.enchantments.add(new Enchantment(StatusEffectType.POISON));
 		player.getInventory().addItem(sword);
 		
 		Item staff = ItemID.EXAMPLE_STAFF.getItem();

@@ -22,12 +22,7 @@ public enum EnemyID {
     }
 
     public static int getID(Enemy enemy) {
-        for (int i = 0; i < values().length; i++) {
-            if (values()[i] == enemy.id) {
-                return i;
-            }
-        }
-        return -1;
+        return Globals.indexOf(values(), id -> id == enemy.id);
     }
 
     public static EnemyID getID(int intID) {

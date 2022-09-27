@@ -8,34 +8,20 @@ import java.util.List;
 import java.util.Scanner;
 
 import bullethell.Player.Equipment;
-import bullethell.combat.Entity;
+import bullethell.combat.Enchantment;
+import bullethell.combat.EnchantmentType;
+import bullethell.combat.StatusEffectType;
 import bullethell.enemies.Enemy;
 import bullethell.enemies.EnemyID;
 import bullethell.items.Item;
 import bullethell.items.ItemID;
 import bullethell.items.abilities.HealAbility;
-import bullethell.movement.AngledPath;
-import bullethell.movement.ChargePath;
-import bullethell.movement.CirclePath;
-import bullethell.movement.LinePath;
-import bullethell.movement.Path;
-import bullethell.movement.SeekingPath;
-import bullethell.movement.StraightPath;
 import bullethell.scenes.World;
 import bullethell.ui.Container;
 
-@SuppressWarnings("unused")
 public final class SaveSystem {
     
     private SaveSystem() { }
-
-    private static String getData(Enemy obj) {
-        return getData((Entity) obj) + "," + obj.getHP();
-    }
-
-    private static String getData(GameObject obj) {
-        return obj.getX() + "," + obj.getY() + "," + obj.rotationDeg + "," + obj.getLayer();
-    }
 
     public static void writePlayerData(boolean onDeath) throws IOException {
         File file = new File("data\\PlayerData.dat");
@@ -56,64 +42,59 @@ public final class SaveSystem {
 
         try (FileWriter writer = new FileWriter(file)) {
             writer.write(
-              txtX + "," + txtY + "," 
-            + obj.rotationDeg + ","
-            + obj.getLayer() + ","
-            + obj.equipmentInvIndex + "," 
-            + (!onDeath ? HealAbility.healNum : HealAbility.maxHealNum) + "," 
-            + (!onDeath ? obj.adren : 0) + "," 
-            + obj.maxAdr + "," 
-            + obj.hitToAdrDelay + "," 
-            + (!onDeath ? obj.mana : 0) + "," 
-            + obj.maxMana + "," 
-            + obj.regenDelay + "," 
-            + obj.timeSinceRegen + "," 
-            + obj.hitToRegenDelay + "," 
-            + obj.invincTime + ","
-            + (!onDeath ? obj.hp : obj.maxHP) + "," 
-            + obj.maxHP + ",\n");
+                  txtX + "," + txtY + "," 
+                + obj.rotationDeg + ","
+                + obj.getLayer() + ","
+                + obj.equipmentInvIndex + "," 
+                + (!onDeath ? HealAbility.healNum : HealAbility.maxHealNum) + "," 
+                + (!onDeath ? obj.adren : 0) + "," 
+                + obj.maxAdr + "," 
+                + obj.hitToAdrDelay + "," 
+                + (!onDeath ? obj.mana : 0) + "," 
+                + obj.maxMana + "," 
+                + obj.regenDelay + "," 
+                + obj.timeSinceRegen + "," 
+                + obj.hitToRegenDelay + "," 
+                + obj.invincTime + ","
+                + (!onDeath ? obj.hp : obj.maxHP) + "," 
+                + obj.maxHP + ",\n"
+            );
             
-            String cs;
             if (obj.getCursorSlot() != null) {
-                cs = ItemID.getID(obj.getCursorSlot()) + (obj.getCursorSlot().canStack ? "(" + obj.getCursorSlot().count +")"
-                : ""); 
-            } else {
-                cs = "n";
+                obj.getInventory().addItem(obj.getCursorSlot());
+                obj.select(null);
             }
-            writer.write(cs);
+
             String inv = "\n";
             for (Container<Item> cont : obj.getInventory()) {
                 Item item = cont.getItem();
                 if (item == null) {
                     break;
                 }
-                inv += ItemID.getID(item);
-                if (item.canStack) {
-                    inv += "(" + item.count + ")";
-                }
-                inv += ",";
+                inv += writeItem(item) + ",";
             }
             writer.write(inv);
-
-            for (int i = 0; i < obj.getLoadouts().size(); i++) {
-                Equipment eqp = obj.getLoadouts().get(i);
-                
-                String ld = "\n";
-
-                Container<Item>[] accArr = eqp.getAccSlots();
-                for (int j = 0; j < accArr.length; j++) {
-                    Item item = accArr[j].getItem();
-                    ld += (item != null ? ItemID.getID(item) : "n") + ",";
-                }
-                Container<Item>[] armArr = eqp.getAbilitySlots();
-                for (int j = 0; j < armArr.length; j++) {
-                    Item item = armArr[j].getItem();
-                    ld += (item != null ? ItemID.getID(item) : "n") + ",";
-                }
-                ld += (eqp.getWepSlot().getItem() != null ? ItemID.getID(eqp.getWepSlot().getItem()) : "n") + ",";
-                ld += (eqp.getCoreSlot().getItem() != null ? ItemID.getID(eqp.getCoreSlot().getItem()) : "n") + ",";
-                writer.write(ld);
+            
+            String constantLoadouts = "";
+            Container<Item>[] accArr = Player.Equipment.getAccSlots();
+            for (int i = 0; i < accArr.length; i++) {
+                Item item = accArr[i].getItem();
+                constantLoadouts += writeItem(item) + ",";
             }
+            
+            Container<Item>[] abilityArr = Player.Equipment.getAbilitySlots();
+            for (int i = 0; i < abilityArr.length; i++) {
+                Item item = abilityArr[i].getItem();
+                constantLoadouts += writeItem(item) + ",";
+            }
+            constantLoadouts += writeItem(Player.Equipment.getCoreSlot().getItem()) + ",";
+            writer.write(constantLoadouts + "\n");
+            
+            String weapons = "";
+            for (int i = 0; i < obj.getLoadouts().size(); i++) {
+                weapons += writeItem(obj.getLoadouts().get(i).getWepSlot().getItem()) + ",";
+            }
+            writer.write(weapons);
         }
     }
 
@@ -190,10 +171,6 @@ public final class SaveSystem {
             }
             obj.setLocation(pX, pY);
 
-            scanner.nextLine();
-
-            obj.select(parseItem(scanner.nextLine()));
-
             String invLine = scanner.nextLine();
             int startIndex = 0;
             while (true) {
@@ -206,18 +183,18 @@ public final class SaveSystem {
                 startIndex = invLine.indexOf(",", startIndex) + 1;
             }
 
+            scanner.nextLine();
+            for (int i = 0; i < Equipment.accSlotNum; i++) {
+                Player.Equipment.setAccSlot(i, parseItem(scanner.next()));
+            }
+            for (int i = 0; i < Equipment.abilitySlotNum; i++) {
+                Player.Equipment.setAbilitySlot(i, parseItem(scanner.next()));
+            }
+            Player.Equipment.setCoreSlot(parseItem(scanner.next()));
+            scanner.nextLine();
             for (int i = 0; i < obj.getLoadouts().size(); i++) {
                 Equipment eqp = obj.getLoadouts().get(i);
-                for (int j = 0; j < Equipment.accSlotNum; j++) {
-                    String str = scanner.next();
-                    eqp.setAccSlot(j, parseItem(str));
-                }
-                for (int j = 0; j < Equipment.abilitySlotNum; j++) {
-                    eqp.setAbilitySlot(j, parseItem(scanner.next()));
-                }
                 eqp.setWepSlot((Item) parseItem(scanner.next()));
-                eqp.setCoreSlot(parseItem(scanner.next()));
-                scanner.nextLine();
             }
         }
     }
@@ -228,15 +205,10 @@ public final class SaveSystem {
         try (FileWriter writer = new FileWriter(file)) {
             for (int i = 0; i < GameSolid.solids.size(); i++) {
                 GameSolid solid = GameSolid.solids.get(i);
-                if (solid instanceof Player) {
+                if (solid instanceof Enemy enemy && !enemy.bossEnemy) {
+                    writer.write(writeEnemy(enemy) + "\n");
                     continue;
                 }
-                try {
-                    if (solid instanceof Enemy enemy && !enemy.bossEnemy) {
-                        writer.write(EnemyID.getID(enemy) + "(" + getData(enemy) + ")" + (enemy.isAlive() ? 1 : 0) + "\n");
-                        continue;
-                    }
-                } catch (UnindexedGameObjectException uigoe) { System.err.println(solid); }
             }
         }
     }
@@ -266,7 +238,7 @@ public final class SaveSystem {
         }
     }
 
-    public static void loadWorld(boolean newWorld) throws IOException {
+    public static void readWorldData(boolean newWorld) throws IOException {
         File file = new File("data\\WorldData.dat");
         
         if (newWorld || !file.exists()) {
@@ -343,9 +315,32 @@ public final class SaveSystem {
         try {
             readPlayerData();
             readEntityData();
-            loadWorld(newWorld);
+            readWorldData(newWorld);
             readSettingsData();
         } catch (IOException e) { e.printStackTrace(); }
+    }
+
+    private static String writeItem(Item item) {
+        if (item == null) {
+            return "n";
+        }
+
+        String result = Integer.toString(ItemID.getID(item));
+        if (item.canStack) {
+            result += "(" + item.count + ")";
+        }
+        if (item.enchantments.size() > 0) {
+            result += "[";
+            for (Enchantment enchantment : item.enchantments) {
+                result += "{";
+                result += EnchantmentType.getID(enchantment.eType) + "|";
+                result += StatusEffectType.getID(enchantment.sType) + "|";
+                result += enchantment.mDmg;
+                result += "}";
+            }
+            result += "]";
+        }
+        return result;
     }
 
     private static Item parseItem(String str) {
@@ -353,15 +348,48 @@ public final class SaveSystem {
             return null;
         }
 
-        int parentheses = str.indexOf("(");
-        if (parentheses >= 0) {
-            int count = Integer.parseInt(str.substring(str.indexOf("(") + 1, str.indexOf(")")));
-            Item item = ItemID.getItem(Integer.parseInt(str.substring(0, parentheses)));
+        Item item;
+        int parentheses = str.indexOf('(');
+        int brackets = str.indexOf('[');
+
+        if (parentheses > 0) {
+            item = ItemID.getItem(Integer.parseInt(str.substring(0, parentheses)));
+            int count = Integer.parseInt(str.substring(parentheses + 1, str.indexOf(")")));
             item.count = count;
-            return item;
+        } else if (brackets > 0) {
+            item = ItemID.getItem(Integer.parseInt(str.substring(0, brackets)));
         } else {
-            return ItemID.getItem(Integer.parseInt(str));
+            item = ItemID.getItem(Integer.parseInt(str));
         }
+
+        if (brackets > 0) {
+            int lowIndex = brackets + 2;
+            while (true) {
+                int highIndex = str.indexOf('}', lowIndex);
+                if (lowIndex == -1 || highIndex == -1) {
+                    break;
+                }
+                
+                String subStr = str.substring(lowIndex, highIndex);
+                Object[] data = readNums(subStr, '|');
+                switch ((int) data[0]) {
+                    case 0:
+                        item.enchantments.add(new Enchantment((float) data[2], StatusEffectType.getEffect((int) data[1])));
+                        break;
+                    case 1:
+                        item.enchantments.add(new Enchantment(StatusEffectType.getEffect((int) data[1])));
+                        break;
+                }
+                lowIndex = highIndex + 2;
+            }
+        }
+        return item;
+    }
+
+    private static String writeEnemy(Enemy enemy) {
+        return EnemyID.getID(enemy) + "(" + 
+            enemy.getX() + "," + enemy.getY() + "," + enemy.rotationDeg + "," + enemy.getLayer() + "," + enemy.getHP() +
+            ")" + (enemy.isAlive() ? 1 : 0);
     }
 
     private static Enemy parseEnemy(String str) {
@@ -409,13 +437,11 @@ public final class SaveSystem {
     }
 
     private static Object[] readNums(String baseData, char indicator) {
-        
         baseData += "|";
 
         List<Object> result = new ArrayList<>();
-        int startIndex = 0;
-        for (int i = 0; ; i++) {
-            int lowIndex = startIndex;
+        int lowIndex = 0;
+        while (true) {
             int highIndex = baseData.indexOf(indicator, lowIndex + 1);
             if (lowIndex == -1 || highIndex == -1) {
                 break;
@@ -427,25 +453,8 @@ public final class SaveSystem {
                 result.add(Integer.parseInt(substr));
             }
 
-            startIndex = highIndex + 1;
+            lowIndex = highIndex + 1;
         }
         return result.toArray();
-    }
-
-    private static GameObject parseGameObject(String str) throws IOException {
-        GameObject result = new GameObject();
-        String baseData = str.substring(str.indexOf('(') + 1, str.indexOf(')'));
-        Object[] nums = readNums(baseData, ',');
-        result.setLocation((int) nums[0], (int) nums[1]);
-        result.rotate((float) nums[2]);
-        result.setLayer((int) nums[3]);
-        return result;
-    }
-
-    private static class UnindexedGameObjectException extends RuntimeException {
-
-        public UnindexedGameObjectException(GameObject obj) {
-            super(obj instanceof Item item ? item.name : obj + " could not be found in the ID list.");
-        }
     }
 }

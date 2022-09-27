@@ -46,12 +46,7 @@ public enum ItemID {
     }
 
     public static int getID(Item item) {
-        for (int i = 0; i < values().length; i++) {
-            if (values()[i] == item.id) {
-                return i;
-            }
-        }
-        return -1;
+        return Globals.indexOf(values(), id -> id == item.id);
     }
 
     public static ItemID getID(int intID) {

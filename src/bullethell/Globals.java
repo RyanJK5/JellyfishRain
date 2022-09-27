@@ -7,10 +7,10 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.function.Predicate;
 
 import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioSystem;
@@ -179,7 +179,7 @@ public final class Globals {
 
     public static int damageFormula(int baseDMG) {
         Player player = Player.get();
-        int adrenNum = player.getEquipmentInv().hasAbility(ItemID.ADRENALINE_ABILITY) ? player.abilityAdren : player.adren;
+        int adrenNum = Player.Equipment.hasAbility(ItemID.ADRENALINE_ABILITY) ? player.abilityAdren : player.adren;
         return (int) (
           (1 + ((float) adrenNum / (float) player.maxAdr)) * 
           (baseDMG * (1 + player.modifiers.mDMG) + player.modifiers.pDMG));
@@ -212,6 +212,19 @@ public final class Globals {
     }
 
     public static <T> boolean contains(T[] arr, T obj) {
-        return Arrays.stream(arr).anyMatch(o -> o.equals(obj));
+        return indexOf(arr, obj) >= 0;
+    }
+
+    public static <T> int indexOf(T[] arr, T obj) {
+        return indexOf(arr, o -> o.equals(obj));
+    }
+
+    public static <T> int indexOf(T[] arr, Predicate<T> predicate) {
+        for (int i = 0; i < arr.length; i++) {
+            if (predicate.test(arr[i])) {
+                return i;
+            }
+        }
+        return -1;
     }
 }

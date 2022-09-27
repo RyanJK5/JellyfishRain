@@ -6,6 +6,7 @@ public final class Dummy extends Enemy {
 
     @Override
     protected void setValues() {
+        id = EnemyID.DUMMY;
         maxHP = Integer.MAX_VALUE;
         hp = maxHP;
         path = Path.DEFAULT_PATH;
