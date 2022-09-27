@@ -1,5 +1,6 @@
-package bullethell;
+package bullethell.combat;
 
+import bullethell.Globals;
 import bullethell.enemies.Enemy;
 
 public class StatusEffect {

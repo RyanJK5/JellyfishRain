@@ -4,8 +4,8 @@ import java.awt.image.BufferedImage;
 
 import bullethell.Globals;
 import bullethell.Player;
-import bullethell.Projectile;
 import bullethell.Spritesheet;
+import bullethell.combat.Projectile;
 import bullethell.items.EquipType;
 import bullethell.items.Item;
 import bullethell.items.ItemID;
@@ -40,8 +40,7 @@ public final class ExampleStaff extends Item {
 
         double angle = Globals.pointToCursorAngle(centerX, centerY);
 
-        Projectile proj = new Projectile(Spritesheet.getSpriteSheet(projSprite), new AngledPath(angle), false, 0, 20, 
-          getCritDMG());
+        Projectile proj = new WeaponProjectile(this, Spritesheet.getSpriteSheet(projSprite), new AngledPath(angle), false, 0, 20);
         proj.rotate((float) -angle + 180);
         proj.setRange(range);
         proj.setLocation(centerX, centerY);

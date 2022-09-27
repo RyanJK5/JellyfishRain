@@ -4,8 +4,8 @@ import java.awt.image.BufferedImage;
 
 import bullethell.Globals;
 import bullethell.Player;
-import bullethell.Projectile;
 import bullethell.Spritesheet;
+import bullethell.combat.Projectile;
 import bullethell.items.EquipType;
 import bullethell.items.Item;
 import bullethell.items.ItemID;
@@ -40,8 +40,8 @@ public final class ExampleScepter extends Item {
         double angle = Globals.pointToCursorAngle(centerX, centerY);
 
         for (double i = -maxSpread / 2; i <= maxSpread / 2; i += maxSpread / (shotNum - 1)) {
-            Projectile proj = new Projectile(Spritesheet.getSpriteSheet(projSprite), new AngledPath(angle + i), false, 0, 10, 
-              getCritDMG());
+            Projectile proj = new WeaponProjectile(this, Spritesheet.getSpriteSheet(projSprite), 
+              new AngledPath(angle + i), false, 0, 10);
             proj.setLocation(centerX, centerY);
             proj.setFriendly(true);
             proj.setRange(range);

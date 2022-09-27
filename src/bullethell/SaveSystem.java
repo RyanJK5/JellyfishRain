@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import bullethell.Player.Equipment;
+import bullethell.combat.Entity;
 import bullethell.enemies.Enemy;
 import bullethell.enemies.EnemyID;
 import bullethell.items.Item;

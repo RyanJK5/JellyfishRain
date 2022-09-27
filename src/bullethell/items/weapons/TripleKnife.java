@@ -5,10 +5,10 @@ import java.awt.Rectangle;
 
 import bullethell.Globals;
 import bullethell.Spritesheet;
+import bullethell.combat.MeleeHitbox;
 import bullethell.items.EquipType;
 import bullethell.items.Item;
 import bullethell.items.ItemID;
-import bullethell.items.MeleeHitbox;
 
 public class TripleKnife extends Item {
     
@@ -32,7 +32,7 @@ public class TripleKnife extends Item {
         dmg = 20;
         fireTime = 15;
 
-        critCondition = () -> strikeNum == 2;
+        critCondition = e -> strikeNum == 2;
         critMultiplier = 50f / dmg;
     }
 
@@ -49,7 +49,7 @@ public class TripleKnife extends Item {
         fireTime = 15;
         timeSinceLastAttack = 0;
         Rectangle bounds = new Rectangle(0, 0, spritesheet.getSprite(0, strikeNum).getWidth(), spritesheet.getSprite(0, strikeNum).getHeight());
-        MeleeHitbox hitbox = new MeleeHitbox(spritesheet, bounds, getCritDMG(), 10, 1);
+        MeleeHitbox hitbox = new MeleeHitbox(this, spritesheet, bounds, 10, 1);
         hitbox.getCurrentAnimation().setToFrame(strikeNum);
         hitbox.update();
         

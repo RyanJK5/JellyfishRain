@@ -23,18 +23,18 @@ import java.io.IOException;
 import javax.swing.Timer;
 
 import bullethell.Audio;
-import bullethell.Entity;
 import bullethell.GameObject;
 import bullethell.GameSolid;
 import bullethell.GameState;
 import bullethell.Globals;
 import bullethell.Parallax;
 import bullethell.Player;
-import bullethell.Projectile;
 import bullethell.Spritesheet;
+import bullethell.combat.Entity;
+import bullethell.combat.Projectile;
+import bullethell.combat.WeaponEntity;
 import bullethell.enemies.EnemyID;
 import bullethell.enemies.JellyFishBoss;
-import bullethell.items.weapons.ExampleSword;
 import bullethell.movement.ChargePath;
 import bullethell.movement.CirclePath;
 import bullethell.movement.Direction;
@@ -183,18 +183,12 @@ public final class ErnestoBoss implements Scene, Bossfight {
                     
                     if ((indicatorProjDelay != 0 && age < indicatorProjDelay) ||
                       (obj instanceof Projectile) ||
-                      (obj instanceof ExampleSword.ExampleSwordHitbox)) {
-                        return false;
-                    }
-            
-                    if (obj instanceof GameSolid && !(obj instanceof Entity)) {
-                        permakill();
+                      (obj instanceof WeaponEntity)) {
                         return false;
                     }
             
                     Entity entity = (Entity) obj;
                     boolean successful = false;
-                    
                     if (friendly() != entity.friendly() && !successful && !entity.isInvicible()) {
                         if (pierce != Integer.MAX_VALUE) {
                             pierce--;

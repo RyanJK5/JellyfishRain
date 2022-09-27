@@ -1,26 +1,31 @@
-package bullethell.items;
+package bullethell.combat;
 
-import bullethell.Entity;
+import java.util.function.Predicate;
+
 import bullethell.GameSolid;
 import bullethell.Player;
 import bullethell.Spritesheet;
 import bullethell.enemies.Enemy;
+import bullethell.items.Item;
 import bullethell.movement.Path;
 
-public class MeleeHitbox extends Entity {
+public class MeleeHitbox extends Entity implements WeaponEntity {
 
     private final int lifeSpan;
     private final int maxHits;
     private final int hitDelay;
-    
+
+    private final Item item;
+
     private int numHits;
     private int age;
     private int lastHit;
 
-    public MeleeHitbox(Spritesheet spritesheet, java.awt.Rectangle bounds, int dmg, int lifeSpan, int maxHits) {
-        super(spritesheet, Path.DEFAULT_PATH, dmg, 0, 0, true);
+public MeleeHitbox(Item sender, Spritesheet spritesheet, java.awt.Rectangle bounds, int lifeSpan, int maxHits) {
+        super(spritesheet, Path.DEFAULT_PATH, sender.dmg, 0, 0, true);
         setHitbox(bounds);
         setLayer(10);
+        item = sender;
         this.lifeSpan = lifeSpan;
         this.maxHits = maxHits;
         hitDelay = lifeSpan / maxHits;
@@ -30,7 +35,7 @@ public class MeleeHitbox extends Entity {
     public final boolean onCollision(GameSolid obj) {
         if (!(obj instanceof Enemy enem && !enem.friendly())) return false;
             if (numHits < maxHits && age - hitDelay >= lastHit && !enem.isInvicible()) {
-                enem.registerDMG(dmg);
+                enem.registerDMG(item.getCritDMG(enem));
                 Player.get().registerDealtDMG(dmg, this);
                 numHits++;
                 lastHit = age;
@@ -73,4 +78,9 @@ public class MeleeHitbox extends Entity {
 
     @Override
     public final void registerDMG(int dmg) { }
+
+    @Override
+    public Predicate<Enemy> getCritCondition() {
+        return item.critCondition;
+    }
 }

@@ -5,10 +5,10 @@ import java.awt.Rectangle;
 import bullethell.Globals;
 import bullethell.Player;
 import bullethell.Spritesheet;
+import bullethell.combat.MeleeHitbox;
 import bullethell.items.EquipType;
 import bullethell.items.Item;
 import bullethell.items.ItemID;
-import bullethell.items.MeleeHitbox;
 import bullethell.items.Recipe;
 
 public final class ExampleSword extends Item {
@@ -41,14 +41,14 @@ public final class ExampleSword extends Item {
         if (!(player.getCurrentFire() >= fireTime && player.isAlive())) {
             return;
         }
-        new ExampleSwordHitbox().update();
+        new ExampleSwordHitbox();
     }
 
     public final class ExampleSwordHitbox extends MeleeHitbox {
 		
         public ExampleSwordHitbox() {
-            super(Spritesheet.getSpriteSheet("Slash"), new Rectangle(140, 0, 43, 162), 
-              getCritDMG(), 15, 2);
+            super(ExampleSword.this, Spritesheet.getSpriteSheet("Slash"), new Rectangle(140, 0, 43, 162), 
+            15, 2);
         }
 
         private double theta = 0;

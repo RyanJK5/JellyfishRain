@@ -2,11 +2,12 @@ package bullethell.items;
 
 import java.awt.Graphics;
 import java.io.File;
-import java.util.function.Supplier;
+import java.util.function.Predicate;
 
 import bullethell.GameObject;
 import bullethell.Globals;
 import bullethell.Player;
+import bullethell.enemies.Enemy;
 
 public abstract class Item extends GameObject {
 
@@ -20,7 +21,7 @@ public abstract class Item extends GameObject {
 
     public boolean canStack;
 
-    public Supplier<Boolean> critCondition;
+    public Predicate<Enemy> critCondition;
     public float critMultiplier;
     public int dmg;
     public int manaCost;
@@ -41,7 +42,7 @@ public abstract class Item extends GameObject {
         name = "Unnamed";
         description = "";
         recipes = new Recipe[0];
-        critCondition = () -> false;
+        critCondition = e -> false;
         critMultiplier = 1.5f;
         weaponModifiers = new WeaponModifiers();
         playerModifiers = new PlayerModifiers();
@@ -168,8 +169,8 @@ public abstract class Item extends GameObject {
         }
     }
 
-    public int getCritDMG() {
-        return critCondition.get() ? (int) (dmg * critMultiplier) : dmg;
+    public int getCritDMG(Enemy enemy) {
+        return critCondition.test(enemy) ? (int) (dmg * critMultiplier) : dmg;
     }
 
     @Override

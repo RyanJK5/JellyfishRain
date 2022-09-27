@@ -14,7 +14,6 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import bullethell.Entity;
 import bullethell.GameObject;
 import bullethell.GameSolid;
 import bullethell.GameState;
@@ -24,6 +23,7 @@ import bullethell.Player;
 import bullethell.SaveSystem;
 import bullethell.SolidContainer;
 import bullethell.Trigger;
+import bullethell.combat.Entity;
 import bullethell.enemies.Enemy;
 import bullethell.enemies.EnemyGroup;
 import bullethell.enemies.EnemyID;

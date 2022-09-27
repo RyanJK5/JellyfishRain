@@ -38,6 +38,8 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import bullethell.combat.Entity;
+import bullethell.combat.StatusEffect;
 import bullethell.enemies.Enemy;
 import bullethell.enemies.EnemyID;
 import bullethell.items.ItemID;

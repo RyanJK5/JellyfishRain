@@ -1,4 +1,4 @@
-package bullethell;
+package bullethell.combat;
 
 import java.awt.Graphics;
 import java.awt.Point;
@@ -10,9 +10,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 
+import bullethell.Animated;
+import bullethell.Animation;
+import bullethell.GameSolid;
+import bullethell.Globals;
+import bullethell.Spritesheet;
 import bullethell.movement.Path;
 
-public non-sealed abstract class Entity extends GameSolid implements ActionListener, Animated {
+public abstract class Entity extends GameSolid implements ActionListener, Animated {
 
 	protected boolean drawIndicator;
     protected Path path;
@@ -20,12 +25,12 @@ public non-sealed abstract class Entity extends GameSolid implements ActionListe
     protected Animation[] animations;
     protected int currentAnimation;
 
-    protected int dmg;
-    protected int maxHP, hp;
-    protected float speed;
-    protected boolean friendly;
-    protected boolean invincible;
-    protected boolean ignoreSolids;
+    public int dmg;
+    public int maxHP, hp;
+    public float speed;
+    public boolean friendly;
+    public boolean invincible;
+    public boolean ignoreSolids;
 
     protected Entity(Spritesheet spritesheet, Path path, int dmg, int maxHP, float speed, boolean friendly) {
         super(spritesheet.getSprite(0, 0));

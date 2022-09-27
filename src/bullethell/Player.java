@@ -18,6 +18,8 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
+import bullethell.combat.Entity;
+import bullethell.combat.Projectile;
 import bullethell.items.EquipType;
 import bullethell.items.Item;
 import bullethell.items.ItemID;

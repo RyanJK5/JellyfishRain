@@ -1,4 +1,4 @@
-package bullethell;
+package bullethell.combat;
 
 import java.awt.Graphics2D;
 import java.awt.AlphaComposite;
@@ -11,6 +11,10 @@ import java.awt.geom.Area;
 import java.util.ArrayList;
 import java.util.List;
 
+import bullethell.GameSolid;
+import bullethell.Globals;
+import bullethell.Player;
+import bullethell.Spritesheet;
 import bullethell.items.weapons.ExampleSword;
 import bullethell.movement.Path;
 

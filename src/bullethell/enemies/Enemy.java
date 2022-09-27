@@ -14,13 +14,13 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import bullethell.Entity;
 import bullethell.GameObject;
 import bullethell.GameSolid;
 import bullethell.Globals;
 import bullethell.Player;
 import bullethell.Spritesheet;
-import bullethell.StatusEffect;
+import bullethell.combat.Entity;
+import bullethell.combat.StatusEffect;
 import bullethell.items.ItemDrop;
 import bullethell.items.ItemLoot;
 

@@ -11,7 +11,9 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
-public sealed class GameSolid extends GameObject permits Entity {
+import bullethell.combat.Entity;
+
+public class GameSolid extends GameObject {
 
 	protected static final Quadtree<GameSolid> quadtree = new Quadtree<>(new Rectangle(Globals.WIDTH, Globals.HEIGHT));
 	protected static final List<GameSolid> solids = new ArrayList<>();
