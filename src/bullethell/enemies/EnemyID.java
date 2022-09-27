@@ -7,7 +7,7 @@ import bullethell.Globals;
 import bullethell.Spritesheet;
 
 public enum EnemyID {
-    
+    DUMMY(Dummy.class),
     PIXIE(Pixie.class),
     JELLY_FISH_BOSS(JellyFishBoss.class);
 

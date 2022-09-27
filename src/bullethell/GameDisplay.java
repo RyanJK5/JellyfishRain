@@ -38,10 +38,12 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import bullethell.combat.Enchantment;
 import bullethell.combat.Entity;
-import bullethell.combat.StatusEffect;
+import bullethell.combat.StatusEffectType;
 import bullethell.enemies.Enemy;
 import bullethell.enemies.EnemyID;
+import bullethell.items.Item;
 import bullethell.items.ItemID;
 import bullethell.movement.Direction;
 import bullethell.scenes.MainMenu;
@@ -65,18 +67,18 @@ public final class GameDisplay extends JPanel {
 		mouseMoveListener.locationChange(java.awt.MouseInfo.getPointerInfo().getLocation());
 
 		SaveSystem.loadWorld(true);
-		player.setLocation(Globals.SCREEN_WIDTH / 2, Globals.SCREEN_HEIGHT / 2);
 		player.setLocation(Globals.WIDTH / 2, 100);
-		player.getInventory().addItem(ItemID.DASH_ABILITY.getItem());
-		player.getInventory().addItem(ItemID.HEAL_ABILITY.getItem());
-		player.getInventory().addItem(ItemID.TP_ABILITY.getItem());
-		player.getInventory().addItem(ItemID.FOCUS_ABILITY.getItem());
-		player.getInventory().addItem(ItemID.ADRENALINE_ABILITY.getItem());
-		player.getInventory().addItem(ItemID.TRIPLE_KNIFE.getItem());
 
-		Enemy ent = EnemyID.getEnemy(EnemyID.PIXIE);
-		ent.setLocation(500, 200);
-		ent.addStatusEffect(new StatusEffect(10, 500, 2000));
+		Item sword = ItemID.EXAMPLE_SWORD.getItem();
+		sword.enchantments.add(new Enchantment(0.5f, StatusEffectType.POISON));
+		player.getInventory().addItem(sword);
+		
+		Item staff = ItemID.EXAMPLE_STAFF.getItem();
+		staff.enchantments.add(new Enchantment(StatusEffectType.POISON));
+		player.getInventory().addItem(staff);
+		
+		Enemy enemy = EnemyID.DUMMY.getEnemy();
+		enemy.setLocation(player.getX() + 200, player.getY());
 	}
 	
 	protected void endGame() {

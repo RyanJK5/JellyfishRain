@@ -2,7 +2,10 @@ package bullethell.items.weapons;
 
 import java.util.function.Predicate;
 
+import bullethell.GameSolid;
+import bullethell.Player;
 import bullethell.Spritesheet;
+import bullethell.combat.Entity;
 import bullethell.combat.Projectile;
 import bullethell.combat.WeaponEntity;
 import bullethell.enemies.Enemy;
@@ -41,5 +44,47 @@ public class WeaponProjectile extends Projectile implements WeaponEntity {
     @Override
     public Predicate<Enemy> getCritCondition() {
         return item.critCondition;
+    }
+
+    @Override
+    public boolean onCollision(GameSolid obj) {
+        if (pierce < 0) {
+			permakill();
+			return false;
+		}
+
+		if (obj instanceof GameSolid && !(obj instanceof Entity)) {
+			permakill();
+			return false;
+		}
+
+        if (!(obj instanceof Enemy)) {
+            return false;
+        }
+
+		Enemy enemy = (Enemy) obj;
+		boolean successful = false;
+		for (Entity hit : hits) {
+			if (enemy == hit) {
+				successful = true;
+				break;
+			}
+		}
+		if (!successful && !enemy.isInvicible()) {
+			if (pierce != Integer.MAX_VALUE) {
+				pierce--;
+			}
+			enemy.registerDMG(item.getModifiedDMG(enemy));
+			if (friendly()) {
+				Player.get().registerDealtDMG(dmg, this);
+			}
+			hits.add(enemy);
+
+			if (pierce < 0) {
+				permakill();
+				return false;
+			}
+		}
+		return !successful;
     }
 }

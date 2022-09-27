@@ -6,14 +6,25 @@ import bullethell.enemies.Enemy;
 public class StatusEffect {
     
     private int age;
+    
+    public final StatusEffectType type;
     public final int dmg;
     public final int duration;
     public final int hitDelay;
 
-    public StatusEffect(int dph, int miliHitDelay, int miliDuration) {
+    public StatusEffect(StatusEffectType type, int dph, int miliHitDelay, int miliDuration) {
+        this.type = type;
         dmg = dph;
         hitDelay = miliHitDelay / Globals.TIMER_DELAY;
         duration = miliDuration / Globals.TIMER_DELAY;
+    }
+
+    public StatusEffect(StatusEffectType type) {
+        this.type = type;
+        dmg = type.defaultDPH;
+        hitDelay = type.defaultMiliHitDelay / Globals.TIMER_DELAY;
+        duration = type.defaultMiliDuration / Globals.TIMER_DELAY;
+        
     }
 
     public boolean active() {

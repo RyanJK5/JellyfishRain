@@ -47,22 +47,21 @@ public final class ExampleSword extends Item {
     public final class ExampleSwordHitbox extends MeleeHitbox {
 		
         public ExampleSwordHitbox() {
-            super(ExampleSword.this, Spritesheet.getSpriteSheet("Slash"), new Rectangle(140, 0, 43, 162), 
+            super(ExampleSword.this, Spritesheet.getSpriteSheet("Slash"), new Rectangle(0, 0, 43, 162), 
             15, 2);
         }
 
-        private double theta = 0;
         @Override
         public void update() {
-            if (getAge() == 0) {
+            super.update();
+
+            Player player = Player.get();
+            setRotationAnchor(player.getCenterX(), player.getCenterY());
+            
+            if (getAge() == 1) {
                 rotate((float) (-coverage / 2));
             }
-            
-            double angle = Math.toDegrees(theta);
-            angle = -angle;
             rotate((float) (coverage / getLifeSpan()));
-
-            super.update();
         }
     }
 }

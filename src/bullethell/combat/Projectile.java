@@ -1,9 +1,9 @@
 package bullethell.combat;
 
-import java.awt.Graphics2D;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.geom.AffineTransform;
@@ -15,7 +15,6 @@ import bullethell.GameSolid;
 import bullethell.Globals;
 import bullethell.Player;
 import bullethell.Spritesheet;
-import bullethell.items.weapons.ExampleSword;
 import bullethell.movement.Path;
 
 public class Projectile extends Entity {
@@ -121,7 +120,7 @@ public class Projectile extends Entity {
 		
 		if ((indicatorProjDelay != 0 && age < indicatorProjDelay) ||
 		  (obj instanceof Projectile) ||
-		  (obj instanceof ExampleSword.ExampleSwordHitbox)) {
+		  (obj instanceof MeleeHitbox)) {
 			return false;
 		}
 

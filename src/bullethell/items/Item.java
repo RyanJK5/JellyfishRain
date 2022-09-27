@@ -2,11 +2,15 @@ package bullethell.items;
 
 import java.awt.Graphics;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Predicate;
 
 import bullethell.GameObject;
 import bullethell.Globals;
 import bullethell.Player;
+import bullethell.combat.Enchantment;
+import bullethell.combat.StatusEffect;
 import bullethell.enemies.Enemy;
 
 public abstract class Item extends GameObject {
@@ -18,6 +22,7 @@ public abstract class Item extends GameObject {
     public String description;
 
     public Recipe[] recipes;
+    public List<Enchantment> enchantments;
 
     public boolean canStack;
 
@@ -35,13 +40,15 @@ public abstract class Item extends GameObject {
 
     protected Item() {
         super(null, true);
-        setSprite(new File("sprites\\items\\" + getClass().getSimpleName() + ".png").exists() ? Globals.getImage("items\\" + getClass().getSimpleName()) : 
+        setSprite(new File("sprites\\items\\" + getClass().getSimpleName() + ".png").exists() ? 
+          Globals.getImage("items\\" + getClass().getSimpleName()) : 
         Globals.getImage("items\\Default"));
         
         equipType = EquipType.NONE;
         name = "Unnamed";
         description = "";
         recipes = new Recipe[0];
+        enchantments = new ArrayList<>();
         critCondition = e -> false;
         critMultiplier = 1.5f;
         weaponModifiers = new WeaponModifiers();
@@ -124,7 +131,8 @@ public abstract class Item extends GameObject {
         final int spacing = 20;
         final int x = Player.cursorX() + 10;
         final int y = Player.cursorY() + 25;
-        for (int i = 0; i < 6; i++) {
+
+        for (int i = 0; i < 7; i++) {
             switch (i) {
                 case 0:
                     g.drawString(name, x, y);
@@ -138,7 +146,8 @@ public abstract class Item extends GameObject {
                     }
                 case 2:
                     if (equipType == EquipType.WEAPON && manaCost != 0) {
-                        g.drawString("    " + (int) ((float) manaCost / Player.get().getMaxMana() * 100) + "% mana", x, y + index * spacing);
+                        g.drawString("    " + (int) ((float) manaCost / Player.get().getMaxMana() * 100) + "% mana", 
+                          x, y + index * spacing);
                         break;
                     } else {
                         continue;
@@ -160,17 +169,39 @@ public abstract class Item extends GameObject {
                 case 5:
                     if (description.length() > 0) {
                         g.drawString("    " + description, x, y + index * spacing);
+                        break;
                     } else {
                         continue;
                     }
-                    
+                case 6:
+                    g.setColor(new java.awt.Color(0, 153, 151));
+                    for (Enchantment enchantment : enchantments) {
+                        g.drawString("    " + enchantment, x, y + index * spacing);
+                        index++;
+                    }
             }
             index++;
         }
     }
 
-    public int getCritDMG(Enemy enemy) {
-        return critCondition.test(enemy) ? (int) (dmg * critMultiplier) : dmg;
+    public int getModifiedDMG(Enemy enemy) {
+        float finalmDmg = 1;
+        if (critCondition.test(enemy)) {
+            finalmDmg += critMultiplier;
+        }
+        for (Enchantment enchantment : enchantments) {
+            switch (enchantment.eType) {
+                case EFFECT_DAMAGE_BOOST:
+                    if (enchantment.test(enemy)) {
+                        finalmDmg += enchantment.mDmg;
+                    }
+                    break;
+                case INFLICT_EFFECT:
+                    enemy.addStatusEffect(new StatusEffect(enchantment.sType));
+                    break;
+            }
+        }
+        return (int) (dmg * finalmDmg);
     }
 
     @Override

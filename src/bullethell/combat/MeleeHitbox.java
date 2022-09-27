@@ -35,7 +35,7 @@ public MeleeHitbox(Item sender, Spritesheet spritesheet, java.awt.Rectangle boun
     public final boolean onCollision(GameSolid obj) {
         if (!(obj instanceof Enemy enem && !enem.friendly())) return false;
             if (numHits < maxHits && age - hitDelay >= lastHit && !enem.isInvicible()) {
-                enem.registerDMG(item.getCritDMG(enem));
+                enem.registerDMG(item.getModifiedDMG(enem));
                 Player.get().registerDealtDMG(dmg, this);
                 numHits++;
                 lastHit = age;

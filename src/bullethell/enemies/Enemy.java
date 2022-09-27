@@ -34,7 +34,7 @@ public abstract class Enemy extends Entity {
     public boolean bossEnemy;
     
     protected ItemLoot[] lootTable;
-    protected List<StatusEffect> activeEffects;
+    public final List<StatusEffect> activeEffects;
     
     public Area provocationArea;
     public Area provokedArea;
@@ -85,10 +85,6 @@ public abstract class Enemy extends Entity {
 
     @Override  
     public void update() {
-        if (readyToKill()) {
-            gameKill();
-        } 
-
         if (groupID >= 0 && !EnemyGroup.getGroup(groupID).anyDetectPlayer()) {
             return;
         }
@@ -292,5 +288,9 @@ public abstract class Enemy extends Entity {
         timeSinceHit = 0;
         new Hit(dmgTaken, x + w, y);
         healthBar.revive();
+
+        if (readyToKill()) {
+            gameKill();
+        }
     }
 }
