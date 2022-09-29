@@ -21,15 +21,16 @@ import bullethell.ui.Text;
  * All subclasses of {@code Scene} should be singletons.
  */
 public sealed interface Scene
-  permits CoreForge, ErnestoBoss, Forge, MainMenu, OptionsMenu, World {
+  permits CoreForge, ErnestoBoss, Forge, MainMenu, OptionsMenu, World, EnchantmentForge {
 
+	GameState getState();
+	
     void start(int x, int y);
 
     void end();
 
 	boolean isActive();
 
-	GameState getState();
 
 	/**
 	 * A new {@code Thread} should be created to call this method to prevent the program from being frozen.

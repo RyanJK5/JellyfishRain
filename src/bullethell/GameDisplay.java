@@ -38,14 +38,11 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import bullethell.combat.Enchantment;
 import bullethell.combat.Entity;
-import bullethell.combat.StatusEffectType;
 import bullethell.enemies.Enemy;
 import bullethell.enemies.EnemyID;
-import bullethell.items.Item;
-import bullethell.items.ItemID;
 import bullethell.movement.Direction;
+import bullethell.scenes.EnchantmentForge;
 import bullethell.scenes.MainMenu;
 import bullethell.scenes.OptionsMenu;
 import bullethell.scenes.Scene;
@@ -65,19 +62,12 @@ public final class GameDisplay extends JPanel {
 
 	public void gameStart() throws IOException {
 		mouseMoveListener.locationChange(java.awt.MouseInfo.getPointerInfo().getLocation());
-
+		
 		SaveSystem.readWorldData(true);
 		player.setLocation(Globals.WIDTH / 2, 100);
 
-		Item sword = ItemID.EXAMPLE_SWORD.getItem();
-		sword.enchantments.add(new Enchantment(0.5f, StatusEffectType.POISON));
-		sword.enchantments.add(new Enchantment(StatusEffectType.POISON));
-		player.getInventory().addItem(sword);
-		
-		Item staff = ItemID.EXAMPLE_STAFF.getItem();
-		staff.enchantments.add(new Enchantment(StatusEffectType.POISON));
-		player.getInventory().addItem(staff);
-		
+		EnchantmentForge.get().start(Globals.WIDTH / 2, 200);
+
 		Enemy enemy = EnemyID.DUMMY.getEnemy();
 		enemy.setLocation(player.getX() + 200, player.getY());
 	}

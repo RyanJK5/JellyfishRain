@@ -254,6 +254,11 @@ final class Forge implements Scene {
         exitTrigger.actionPerformed(null);
     }
    
+    @Override
+    public boolean isActive() {
+        return forge.isAlive();
+    }
+
     private void setContSprites() {
         try {
             for (Container<RecipeItem> cont : inv) {
@@ -374,10 +379,5 @@ final class Forge implements Scene {
 
         @Override
         protected void setValues() { }
-    }
-
-    @Override
-    public boolean isActive() {
-        return forge.isAlive();
     }
 }
