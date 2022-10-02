@@ -20,7 +20,8 @@ import bullethell.Globals;
 import bullethell.Player;
 import bullethell.Spritesheet;
 import bullethell.combat.Entity;
-import bullethell.combat.StatusEffect;
+import bullethell.combat.tags.Tag;
+import bullethell.combat.tags.TagActivationType;
 import bullethell.items.ItemDrop;
 import bullethell.items.ItemLoot;
 
@@ -34,7 +35,7 @@ public abstract class Enemy extends Entity {
     public boolean bossEnemy;
     
     protected ItemLoot[] lootTable;
-    public final List<StatusEffect> activeEffects;
+    public final List<Tag> tags;
     
     public Area provocationArea;
     public Area provokedArea;
@@ -59,7 +60,7 @@ public abstract class Enemy extends Entity {
             e.printStackTrace();
         }
         lootTable = new ItemLoot[0];
-        activeEffects = new ArrayList<>();
+        tags = new ArrayList<>();
         name = "Unnamed";
 
         setValues();
@@ -79,8 +80,15 @@ public abstract class Enemy extends Entity {
         return new Dimension(1, 1);
     }
 
-    public void addStatusEffect(StatusEffect effect) {
-        activeEffects.add(effect);
+    public void addTag(Tag tag) {
+        if (tag.getActivationType() == TagActivationType.ONE_TIME) {
+            tag.apply(this);
+            return;
+        }
+        if (tag.getActivationType() == TagActivationType.ON_DEATH & tags.contains(tag)) {
+            return;
+        }
+        tags.add(tag);
     }
 
     @Override  
@@ -89,15 +97,17 @@ public abstract class Enemy extends Entity {
             return;
         }
 
-        List<StatusEffect> toRemove = new ArrayList<>();
-        for (StatusEffect effect : activeEffects) {
-            if (!effect.active()) {
-                toRemove.add(effect);
+        List<Tag> toRemove = new ArrayList<>();
+        for (Tag tag : tags) {
+            if (!tag.active()) {
+                toRemove.add(tag);
                 continue;
             }
-            effect.update(this);
+            if (tag.getActivationType() == TagActivationType.EVERY_TICK) {
+                tag.apply(this);
+            }
         }
-        activeEffects.removeAll(toRemove);
+        tags.removeAll(toRemove);
         
         move();
         timeSinceHit++;
@@ -192,6 +202,12 @@ public abstract class Enemy extends Entity {
 
     private void gameKill() {
         permakill();
+
+        for (Tag tag : tags) {
+            if (tag.getActivationType() == TagActivationType.ON_DEATH) {
+                tag.apply(this);
+            }
+        }
 
         if (lootTable == null) {
             return;

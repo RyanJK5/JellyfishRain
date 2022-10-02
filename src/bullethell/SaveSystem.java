@@ -10,7 +10,7 @@ import java.util.Scanner;
 import bullethell.Player.Equipment;
 import bullethell.combat.Enchantment;
 import bullethell.combat.EnchantmentType;
-import bullethell.combat.StatusEffectType;
+import bullethell.combat.tags.StatusEffectType;
 import bullethell.enemies.Enemy;
 import bullethell.enemies.EnemyID;
 import bullethell.items.Item;
@@ -335,7 +335,7 @@ public final class SaveSystem {
                 result += "{";
                 result += EnchantmentType.getID(enchantment.eType) + "|";
                 result += StatusEffectType.getID(enchantment.sType) + "|";
-                result += enchantment.mDmg;
+                result += enchantment.floatArg;
                 result += "}";
             }
             result += "]";
@@ -374,10 +374,10 @@ public final class SaveSystem {
                 Object[] data = readNums(subStr, '|');
                 switch ((int) data[0]) {
                     case 0:
-                        item.enchantments.add(new Enchantment((float) data[2], StatusEffectType.getEffect((int) data[1])));
+                        item.enchantments.add(new Enchantment((float) data[2], StatusEffectType.getType((int) data[1])));
                         break;
                     case 1:
-                        item.enchantments.add(new Enchantment(StatusEffectType.getEffect((int) data[1])));
+                        item.enchantments.add(new Enchantment(StatusEffectType.getType((int) data[1])));
                         break;
                 }
                 lowIndex = highIndex + 2;

@@ -38,6 +38,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import bullethell.combat.Entity;
+import bullethell.combat.tags.DeathExplosion;
 import bullethell.enemies.Enemy;
 import bullethell.enemies.EnemyID;
 import bullethell.movement.Direction;
@@ -67,8 +68,10 @@ public final class GameDisplay extends JPanel {
 
 		setScene(EnchantmentForge.get(), Globals.WIDTH / 2, 200);
 
-		Enemy enemy = EnemyID.DUMMY.getEnemy();
-		enemy.setLocation(player.getX() + 200, player.getY());
+		Enemy dummy = EnemyID.DUMMY.getEnemy();
+		dummy.setLocation(player.getX() + 200, player.getY());
+		dummy.addTag(new DeathExplosion(100));
+		dummy.setHP(200);
 	}
 	
 	protected void endGame() {

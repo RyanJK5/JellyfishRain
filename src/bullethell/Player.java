@@ -504,6 +504,9 @@ public final class Player extends Entity {
 		for (GameObject obj : objs) {
 			obj.kill();
 		}
+		if (!Globals.eAction.turningOn) {
+			Globals.eAction.toggle();
+		}
 		StatusWheel.instances.forEach(obj -> obj.kill());
 	}
 

@@ -10,7 +10,8 @@ import bullethell.GameObject;
 import bullethell.Globals;
 import bullethell.Player;
 import bullethell.combat.Enchantment;
-import bullethell.combat.StatusEffect;
+import bullethell.combat.tags.DeathExplosion;
+import bullethell.combat.tags.StatusEffect;
 import bullethell.enemies.Enemy;
 
 public abstract class Item extends GameObject {
@@ -197,11 +198,14 @@ public abstract class Item extends GameObject {
             switch (enchantment.eType) {
                 case EFFECT_DAMAGE_BOOST:
                     if (enchantment.test(enemy)) {
-                        finalmDmg += enchantment.mDmg;
+                        finalmDmg += enchantment.floatArg;
                     }
                     break;
                 case INFLICT_EFFECT:
-                    enemy.addStatusEffect(new StatusEffect(enchantment.sType));
+                    enemy.addTag(new StatusEffect(enchantment.sType));
+                    break;
+                case VICTIMS_EXPLODE:
+                    enemy.addTag(new DeathExplosion(enchantment.intArg));
                     break;
             }
         }

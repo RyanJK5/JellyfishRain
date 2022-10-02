@@ -1,9 +1,9 @@
-package bullethell.combat;
+package bullethell.combat.tags;
 
 import bullethell.Globals;
 import bullethell.enemies.Enemy;
 
-public class StatusEffect {
+public class StatusEffect implements Tag {
     
     private int age;
     
@@ -31,10 +31,16 @@ public class StatusEffect {
         return age < duration;
     }
 
-    public void update(Enemy target) {
+    @Override
+    public void apply(Enemy target) {
         if (age % hitDelay == 0) {
             target.registerDMG(dmg);
         }
         age++;
+    }
+
+    @Override
+    public TagActivationType getActivationType() {
+        return TagActivationType.EVERY_TICK;
     }
 }

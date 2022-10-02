@@ -12,11 +12,11 @@ import bullethell.GameSolid;
 import bullethell.GameState;
 import bullethell.Globals;
 import bullethell.Player;
-import bullethell.Trigger;
 import bullethell.Player.Equipment;
+import bullethell.Trigger;
 import bullethell.combat.Enchantment;
 import bullethell.combat.EnchantmentType;
-import bullethell.combat.StatusEffectType;
+import bullethell.combat.tags.StatusEffectType;
 import bullethell.items.EquipType;
 import bullethell.items.Item;
 import bullethell.ui.Button;
@@ -97,8 +97,12 @@ public final class EnchantmentForge implements Scene {
             public void update(Graphics g) {
                 super.update(g);
                 g.setFont(BOX_FONT);
-                g.setColor(StatusEffectType.values()[effectIndex].getColor());
-                g.drawString(StatusEffectType.values()[effectIndex].presentTense(), x + 20, y + h / 2 + 22);
+                g.setColor(StatusEffectType.getType(effectIndex).getColor());
+                g.drawString(StatusEffectType.getType(effectIndex).presentTense(), x + 20, y + h / 2 + 22);
+                if (!EnchantmentType.getType(enchantIndex).statusEffectBased) {
+                    g.setColor(new java.awt.Color(0, 0, 0, 0.5f));
+                    g.fillRect(x, y, w, h);
+                }
             }
         };
 
@@ -108,9 +112,12 @@ public final class EnchantmentForge implements Scene {
                 super.update(g);
                 g.setFont(BOX_FONT);
                 String str = "";
-                switch (EnchantmentType.values()[enchantIndex]) {
+                switch (EnchantmentType.getType(enchantIndex)) {
                     case EFFECT_DAMAGE_BOOST:
                         str = "+" + enchantPercent + "% damage to";
+                        break;
+                    case VICTIMS_EXPLODE:
+                        str = "Explode on death";
                         break;
                     case INFLICT_EFFECT:
                         str = "Inflicts";
@@ -155,8 +162,7 @@ public final class EnchantmentForge implements Scene {
             }
         };
         enchantDown.setGlowOnHover(false);
-        enchantDown.setAltCondition(() -> enchantIndex >= EnchantmentType.values().length - 1 ||
-          (enchantPercent >= 100 && enchantIndex != Globals.indexOf(EnchantmentType.values(), EnchantmentType.EFFECT_DAMAGE_BOOST)));
+        enchantDown.setAltCondition(() -> enchantIndex >= EnchantmentType.values().length - 1);
 
         effectUp = new Button(up) {
             @Override
@@ -167,7 +173,7 @@ public final class EnchantmentForge implements Scene {
             }
         };
         effectUp.setGlowOnHover(false);
-        effectUp.setAltCondition(() -> effectIndex <= 0);
+        effectUp.setAltCondition(() -> effectIndex <= 0 || !EnchantmentType.getType(enchantIndex).statusEffectBased);
 
         effectDown = new Button(down) {
             @Override
@@ -178,7 +184,7 @@ public final class EnchantmentForge implements Scene {
             }
         };
         effectDown.setGlowOnHover(false);
-        effectDown.setAltCondition(() -> effectIndex >= StatusEffectType.values().length - 1);
+        effectDown.setAltCondition(() -> effectIndex >= StatusEffectType.values().length - 1 || !EnchantmentType.getType(enchantIndex).statusEffectBased);
     }
 
     private void setupSlots() {
@@ -206,7 +212,7 @@ public final class EnchantmentForge implements Scene {
                     return;
                 }
                 enchantSlot.getItem().addEnchantment(
-                    new Enchantment(EnchantmentType.values()[enchantIndex], StatusEffectType.values()[effectIndex], enchantPercent / 100f)
+                    new Enchantment(EnchantmentType.getType(enchantIndex), StatusEffectType.getType(effectIndex), enchantPercent / 100f, -1)
                 );
             }
         };
@@ -219,7 +225,8 @@ public final class EnchantmentForge implements Scene {
             return false;
         }
         for (Enchantment enchant : item.enchantments) {
-            if (enchant.eType == EnchantmentType.values()[enchantIndex] || enchant.sType == StatusEffectType.values()[effectIndex]) {
+            if (enchant.eType == EnchantmentType.getType(enchantIndex) || 
+              (enchant.sType == StatusEffectType.getType(effectIndex) && EnchantmentType.getType(enchantIndex).statusEffectBased)) {
                 return true;
             }
         }

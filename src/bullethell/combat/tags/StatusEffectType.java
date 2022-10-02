@@ -1,4 +1,4 @@
-package bullethell.combat;
+package bullethell.combat.tags;
 
 import bullethell.Globals;
 import java.awt.Color;
@@ -21,7 +21,7 @@ public enum StatusEffectType {
         return Globals.indexOf(values(), type);
     }
 
-    public static StatusEffectType getEffect(int id) {
+    public static StatusEffectType getType(int id) {
         return values()[id];
     }
 
