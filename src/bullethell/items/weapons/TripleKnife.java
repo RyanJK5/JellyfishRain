@@ -5,12 +5,12 @@ import java.awt.Rectangle;
 
 import bullethell.Globals;
 import bullethell.Spritesheet;
+import bullethell.combat.EnchantmentPool;
 import bullethell.combat.MeleeHitbox;
-import bullethell.items.EquipType;
-import bullethell.items.Item;
+import bullethell.combat.tags.StatusEffectType;
 import bullethell.items.ItemID;
 
-public class TripleKnife extends Item {
+public class TripleKnife extends Weapon {
     
     private static final int RESET_DELAY = 500 / Globals.TIMER_DELAY;
     
@@ -24,9 +24,14 @@ public class TripleKnife extends Item {
     private int timeSinceLastAttack;
 
     @Override
+    protected void setEnchantmentParams() {
+        enchantPool = EnchantmentPool.MELEE_WEAPON;
+        allowedEffects = new StatusEffectType[] { StatusEffectType.POISON };
+    }
+
+    @Override
     protected void setValues() {
         id = ItemID.TRIPLE_KNIFE;
-        equipType = EquipType.WEAPON;
         name = "Triple Knife";
         description = "Three rapid attacks, followed by a cooldown";
         dmg = 20;

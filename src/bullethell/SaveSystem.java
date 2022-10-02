@@ -16,6 +16,7 @@ import bullethell.enemies.EnemyID;
 import bullethell.items.Item;
 import bullethell.items.ItemID;
 import bullethell.items.abilities.HealAbility;
+import bullethell.items.weapons.Weapon;
 import bullethell.scenes.World;
 import bullethell.ui.Container;
 
@@ -329,9 +330,9 @@ public final class SaveSystem {
         if (item.canStack) {
             result += "(" + item.count + ")";
         }
-        if (item.enchantments.size() > 0) {
+        if (item instanceof Weapon wep && wep.enchantments.size() > 0) {
             result += "[";
-            for (Enchantment enchantment : item.enchantments) {
+            for (Enchantment enchantment : wep.enchantments) {
                 result += "{";
                 result += EnchantmentType.getID(enchantment.eType) + "|";
                 result += StatusEffectType.getID(enchantment.sType) + "|";
@@ -363,6 +364,7 @@ public final class SaveSystem {
         }
 
         if (brackets > 0) {
+            Weapon wep = (Weapon) item;
             int lowIndex = brackets + 2;
             while (true) {
                 int highIndex = str.indexOf('}', lowIndex);
@@ -374,10 +376,10 @@ public final class SaveSystem {
                 Object[] data = readNums(subStr, '|');
                 switch ((int) data[0]) {
                     case 0:
-                        item.enchantments.add(new Enchantment((float) data[2], StatusEffectType.getType((int) data[1])));
+                        wep.enchantments.add(new Enchantment((float) data[2], StatusEffectType.getType((int) data[1])));
                         break;
                     case 1:
-                        item.enchantments.add(new Enchantment(StatusEffectType.getType((int) data[1])));
+                        wep.enchantments.add(new Enchantment(StatusEffectType.getType((int) data[1])));
                         break;
                 }
                 lowIndex = highIndex + 2;

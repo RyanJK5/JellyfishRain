@@ -5,21 +5,26 @@ import java.awt.image.BufferedImage;
 import bullethell.Globals;
 import bullethell.Player;
 import bullethell.Spritesheet;
+import bullethell.combat.EnchantmentPool;
 import bullethell.combat.Projectile;
-import bullethell.items.EquipType;
-import bullethell.items.Item;
+import bullethell.combat.tags.StatusEffectType;
 import bullethell.items.ItemID;
 import bullethell.movement.AngledPath;
 
-public final class ExampleScepter extends Item {
+public final class ExampleScepter extends Weapon {
     
 	private double maxSpread;
     private int shotNum;
 
     @Override
+    protected void setEnchantmentParams() {
+        enchantPool = EnchantmentPool.MAGIC_RANGED_WEAPON;
+        allowedEffects = new StatusEffectType[] { StatusEffectType.POISON };
+    }
+
+    @Override
     protected void setValues() {
         id = ItemID.EXAMPLE_SCEPTER;
-        equipType = EquipType.WEAPON;
 
         name = "Example Scepter";
 

@@ -16,9 +16,9 @@ import bullethell.Player.Equipment;
 import bullethell.Trigger;
 import bullethell.combat.Enchantment;
 import bullethell.combat.EnchantmentType;
-import bullethell.combat.tags.StatusEffectType;
 import bullethell.items.EquipType;
 import bullethell.items.Item;
+import bullethell.items.weapons.Weapon;
 import bullethell.ui.Button;
 import bullethell.ui.Container;
 import bullethell.ui.Inventory;
@@ -44,7 +44,7 @@ public final class EnchantmentForge implements Scene {
     private Button enchantUp, enchantDown;
     private Button effectUp, effectDown;
     
-    private Container<Item> enchantSlot;
+    private Container<Weapon> enchantSlot;
     private Inventory<Item> availableItems;
     private Item[] equipArr;
     private Button enchantButton;
@@ -96,10 +96,13 @@ public final class EnchantmentForge implements Scene {
             @Override
             public void update(Graphics g) {
                 super.update(g);
+                if (enchantSlot.getItem() == null) {
+                    return;
+                }
                 g.setFont(BOX_FONT);
-                g.setColor(StatusEffectType.getType(effectIndex).getColor());
-                g.drawString(StatusEffectType.getType(effectIndex).presentTense(), x + 20, y + h / 2 + 22);
-                if (!EnchantmentType.getType(enchantIndex).statusEffectBased) {
+                g.setColor(enchantSlot.getItem().allowedEffects[effectIndex].getColor());
+                g.drawString(enchantSlot.getItem().allowedEffects[effectIndex].presentTense(), x + 20, y + h / 2 + 22);
+                if (!enchantSlot.getItem().enchantPool.getType(enchantIndex).statusEffectBased) {
                     g.setColor(new java.awt.Color(0, 0, 0, 0.5f));
                     g.fillRect(x, y, w, h);
                 }
@@ -110,9 +113,12 @@ public final class EnchantmentForge implements Scene {
             @Override
             public void update(Graphics g) {
                 super.update(g);
+                if (enchantSlot.getItem() == null) {
+                    return;
+                }
                 g.setFont(BOX_FONT);
                 String str = "";
-                switch (EnchantmentType.getType(enchantIndex)) {
+                switch (enchantSlot.getItem().enchantPool.getType(enchantIndex)) {
                     case EFFECT_DAMAGE_BOOST:
                         str = "+" + enchantPercent + "% damage to";
                         break;
@@ -136,8 +142,9 @@ public final class EnchantmentForge implements Scene {
         enchantUp = new Button(up) {
             @Override
             protected void activate() {
-                if (!getAltCondition().get()) {
-                    if (enchantPercent > 20 && enchantIndex == Globals.indexOf(EnchantmentType.values(), EnchantmentType.EFFECT_DAMAGE_BOOST)) {
+                if (enchantSlot.getItem() != null && !getAltCondition().get()) {
+                    if (enchantPercent > 20 && enchantIndex == Globals.indexOf(enchantSlot.getItem().enchantPool.getTypes(), 
+                      EnchantmentType.EFFECT_DAMAGE_BOOST)) {
                         enchantPercent -= 20;
                         return;
                     }
@@ -146,14 +153,15 @@ public final class EnchantmentForge implements Scene {
             }
         };
         enchantUp.setGlowOnHover(false);
-        enchantUp.setAltCondition(() -> enchantIndex <= 0 &&
-          !(enchantPercent > 20 && enchantIndex == Globals.indexOf(EnchantmentType.values(), EnchantmentType.EFFECT_DAMAGE_BOOST)));
+        enchantUp.setAltCondition(() -> enchantSlot.getItem() == null || (enchantIndex <= 0 &&
+          !(enchantPercent > 20 && enchantIndex == Globals.indexOf(enchantSlot.getItem().enchantPool.getTypes(), EnchantmentType.EFFECT_DAMAGE_BOOST))));
 
         enchantDown = new Button(down) {
             @Override
             protected void activate() {
                 if (!getAltCondition().get()) {
-                    if (enchantPercent < 100 && enchantIndex == Globals.indexOf(EnchantmentType.values(), EnchantmentType.EFFECT_DAMAGE_BOOST)) {
+                    if (enchantPercent < 100 && enchantIndex == Globals.indexOf(enchantSlot.getItem().enchantPool.getTypes(), 
+                      EnchantmentType.EFFECT_DAMAGE_BOOST)) {
                         enchantPercent += 20;
                         return;
                     }
@@ -162,7 +170,7 @@ public final class EnchantmentForge implements Scene {
             }
         };
         enchantDown.setGlowOnHover(false);
-        enchantDown.setAltCondition(() -> enchantIndex >= EnchantmentType.values().length - 1);
+        enchantDown.setAltCondition(() -> enchantSlot.getItem() == null || enchantIndex >= enchantSlot.getItem().enchantPool.getTypes().length - 1);
 
         effectUp = new Button(up) {
             @Override
@@ -173,7 +181,8 @@ public final class EnchantmentForge implements Scene {
             }
         };
         effectUp.setGlowOnHover(false);
-        effectUp.setAltCondition(() -> effectIndex <= 0 || !EnchantmentType.getType(enchantIndex).statusEffectBased);
+        effectUp.setAltCondition(() -> enchantSlot.getItem() == null || 
+          effectIndex <= 0 || !enchantSlot.getItem().enchantPool.getType(enchantIndex).statusEffectBased);
 
         effectDown = new Button(down) {
             @Override
@@ -184,19 +193,22 @@ public final class EnchantmentForge implements Scene {
             }
         };
         effectDown.setGlowOnHover(false);
-        effectDown.setAltCondition(() -> effectIndex >= StatusEffectType.values().length - 1 || !EnchantmentType.getType(enchantIndex).statusEffectBased);
+        effectDown.setAltCondition(() -> enchantSlot.getItem() == null || effectIndex >= enchantSlot.getItem().allowedEffects.length - 1 || 
+          !enchantSlot.getItem().enchantPool.getType(enchantIndex).statusEffectBased);
     }
 
     private void setupSlots() {
-        enchantSlot = new Container<>(Globals.getImage("InventorySlot"), Item.class) {
+        enchantSlot = new Container<>(Globals.getImage("InventorySlot"), Weapon.class) {
             @Override
-            public boolean moveItem(boolean taking, Inventory<? super Item> inventory) {
+            public boolean moveItem(boolean taking, Inventory<? super Weapon> inventory) {
                 if (Player.get().getCursorSlot() != null) {
                     Item cSlot = Player.get().getCursorSlot();
-                    if (cSlot.equipType != EquipType.WEAPON || cSlot.enchantments.size() >= MAX_ENCHANT_NUM) {
+                    if (cSlot.equipType != EquipType.WEAPON || (cSlot instanceof Weapon wep && wep.enchantments.size() >= MAX_ENCHANT_NUM)) {
                         return true;
                     }
                 }
+                enchantIndex = 0;
+                effectIndex = 0;
                 return super.moveItem(taking, inventory);
             }
         };
@@ -212,21 +224,27 @@ public final class EnchantmentForge implements Scene {
                     return;
                 }
                 enchantSlot.getItem().addEnchantment(
-                    new Enchantment(EnchantmentType.getType(enchantIndex), StatusEffectType.getType(effectIndex), enchantPercent / 100f, -1)
+                    new Enchantment(enchantSlot.getItem().enchantPool.getType(enchantIndex), enchantSlot.getItem().allowedEffects[effectIndex], 
+                      enchantPercent / 100f, -1)
                 );
             }
         };
-        enchantButton.setAltCondition(() -> conflictingEnchantments(enchantSlot.getItem()) || enchantSlot.getItem() == null || 
+        enchantButton.setAltCondition(() -> enchantSlot.getItem() == null || conflictingEnchantments(enchantSlot.getItem()) || 
           enchantSlot.getItem().enchantments.size() >= 3);
     }
 
-    private boolean conflictingEnchantments(Item item) {
+    private boolean conflictingEnchantments(Weapon item) {
         if (item == null) {
             return false;
         }
         for (Enchantment enchant : item.enchantments) {
-            if (enchant.eType == EnchantmentType.getType(enchantIndex) || 
-              (enchant.sType == StatusEffectType.getType(effectIndex) && EnchantmentType.getType(enchantIndex).statusEffectBased)) {
+            if (enchant.eType == enchantSlot.getItem().enchantPool.getType(enchantIndex) || 
+              (enchant.sType == enchantSlot.getItem().allowedEffects[effectIndex] && 
+              enchantSlot.getItem().enchantPool.getType(enchantIndex).statusEffectBased)) {
+                System.out.println(enchant.eType == enchantSlot.getItem().enchantPool.getType(enchantIndex));
+                System.out.println(enchant.sType == enchantSlot.getItem().allowedEffects[effectIndex]);
+                System.out.println(enchantSlot.getItem().enchantPool.getType(enchantIndex).statusEffectBased);
+                System.out.println();
                 return true;
             }
         }
@@ -329,8 +347,15 @@ public final class EnchantmentForge implements Scene {
                 }
             }
             for (int i = 0; i < Player.get().getLoadouts().size(); i++) {
-                Player.get().getLoadouts().get(i).setWepSlot(equipArr[i]);
+                if (availableItems.contains(equipArr[i])) {
+                    Player.get().getLoadouts().get(i).setWepSlot(equipArr[i]);
+                    if (enchantSlot.getItem() == equipArr[i]) {
+                        enchantSlot.setItem(null);
+                    }
+                }
             }
+            Player.get().getInventory().addItem(enchantSlot.getItem());
+            enchantSlot.setItem(null);
             if (Globals.alwaysShowUI) {
                 Player.get().showUI();
             }

@@ -29,6 +29,7 @@ import bullethell.items.WeaponModifiers;
 import bullethell.items.abilities.DashAbility;
 import bullethell.items.abilities.HealAbility;
 import bullethell.items.abilities.TeleportAbility;
+import bullethell.items.weapons.Weapon;
 import bullethell.movement.Direction;
 import bullethell.scenes.Bossfight;
 import bullethell.ui.Container;
@@ -186,6 +187,10 @@ public final class Player extends Entity {
 
 			@Override
 			public void addItem(Item item) {
+				if (item == null) {
+					return;
+				}
+				
 				if (player.getCursorSlot() == null) {
 					int count = 0;
 					rotDeg = -rotDeg;
@@ -615,7 +620,7 @@ public final class Player extends Entity {
 	}
 
 	public void fire() {
-		Item wep = getEquipmentInv().getWepSlot().getItem(); 
+		Weapon wep = getEquipmentInv().getWepSlot().getItem(); 
 		if (wep == null || currentFire < wep.fireTime) {
 			return;
 		} 
@@ -835,7 +840,7 @@ public final class Player extends Entity {
 		private static Container<Item>[] accSlots = new EquipmentContainer[accSlotNum];
 		@SuppressWarnings("unchecked")
 		private static Container<Item>[] abilitySlots = new EquipmentContainer[abilitySlotNum];
-		private Container<Item> wepSlot;
+		private Container<Weapon> wepSlot;
 		private static Container<Item> coreSlot;
 
 		private static BufferedImage abilityBackground;
@@ -857,7 +862,7 @@ public final class Player extends Entity {
 			wepSlot = new EquipmentContainer<>(
 				ui.getSubimage(wepBounds.x, wepBounds.y, wepBounds.width, wepBounds.height),
 				emptyUI.getSubimage(wepBounds.x, wepBounds.y, wepBounds.width, wepBounds.height),
-				Item.class);
+				Weapon.class);
 			
 			if (coreSlot != null) {
 				return;
@@ -994,7 +999,7 @@ public final class Player extends Entity {
 			coreSlot.setLocation(coreX, coreY);
 		}
 
-		public Container<Item> getWepSlot() { return wepSlot; }
+		public Container<Weapon> getWepSlot() { return wepSlot; }
 		public static Container<Item>[] getAccSlots() { return accSlots; }
 		public static Container<Item>[] getAbilitySlots() { return abilitySlots; }
 		public static Container<Item> getCoreSlot() { return coreSlot; }
@@ -1008,10 +1013,10 @@ public final class Player extends Entity {
 		}
 
 		public boolean setWepSlot(Item wepSlotItem) {
-			if (wepSlotItem != null && wepSlotItem.equipType != EquipType.WEAPON) {
+			if (wepSlotItem != null && !(wepSlotItem instanceof Weapon)) {
 				return false;
 			}
-			wepSlot.setItem(wepSlotItem);
+			wepSlot.setItem((Weapon) wepSlotItem);
 			updateModifiers();
 			return true;
 		}

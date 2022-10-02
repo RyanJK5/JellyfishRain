@@ -6,7 +6,7 @@ import bullethell.GameSolid;
 import bullethell.Player;
 import bullethell.Spritesheet;
 import bullethell.enemies.Enemy;
-import bullethell.items.Item;
+import bullethell.items.weapons.Weapon;
 import bullethell.movement.Path;
 
 public class MeleeHitbox extends Entity implements WeaponEntity {
@@ -15,13 +15,13 @@ public class MeleeHitbox extends Entity implements WeaponEntity {
     private final int maxHits;
     private final int hitDelay;
 
-    private final Item item;
+    private final Weapon item;
 
     private int numHits;
     private int age;
     private int lastHit;
 
-public MeleeHitbox(Item sender, Spritesheet spritesheet, java.awt.Rectangle bounds, int lifeSpan, int maxHits) {
+public MeleeHitbox(Weapon sender, Spritesheet spritesheet, java.awt.Rectangle bounds, int lifeSpan, int maxHits) {
         super(spritesheet, Path.DEFAULT_PATH, sender.dmg, 0, 0, true);
         setHitbox(bounds);
         setLayer(10);

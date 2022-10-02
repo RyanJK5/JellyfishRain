@@ -5,13 +5,13 @@ import java.awt.Rectangle;
 import bullethell.Globals;
 import bullethell.Player;
 import bullethell.Spritesheet;
+import bullethell.combat.EnchantmentPool;
 import bullethell.combat.MeleeHitbox;
-import bullethell.items.EquipType;
-import bullethell.items.Item;
+import bullethell.combat.tags.StatusEffectType;
 import bullethell.items.ItemID;
 import bullethell.items.Recipe;
 
-public final class ExampleSword extends Item {
+public final class ExampleSword extends Weapon {
 
     private ExampleSwordHitbox atkBox;
     private float coverage;
@@ -21,13 +21,18 @@ public final class ExampleSword extends Item {
     @Override
     protected void setValues() {
         id = ItemID.EXAMPLE_SWORD;
-        equipType = EquipType.WEAPON;
 
         name = "Example Sword";
         
         dmg = 40;
         fireTime = 300 / Globals.TIMER_DELAY;
         coverage = 90;
+    }
+
+    @Override
+    protected void setEnchantmentParams() {
+        enchantPool = EnchantmentPool.MELEE_WEAPON;
+        allowedEffects = new StatusEffectType[] { StatusEffectType.POISON };
     }
 
     @Override

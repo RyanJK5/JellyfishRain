@@ -137,12 +137,13 @@ public final class GameDisplay extends JPanel {
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
+				mouseDown = false;
+				
 				if (Globals.getFreezeHotkeys()) {
 					return;
 				}
 				updateMap(e, false);
 				
-				mouseDown = false;
 				mouseMoveListener.moveInv = null;
 				if (e.getButton() == MouseEvent.BUTTON1 || !frame.isFocused()) player.setFiring(false);
 			}

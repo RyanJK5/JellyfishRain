@@ -9,34 +9,33 @@ import bullethell.combat.Entity;
 import bullethell.combat.Projectile;
 import bullethell.combat.WeaponEntity;
 import bullethell.enemies.Enemy;
-import bullethell.items.Item;
 import bullethell.movement.Path;
 
 public class WeaponProjectile extends Projectile implements WeaponEntity {
 
-    private final Item item;
+    private final Weapon item;
 
-    public WeaponProjectile(Item sender, Spritesheet spritesheet, Path path, boolean immortal, int lifeSpan, float speed) {
+    public WeaponProjectile(Weapon sender, Spritesheet spritesheet, Path path, boolean immortal, int lifeSpan, float speed) {
         super(spritesheet, path, immortal, lifeSpan, speed, sender.dmg);
         item = sender;
     }
 
-    public WeaponProjectile(Item sender, Spritesheet spritesheet, Path path, int speed) {
+    public WeaponProjectile(Weapon sender, Spritesheet spritesheet, Path path, int speed) {
         super(spritesheet, path, speed, sender.dmg);
         item = sender;
     }
 
-    public WeaponProjectile(Item sender, Spritesheet spritesheet, Path path) {
+    public WeaponProjectile(Weapon sender, Spritesheet spritesheet, Path path) {
         super(spritesheet, path);
         item = sender;
     }
 
-    public WeaponProjectile(Item sender, Path path) {
+    public WeaponProjectile(Weapon sender, Path path) {
         super(path);
         item = sender;
     }
 
-    public WeaponProjectile(Item sender) {
+    public WeaponProjectile(Weapon sender) {
         super();
         item = sender;
     }

@@ -2,17 +2,12 @@ package bullethell.items;
 
 import java.awt.Graphics;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Predicate;
 
 import bullethell.GameObject;
 import bullethell.Globals;
 import bullethell.Player;
 import bullethell.combat.Enchantment;
-import bullethell.combat.tags.DeathExplosion;
-import bullethell.combat.tags.StatusEffect;
-import bullethell.enemies.Enemy;
+import bullethell.items.weapons.Weapon;
 
 public abstract class Item extends GameObject {
 
@@ -23,17 +18,9 @@ public abstract class Item extends GameObject {
     public String description;
 
     public Recipe[] recipes;
-    public List<Enchantment> enchantments;
 
     public boolean canStack;
-
-    public Predicate<Enemy> critCondition;
-    public float critMultiplier;
-    public int dmg;
-    public int manaCost;
-    public int fireTime;
-    public int range;
-
+    
     public WeaponModifiers weaponModifiers;
     public PlayerModifiers playerModifiers;
 
@@ -49,9 +36,6 @@ public abstract class Item extends GameObject {
         name = "Unnamed";
         description = "";
         recipes = new Recipe[0];
-        enchantments = new ArrayList<>();
-        critCondition = e -> false;
-        critMultiplier = 1.5f;
         weaponModifiers = new WeaponModifiers();
         playerModifiers = new PlayerModifiers();
         count = 0;
@@ -67,10 +51,6 @@ public abstract class Item extends GameObject {
 
     protected abstract void setValues();
     protected void addRecipes() { }
-
-    public void addEnchantment(Enchantment enchant) {
-        enchantments.add(enchant);
-    }
 
     public void onUse() { }
 
@@ -143,30 +123,30 @@ public abstract class Item extends GameObject {
                     g.drawString(name, x, y);
                     break;
                 case 1:
-                    if (equipType == EquipType.WEAPON) {
-                        g.drawString("    " + Globals.damageFormula(dmg) + " damage", x, y + index * spacing);
+                    if (this instanceof Weapon wep) {
+                        g.drawString("    " + Globals.damageFormula(wep.dmg) + " damage", x, y + index * spacing);
                         break;
                     } else {
                         continue;
                     }
                 case 2:
-                    if (equipType == EquipType.WEAPON && manaCost != 0) {
-                        g.drawString("    " + (int) ((float) manaCost / Player.get().getMaxMana() * 100) + "% mana", 
+                    if (this instanceof Weapon wep2 && wep2.manaCost != 0) {
+                        g.drawString("    " + (int) ((float) wep2.manaCost / Player.get().getMaxMana() * 100) + "% mana", 
                           x, y + index * spacing);
                         break;
                     } else {
                         continue;
                     }
                 case 3:
-                    if (equipType == EquipType.WEAPON) {    
-                        g.drawString("    " + fireTime + " fire time", x, y + index * spacing);
+                    if (this instanceof Weapon wep3) {    
+                        g.drawString("    " + wep3.fireTime + " fire time", x, y + index * spacing);
                         break;
                     } else {
                         continue;
                     }
                 case 4:
-                    if (equipType == EquipType.WEAPON && range > 0) {    
-                        g.drawString("    " + range + " range", x, y + index * spacing);
+                    if (this instanceof Weapon wep4 && wep4.range > 0) {    
+                        g.drawString("    " + wep4.range + " range", x, y + index * spacing);
                         break;
                     } else {
                         continue;
@@ -180,36 +160,15 @@ public abstract class Item extends GameObject {
                     }
                 case 6:
                     g.setColor(new java.awt.Color(0, 153, 151));
-                    for (Enchantment enchantment : enchantments) {
-                        g.drawString("    " + enchantment, x, y + index * spacing);
-                        index++;
+                    if (this instanceof Weapon wep5) {
+                        for (Enchantment enchantment : wep5.enchantments) {
+                            g.drawString("    " + enchantment, x, y + index * spacing);
+                            index++;
+                        }
                     }
             }
             index++;
         }
-    }
-
-    public int getModifiedDMG(Enemy enemy) {
-        float finalmDmg = 1;
-        if (critCondition.test(enemy)) {
-            finalmDmg += critMultiplier;
-        }
-        for (Enchantment enchantment : enchantments) {
-            switch (enchantment.eType) {
-                case EFFECT_DAMAGE_BOOST:
-                    if (enchantment.test(enemy)) {
-                        finalmDmg += enchantment.floatArg;
-                    }
-                    break;
-                case INFLICT_EFFECT:
-                    enemy.addTag(new StatusEffect(enchantment.sType));
-                    break;
-                case VICTIMS_EXPLODE:
-                    enemy.addTag(new DeathExplosion(enchantment.intArg));
-                    break;
-            }
-        }
-        return (int) (dmg * finalmDmg);
     }
 
     @Override

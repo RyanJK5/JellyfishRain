@@ -5,13 +5,13 @@ import java.awt.image.BufferedImage;
 import bullethell.Globals;
 import bullethell.Player;
 import bullethell.Spritesheet;
+import bullethell.combat.EnchantmentPool;
 import bullethell.combat.Projectile;
-import bullethell.items.EquipType;
-import bullethell.items.Item;
+import bullethell.combat.tags.StatusEffectType;
 import bullethell.items.ItemID;
 import bullethell.movement.AngledPath;
 
-public final class ExampleStaff extends Item {
+public final class ExampleStaff extends Weapon {
     
     public static final int DEFAULT_DMG = 10;
     public static final int DEFAULT_FIRE_TIME = 100 / Globals.TIMER_DELAY;
@@ -21,13 +21,18 @@ public final class ExampleStaff extends Item {
     @Override
     public void setValues() {
         id = ItemID.EXAMPLE_STAFF;
-        equipType = EquipType.WEAPON;
 
         name = "Example Staff";
 
         dmg = 10;
         fireTime = 100 / Globals.TIMER_DELAY;
         manaCost = 0;
+    }
+
+    @Override
+    protected void setEnchantmentParams() {
+        enchantPool = EnchantmentPool.MAGIC_RANGED_WEAPON;
+        allowedEffects = new StatusEffectType[] { StatusEffectType.POISON };
     }
 
     @Override
