@@ -23,6 +23,22 @@ public class Enchantment {
         mDmg = 0;
     }
 
+    /**
+     * A constructor with all arguments. Some parameters may be ignored based on {@code eType}.
+     */
+    public Enchantment(EnchantmentType eType, StatusEffectType sType, float mDmg) {
+        this.eType = eType;
+        this.sType = sType;
+        switch (eType) {
+            case EFFECT_DAMAGE_BOOST:
+                this.mDmg = mDmg;
+                break;
+            default:
+                this.mDmg = 0;
+                break;
+        }
+    }
+
     public boolean test(Enemy enemy) {
         return enemy.activeEffects.stream().anyMatch(effect -> effect.type == sType);
     }
@@ -33,7 +49,7 @@ public class Enchantment {
             case EFFECT_DAMAGE_BOOST:
                 return "+" + Math.round(mDmg * 100) + "% damage to " + sType.pastTense() + " enemies";
             case INFLICT_EFFECT:
-                return sType.futureTense() + " on the enemy";
+                return sType.futureTense() + " on enemies";
             default:
                 return "";
         }

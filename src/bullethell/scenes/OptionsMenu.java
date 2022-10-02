@@ -18,7 +18,6 @@ import bullethell.GameState;
 import bullethell.Globals;
 import bullethell.Player;
 import bullethell.SaveSystem;
-import bullethell.movement.Direction;
 import bullethell.ui.Button;
 import bullethell.ui.SliderButton;
 import bullethell.ui.ToggleButton;
@@ -68,14 +67,10 @@ public final class OptionsMenu extends KeyAdapter implements Scene {
     @Override
     public void start(int x, int y) {
         startHub();
-        for (Direction dir : Globals.main.directionMap.keySet()) {
-            Globals.main.directionMap.put(dir, false);
-        }
         if (Player.get().getInventory().isAlive()) {
             Globals.eAction.toggle();
         }
-        Globals.freezeHotkeys = true;
-
+        Globals.setFreezeHotkeys(true);
     }
     
     private void controlsSetup() {
@@ -278,7 +273,7 @@ public final class OptionsMenu extends KeyAdapter implements Scene {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Globals.freezeHotkeys = false;
+        Globals.setFreezeHotkeys(false);
         endHub();
         for (OptionsButton button : keyBindButtons) {
             button.kill();

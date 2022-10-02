@@ -1,9 +1,11 @@
 package bullethell.combat;
 
 import bullethell.Globals;
+import java.awt.Color;
 
 public enum StatusEffectType {
-    POISON(3, 500, 250);
+    POISON(3, 500, 250),
+    TEST(0,0,0);
 
     public final int defaultDPH;
     public final int defaultMiliDuration;
@@ -32,12 +34,30 @@ public enum StatusEffectType {
         }
     }
 
+    public String presentTense() {
+        switch (this) {
+            case POISON:
+                return "Poison";
+            default:
+                return "?";
+        }
+    }
+
     public String pastTense() {
         switch (this) {
             case POISON:
                 return "poisoned";
             default:
                 return "?ed";
+        }
+    }
+
+    public Color getColor() {
+        switch (this) {
+            case POISON:
+                return new Color(4, 112, 0);
+            default:   
+                return Globals.DEFAULT_COLOR;
         }
     }
 }

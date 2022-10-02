@@ -14,6 +14,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -75,12 +76,9 @@ public class Inventory<T extends Item> extends UI implements Iterable<Container<
     /**
      * @param itemClass The generic type for this inventory as a class variable.
      */
-    public Inventory(Dimension dimensions, BufferedImage slotSprite, List<T> items, Class<T> itemClass) {
+    public Inventory(Dimension dimensions, BufferedImage slotSprite, Collection<T> items, Class<T> itemClass) {
         this(dimensions, slotSprite, itemClass);
-
-        for (int i = 0; i < items.size(); i++) {
-            addItem(items.get(i));
-        }
+        addAll(items);
     }
 
     private void makeNavigation() {
@@ -182,6 +180,16 @@ public class Inventory<T extends Item> extends UI implements Iterable<Container<
     public Iterator<Container<T>> iterator() { return slots.iterator(); }
 
     @Override
+    public int getWidth() {
+        return w * width;
+    }
+
+    @Override
+    public int getHeight() {
+        return h * height;
+    }
+
+    @Override
     public void kill() {
         super.kill();
         for (Container<T> cont : slots) {
@@ -192,6 +200,7 @@ public class Inventory<T extends Item> extends UI implements Iterable<Container<
         Globals.main.remove(searchBar);
     }
 
+    @Override
     public void revive() {
         super.revive();
         for (Container<T> cont : slots) {
@@ -315,16 +324,28 @@ public class Inventory<T extends Item> extends UI implements Iterable<Container<
         }
     }
 
-    public void setItems(List<T> items) {
+    public void setItems(Collection<T> items) {
         slots.clear();
         expand();
-        for (int i = 0; i < items.size(); i++) {
-            addItem(items.get(i));
-        }
+        addAll(items);
         sort();
     }
 
+    public List<T> getItems() {
+        List<T> result = new ArrayList<>();
+        for (Container<T> cont : this) {
+            if (cont.getItem() != null) {
+                result.add(cont.getItem());
+            }
+        }
+        return result;
+    }
+
     public void addItem(T item) {
+        if (item == null) {
+            return;
+        }
+     
         int slotNum = -1;
         for (int i = 0; i < slots.size(); i++) {
             if (slots.get(i).getItem() == null && slotNum == -1) {
@@ -341,12 +362,23 @@ public class Inventory<T extends Item> extends UI implements Iterable<Container<
             expand();
         }
         sort(slots);
-        return;
+    }
+
+    public void addAll(Collection<T> items) {
+        for (T item : items) {
+            addItem(item);
+        }
     }
 
     public void replaceItem(T item, T replacement) {
         slots.get(getSlot(item)).setItem(replacement);
         sort(slots);
+    }
+
+    public void removeAll(Collection<T> items) {
+        for (T item : items) {
+            removeItem(item);
+        }
     }
 
     public void removeItem(T item) {

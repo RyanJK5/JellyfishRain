@@ -22,6 +22,7 @@ import javax.swing.Timer;
 
 import bullethell.GameDisplay.ToggleAction;
 import bullethell.items.ItemID;
+import bullethell.movement.Direction;
 
 public final class Globals {
 
@@ -47,7 +48,7 @@ public final class Globals {
 
     public static boolean mouseDown = false;
 	public static boolean freezeCursor = false;
-	public static boolean freezeHotkeys = false;
+	private static boolean freezeHotkeys = false;
 
     public static boolean lockScreen = false;
     public static boolean alwaysShowUI = false;
@@ -77,36 +78,49 @@ public final class Globals {
         WEAPON_3_ACTION = 10
     ;
 
+    public static void setFreezeHotkeys(boolean freezeHotkeys) {
+        Globals.freezeHotkeys = freezeHotkeys;
+        if (!freezeHotkeys) {
+            return;
+        }
+
+        for (Direction dir : Globals.main.directionMap.keySet()) {
+            Globals.main.directionMap.put(dir, false);
+        }
+    }
+
+    public static boolean getFreezeHotkeys() { return freezeHotkeys; }
+
     public static void setGameState(GameState state) {
         switch (state) {
             case DEFAULT:
                 freezeCursor = false;
-                freezeHotkeys = false;
+                setFreezeHotkeys(false);
                 GAME_STATE = GameState.DEFAULT;
                 Player.get().setTimeSinceUI(1);
                 break;
             case MENU:
                 freezeCursor = false;
-                freezeHotkeys = true;
+                setFreezeHotkeys(true);
                 GAME_STATE = GameState.MENU;
                 break;
             case ENCOUNTER:
                 freezeCursor = false;
-                freezeHotkeys = false;
+                setFreezeHotkeys(false);
                 Player.get().showUI();
                 Player.get().resetHeals();
                 GAME_STATE = GameState.ENCOUNTER;
                 break;
             case BOSS:
                 freezeCursor = false;
-                freezeHotkeys = false;
+                setFreezeHotkeys(false);
                 Player.get().showUI();
                 Player.get().resetHeals();
                 GAME_STATE = GameState.BOSS;
                 break;
             case CUTSCENE:
                 freezeCursor = true;
-                freezeHotkeys = true;
+                setFreezeHotkeys(true);
                 GAME_STATE = GameState.CUTSCENE;
                 break;
         }
@@ -213,6 +227,10 @@ public final class Globals {
 
     public static <T> boolean contains(T[] arr, T obj) {
         return indexOf(arr, obj) >= 0;
+    }
+    
+    public static <T> boolean contains(T[] arr, Predicate<T> predicate) {
+        return indexOf(arr, predicate) >= 0;
     }
 
     public static <T> int indexOf(T[] arr, T obj) {

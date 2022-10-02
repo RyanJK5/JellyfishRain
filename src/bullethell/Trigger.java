@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
+import bullethell.scenes.OptionsMenu;
 import bullethell.ui.Container;
 import bullethell.ui.UI;
 
@@ -53,7 +54,8 @@ public abstract class Trigger extends GameObject implements ActionListener, Mous
     private boolean pauseFire = false;
     private int range = DEFAULT_RANGE;
     private int listenerType;
-
+    
+    public boolean addedToObject = false;
     private GameObject target;
     private Predicate<GameObject> condition;
 
@@ -227,6 +229,9 @@ public abstract class Trigger extends GameObject implements ActionListener, Mous
     
     @Override 
     public void keyPressed(KeyEvent e) {
+        if ((Globals.getGameState() == GameState.MENU || OptionsMenu.get().isActive()) && addedToObject) {
+            return;
+        }
         if (keyCodes.size() == 0 || keyCodes.contains(e.getKeyCode())) {
             tryActivate();
         }
@@ -234,6 +239,9 @@ public abstract class Trigger extends GameObject implements ActionListener, Mous
     
     @Override
     public void mousePressed(MouseEvent e) {
+        if ((Globals.getGameState() == GameState.MENU || OptionsMenu.get().isActive()) && addedToObject) {
+            return;
+        }
         if ((!rightClick && !leftClick) ||
           (rightClick && e.getButton() == MouseEvent.BUTTON3) || 
           (leftClick && e.getButton() == MouseEvent.BUTTON1)) {

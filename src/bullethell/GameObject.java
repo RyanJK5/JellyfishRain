@@ -84,6 +84,7 @@ public class GameObject implements Cloneable {
 	
 	public void addTrigger(Trigger trigger) {
 		trigger.setSprite(new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB));
+		trigger.addedToObject = true;
 		trigger.setLocation(x, y);
 		trigger.addCondition((obj) -> isAlive());
 		triggers.add(trigger);

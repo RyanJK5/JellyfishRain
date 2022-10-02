@@ -173,9 +173,9 @@ public final class World implements Scene, ActionListener {
             timeSinceSave = 0;
         }
 
-        if (EnemyGroup.anyGroupAlive()) {
+        if (EnemyGroup.anyGroupAlive() && Globals.getGameState() == GameState.DEFAULT) {
             Globals.setGameState(GameState.ENCOUNTER);
-        } else {
+        } else if (Globals.getGameState() == GameState.ENCOUNTER) {
             Globals.setGameState(GameState.DEFAULT);
         }
         

@@ -102,8 +102,7 @@ public class GameSolid extends GameObject {
 		super.setLocation(x, y);
 	}
 	
-	public static void quadtreeCheck() {
-		
+	public static void updateSolids() {
 		for (int i = 0; i < solids.size(); i++) {
 			if (solids.get(i).isAlive() && solids.get(i) instanceof Entity ent) {
 				ent.update();

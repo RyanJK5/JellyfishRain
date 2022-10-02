@@ -10,7 +10,6 @@ import static bullethell.Globals.PAINT_QUADTREE;
 import static bullethell.Globals.eAction;
 import static bullethell.Globals.frame;
 import static bullethell.Globals.freezeCursor;
-import static bullethell.Globals.freezeHotkeys;
 import static bullethell.Globals.main;
 import static bullethell.Globals.mouseDown;
 import static bullethell.Globals.player;
@@ -66,14 +65,14 @@ public final class GameDisplay extends JPanel {
 		SaveSystem.readWorldData(true);
 		player.setLocation(Globals.WIDTH / 2, 100);
 
-		EnchantmentForge.get().start(Globals.WIDTH / 2, 200);
+		setScene(EnchantmentForge.get(), Globals.WIDTH / 2, 200);
 
 		Enemy enemy = EnemyID.DUMMY.getEnemy();
 		enemy.setLocation(player.getX() + 200, player.getY());
 	}
 	
 	protected void endGame() {
-		Globals.freezeHotkeys = true;
+		Globals.setFreezeHotkeys(true);
 		Entity.removeAll(null);
 		if (scene != null) {
 			scene.end();
@@ -119,26 +118,23 @@ public final class GameDisplay extends JPanel {
 		frame.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
-				if (freezeHotkeys) {
-					return;
-				}
-				
-				if (updateMap(e, true) && e.getButton() != MouseEvent.BUTTON1 && e.getButton() != MouseEvent.BUTTON3) {
-					return;
-				}
-
-				mouseDown = true;
-
 				if (freezeCursor) {
 					return;
 				} 
-
+				
 				UI.uiCheck(e);
+				if (Globals.getFreezeHotkeys()) {
+					return;
+				}
+				if (updateMap(e, true) && e.getButton() != MouseEvent.BUTTON1 && e.getButton() != MouseEvent.BUTTON3) {
+					return;
+				}
+				mouseDown = true;
 			}
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				if (freezeHotkeys) {
+				if (Globals.getFreezeHotkeys()) {
 					return;
 				}
 				updateMap(e, false);
@@ -228,7 +224,7 @@ public final class GameDisplay extends JPanel {
 
 			private void updateMap(KeyEvent e, boolean pressed) {
 				if (e.getKeyCode() == KeyEvent.VK_ESCAPE && pressed) {
-					if (!OptionsMenu.get().isActive() && !freezeHotkeys) {
+					if (!OptionsMenu.get().isActive() && !Globals.getFreezeHotkeys()) {
 						OptionsMenu.get().start(0, 0);
 					}
 					else if (OptionsMenu.get().isActive()) {
@@ -236,7 +232,7 @@ public final class GameDisplay extends JPanel {
 					}
 				}
 				
-				if (freezeHotkeys) {
+				if (Globals.getFreezeHotkeys()) {
 					return;
 				}
 
@@ -351,7 +347,7 @@ public final class GameDisplay extends JPanel {
 		setMovementKeys();
 		GLOBAL_TIMER.addActionListener((ActionEvent e) -> {
 			repaint();
-			GameSolid.quadtreeCheck();
+			GameSolid.updateSolids();
 		});
 		GLOBAL_TIMER.start();
 

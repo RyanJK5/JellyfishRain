@@ -21,6 +21,7 @@ import bullethell.Player;
 import bullethell.Trigger;
 import bullethell.items.Item;
 import bullethell.items.Recipe;
+import bullethell.ui.Button;
 import bullethell.ui.Container;
 import bullethell.ui.Inventory;
 import bullethell.ui.Text;
@@ -35,7 +36,7 @@ final class Forge implements Scene {
     private Inventory<Item> availableComponents;
     private Container<Item> result;
     private Inventory<RecipeItem> inv;
-    private Trigger craftButton;
+    private Button craftButton;
     private Trigger exitTrigger;
     private StartTrigger startTrigger;
     private Text componentsText;
@@ -53,6 +54,7 @@ final class Forge implements Scene {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void start(int x, int y) {
         try {
             BufferedImage forgeImg = ImageIO.read(new File("sprites/Forge.png"));
@@ -202,13 +204,11 @@ final class Forge implements Scene {
             inv.kill();
             inv.setHitbox(inv.getFullWidth() + inv.getWidth() * 5 + 20, inv.getHeight());
 
-            craftButton = new Trigger(ImageIO.read(new File("sprites/CraftButton.png")),
-              new Trigger.Type[] {Trigger.CURSOR_OVER, Trigger.ON_CLICK}) {
-               
+            BufferedImage sheet = Globals.getImage("ActionButtons");
+            craftButton = new Button(sheet.getSubimage(0, sheet.getHeight() / 2, sheet.getWidth(), sheet.getHeight() / 2)) {
                 @Override
                 protected void activate() {
                     if (getTarget() != player) {
-                        @SuppressWarnings("unchecked")
                         Container<RecipeItem> cont = (Container<RecipeItem>) getTarget();
                         Item resultItem = cont.getItem().recipe.craftFromInv();
                         if (resultItem != null) {
@@ -225,6 +225,8 @@ final class Forge implements Scene {
                 }
             };
             craftButton.setLayer(99);
+            craftButton.setAltCondition(() -> craftButton.getTarget() != null && 
+              !((Container<RecipeItem>) craftButton.getTarget()).getItem().recipe.canCraftFromInv());
             craftButton.kill();
 
             startTrigger = new StartTrigger();

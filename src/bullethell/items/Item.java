@@ -67,6 +67,10 @@ public abstract class Item extends GameObject {
     protected abstract void setValues();
     protected void addRecipes() { }
 
+    public void addEnchantment(Enchantment enchant) {
+        enchantments.add(enchant);
+    }
+
     public void onUse() { }
 
     public Item clone(int count) {

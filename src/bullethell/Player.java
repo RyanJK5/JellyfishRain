@@ -152,7 +152,6 @@ public final class Player extends Entity {
 		BufferedImage slotSprite = ImageIO.read(new File("sprites/InventorySlot.png"));
 		loadouts = new ArrayList<>();
 		
-		
 		for (int i = 0; i < 3; i++) {
 			Equipment eqp = new Equipment();
 			eqp.setLocation(-Globals.SCREEN_WIDTH, -Globals.SCREEN_HEIGHT);
@@ -162,6 +161,17 @@ public final class Player extends Entity {
 			} 
 		}
 		equipmentInvIndex = 0;
+
+		GameObject cursorSlot = new GameObject() {
+			@Override
+			public void update(Graphics g) {
+				if (player.cursorSlot != null) {
+					player.cursorSlot.update(g);
+				}
+			}
+		};
+		cursorSlot.setAlwaysDraw(true);
+		cursorSlot.setLayer(102);
 
 		class PlayerInventory extends Inventory<Item> implements ActionListener {
 
@@ -884,10 +894,6 @@ public final class Player extends Entity {
 			wepSlot.update(g2);
 			for (int i = abilitySlotNum - 1; i >= 0; i--) {
 				abilitySlots[i].update(g2);
-			}
-
-			if (player.cursorSlot != null) {
-				player.cursorSlot.update(g2);
 			}
 		}
 
