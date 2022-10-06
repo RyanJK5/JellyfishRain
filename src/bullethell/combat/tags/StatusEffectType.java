@@ -1,11 +1,14 @@
 package bullethell.combat.tags;
 
-import bullethell.Globals;
 import java.awt.Color;
+
+import bullethell.Globals;
 
 public enum StatusEffectType {
     POISON(3, 500, 250),
-    FREEZE(0, 10000, 0);
+    FREEZE(0, 1000, 0),
+    BLEED(200, 1000,0);
+
 
     public final int defaultDPH;
     public final int defaultMiliDuration;
@@ -28,9 +31,11 @@ public enum StatusEffectType {
     public String futureTense() {
         switch (this) {
             case POISON:
-                return "Inflicts poison";
+                return "Inflicts poison on";
             case FREEZE:
                 return "Freezes";
+            case BLEED:
+                return "Inflicts bleed on";
         }
         return "Inflicts ?";
     }
@@ -41,6 +46,8 @@ public enum StatusEffectType {
                 return "Poison";
             case FREEZE:
                 return "Frozen";
+            case BLEED:
+                return "Bleed";
         }
         return "?";
     }
@@ -51,6 +58,8 @@ public enum StatusEffectType {
                 return "poisoned";
             case FREEZE:
                 return "frozen";
+            case BLEED:
+                return "bleeding";
         }
         return "?ed";
     }
@@ -61,6 +70,8 @@ public enum StatusEffectType {
                 return new Color(4, 112, 0);
             case FREEZE:
                 return new Color(33, 174, 255);
+            case BLEED:
+                return new Color(150, 12, 35);
         }
         return Globals.DEFAULT_COLOR;
     }
