@@ -8,5 +8,9 @@ public interface Tag {
 
     boolean active();
 
+    boolean oneTime();
+
+    boolean canStack();
+
     TagActivationType getActivationType();
 }

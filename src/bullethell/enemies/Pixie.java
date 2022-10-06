@@ -13,8 +13,8 @@ public final class Pixie extends Enemy {
         id = EnemyID.PIXIE;
         name = "Pixie";
         ignoreSolids = true;
-        maxHP = 50;
-        hp = 50;
+        maxHP = 500;
+        hp = maxHP;
         dmg = 50;
         speed = Globals.rand.nextInt(8, 12);
         setPath(new SeekingPath(this, Player.get()));

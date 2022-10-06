@@ -241,10 +241,6 @@ public final class EnchantmentForge implements Scene {
             if (enchant.eType == enchantSlot.getItem().enchantPool.getType(enchantIndex) || 
               (enchant.sType == enchantSlot.getItem().allowedEffects[effectIndex] && 
               enchantSlot.getItem().enchantPool.getType(enchantIndex).statusEffectBased)) {
-                System.out.println(enchant.eType == enchantSlot.getItem().enchantPool.getType(enchantIndex));
-                System.out.println(enchant.sType == enchantSlot.getItem().allowedEffects[effectIndex]);
-                System.out.println(enchantSlot.getItem().enchantPool.getType(enchantIndex).statusEffectBased);
-                System.out.println();
                 return true;
             }
         }

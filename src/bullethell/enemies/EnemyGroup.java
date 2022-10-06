@@ -48,7 +48,7 @@ public class EnemyGroup implements ActionListener {
 
     public static boolean anyGroupAlive() {
         for (EnemyGroup group : groups) {
-            if (group.allAlive()) {
+            if (group.enemies.stream().anyMatch(e -> e.isAlive())) {
                 return true;
             }
         }
@@ -61,10 +61,6 @@ public class EnemyGroup implements ActionListener {
 
     public static Enemy[] getEnemies(int groupID) {
         return groups.get(groupID).enemies.toArray(new Enemy[0]);
-    }
-
-    public boolean allAlive() {
-        return enemies.stream().allMatch(e -> e.isAlive());
     }
 
     public boolean anyDetectPlayer() {

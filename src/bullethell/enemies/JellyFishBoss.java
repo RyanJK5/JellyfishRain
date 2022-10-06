@@ -39,14 +39,6 @@ public class JellyFishBoss extends Enemy {
     @Override
     protected void createLootTable() { }
 
-    @Override
-    public void update() {
-        super.update();
-        // if (readyToKill()) {
-        //     ErnestoBoss.get().end();
-        // }
-    }
-    
     public int timesPerformed = 0;
     public boolean switchAlpha = false;
     

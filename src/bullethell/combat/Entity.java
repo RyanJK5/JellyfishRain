@@ -119,26 +119,8 @@ public abstract class Entity extends GameSolid implements ActionListener, Animat
         animations = Animation.getAnimations(spritesheet, this);
     }
 
-    @Override
-	public void toGhost() {
-		super.toGhost();
-        Globals.GLOBAL_TIMER.removeActionListener(this);
-	}
-
-	@Override
-	public void unghost() {
-		super.unghost();
-        for (ActionListener al: Globals.GLOBAL_TIMER.getActionListeners()) {
-            if (this == al) {
-                return;
-            }
-        }
-        // Globals.GLOBAL_TIMER.addActionListener(this);
-	}
-
     public Path getPath() { return path; }
-    public void setPath(Path path) { 
-        this.path = path; }
+    public void setPath(Path path) { this.path = path; }
 
     public int getDMG() { return dmg; }
     public void setDMG(int dmg) { this.dmg = dmg; }

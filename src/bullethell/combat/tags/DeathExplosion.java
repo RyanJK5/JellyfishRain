@@ -68,4 +68,14 @@ public class DeathExplosion implements Tag {
     public boolean equals(Object o) {
         return o instanceof DeathExplosion;
     }
+
+    @Override
+    public boolean oneTime() {
+        return true;
+    }
+
+    @Override
+    public boolean canStack() {
+        return false;
+    }
 }

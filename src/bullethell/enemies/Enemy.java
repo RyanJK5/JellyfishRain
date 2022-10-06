@@ -33,6 +33,7 @@ public abstract class Enemy extends Entity {
     public int timeSinceHit = 0;
     public int dmgTaken;
     public boolean bossEnemy;
+    public boolean paused;
     
     protected ItemLoot[] lootTable;
     public final List<Tag> tags;
@@ -64,6 +65,7 @@ public abstract class Enemy extends Entity {
         name = "Unnamed";
 
         setValues();
+        hp = maxHP;
         createLootTable();
 
         provocationArea = EnemyGroup.getAreaFromEnemy(this, EnemyGroup.DEFAULT_DETECTION_RADIUS);
@@ -81,11 +83,11 @@ public abstract class Enemy extends Entity {
     }
 
     public void addTag(Tag tag) {
-        if (tag.getActivationType() == TagActivationType.ONE_TIME) {
-            tag.apply(this);
+        if (tag == null || (!tag.canStack() && tags.contains(tag))) {
             return;
         }
-        if (tag.getActivationType() == TagActivationType.ON_DEATH & tags.contains(tag)) {
+        if (tag.getActivationType() == TagActivationType.IMMEDIATE) {
+            tag.apply(this);
             return;
         }
         tags.add(tag);
@@ -93,27 +95,17 @@ public abstract class Enemy extends Entity {
 
     @Override  
     public void update() {
-        if (groupID >= 0 && !EnemyGroup.getGroup(groupID).anyDetectPlayer()) {
+        updateTags(TagActivationType.EVERY_TICK);
+        timeSinceHit++;
+        if (timeSinceHit >= HealthBar.SHOW_TIME) {
+            healthBar.kill();
+        }
+        
+        if (paused || (groupID >= 0 && !EnemyGroup.getGroup(groupID).anyDetectPlayer())) {
             return;
         }
 
-        List<Tag> toRemove = new ArrayList<>();
-        for (Tag tag : tags) {
-            if (!tag.active()) {
-                toRemove.add(tag);
-                continue;
-            }
-            if (tag.getActivationType() == TagActivationType.EVERY_TICK) {
-                tag.apply(this);
-            }
-        }
-        tags.removeAll(toRemove);
-        
         move();
-        timeSinceHit++;
-        if (timeSinceHit >= HealthBar.SHOW_TIME) {
-    		healthBar.kill();
-    	}
     }
 
     @Override
@@ -203,11 +195,7 @@ public abstract class Enemy extends Entity {
     private void gameKill() {
         permakill();
 
-        for (Tag tag : tags) {
-            if (tag.getActivationType() == TagActivationType.ON_DEATH) {
-                tag.apply(this);
-            }
-        }
+        updateTags(TagActivationType.ON_DEATH);
 
         if (lootTable == null) {
             return;
@@ -305,8 +293,29 @@ public abstract class Enemy extends Entity {
         new Hit(dmgTaken, x + w, y);
         healthBar.revive();
 
+        updateTags(TagActivationType.ON_HIT);
+    
         if (readyToKill()) {
             gameKill();
         }
+    }
+
+    private void updateTags(TagActivationType type) {
+        List<Tag> toRemove = new ArrayList<>();
+        for (int i = 0; i < tags.size(); i++) {
+            Tag tag = tags.get(i);
+            if (tag.getActivationType() != type) {
+                continue;
+            }
+            if (!tag.active()) {
+                toRemove.add(tag);
+                continue;
+            }
+            tag.apply(this);
+            if (tag.oneTime()) {
+                toRemove.add(tag);
+            }
+        }
+        tags.removeAll(toRemove);
     }
 }

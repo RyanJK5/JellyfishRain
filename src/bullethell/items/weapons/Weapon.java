@@ -55,7 +55,7 @@ public abstract class Weapon extends Item {
                     }
                     break;
                 case INFLICT_EFFECT:
-                    enemy.addTag(new StatusEffect(enchantment.sType));
+                    enemy.addTag(StatusEffect.getStatusEffect(enchantment.sType));
                     break;
                 case VICTIMS_EXPLODE:
                     enemy.addTag(new DeathExplosion(enchantment.intArg));

@@ -19,12 +19,13 @@ public class StatusEffect implements Tag {
         duration = miliDuration / Globals.TIMER_DELAY;
     }
 
-    public StatusEffect(StatusEffectType type) {
-        this.type = type;
-        dmg = type.defaultDPH;
-        hitDelay = type.defaultMiliHitDelay / Globals.TIMER_DELAY;
-        duration = type.defaultMiliDuration / Globals.TIMER_DELAY;
-        
+    public static StatusEffect getStatusEffect(StatusEffectType type) {
+        switch (type) {
+            case FREEZE:
+                return new Freeze(type.defaultMiliDuration);
+            default:
+                return new StatusEffect(type, type.defaultDPH, type.defaultMiliHitDelay, type.defaultMiliDuration);
+        }
     }
 
     public boolean active() {
@@ -42,5 +43,15 @@ public class StatusEffect implements Tag {
     @Override
     public TagActivationType getActivationType() {
         return TagActivationType.EVERY_TICK;
+    }
+
+    @Override
+    public boolean oneTime() {
+        return false;
+    }
+
+    @Override
+    public boolean canStack() {
+        return true;
     }
 }

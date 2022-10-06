@@ -5,7 +5,7 @@ import java.awt.Color;
 
 public enum StatusEffectType {
     POISON(3, 500, 250),
-    TEST(0,0,0);
+    FREEZE(0, 10000, 0);
 
     public final int defaultDPH;
     public final int defaultMiliDuration;
@@ -29,35 +29,39 @@ public enum StatusEffectType {
         switch (this) {
             case POISON:
                 return "Inflicts poison";
-            default:
-                return "Inflicts ?";
+            case FREEZE:
+                return "Freezes";
         }
+        return "Inflicts ?";
     }
 
     public String presentTense() {
         switch (this) {
             case POISON:
                 return "Poison";
-            default:
-                return "?";
+            case FREEZE:
+                return "Frozen";
         }
+        return "?";
     }
 
     public String pastTense() {
         switch (this) {
             case POISON:
                 return "poisoned";
-            default:
-                return "?ed";
+            case FREEZE:
+                return "frozen";
         }
+        return "?ed";
     }
 
     public Color getColor() {
         switch (this) {
             case POISON:
                 return new Color(4, 112, 0);
-            default:   
-                return Globals.DEFAULT_COLOR;
+            case FREEZE:
+                return new Color(33, 174, 255);
         }
+        return Globals.DEFAULT_COLOR;
     }
 }
