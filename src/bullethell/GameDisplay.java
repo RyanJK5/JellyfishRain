@@ -37,9 +37,13 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import bullethell.combat.Enchantment;
 import bullethell.combat.Entity;
+import bullethell.combat.tags.StatusEffectType;
 import bullethell.enemies.Enemy;
 import bullethell.enemies.EnemyID;
+import bullethell.items.ItemID;
+import bullethell.items.weapons.Weapon;
 import bullethell.movement.Direction;
 import bullethell.scenes.EnchantmentForge;
 import bullethell.scenes.MainMenu;
@@ -69,7 +73,13 @@ public final class GameDisplay extends JPanel {
 
 		Enemy dummy = EnemyID.DUMMY.getEnemy();
 		dummy.setLocation(player.getX() + 200, player.getY());
-		dummy.setHP(200);
+
+		Weapon staff = (Weapon) ItemID.EXAMPLE_STAFF.getItem();
+		StatusEffectType[] statuses = {StatusEffectType.FREEZE, StatusEffectType.POISON, StatusEffectType.BLEED };
+		for (StatusEffectType status : statuses) {
+			staff.addEnchantment(new Enchantment(status));
+		}
+		Player.get().getInventory().addItem(staff);
 	}
 	
 	protected void endGame() {

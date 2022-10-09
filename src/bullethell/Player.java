@@ -34,7 +34,7 @@ import bullethell.movement.Direction;
 import bullethell.scenes.Bossfight;
 import bullethell.ui.Container;
 import bullethell.ui.Inventory;
-import bullethell.ui.Text;
+import bullethell.ui.TextBubble;
 import bullethell.ui.UI;
 
 public final class Player extends Entity {
@@ -174,12 +174,7 @@ public final class Player extends Entity {
 		cursorSlot.setAlwaysDraw(true);
 		cursorSlot.setLayer(102);
 
-		class PlayerInventory extends Inventory<Item> implements ActionListener {
-
-			private float rotDeg = 0.25f;
-			private Text txt = new Text("");
-			private Color color = Globals.DEFAULT_COLOR;
-			private int timesPerformed = 0;
+		class PlayerInventory extends Inventory<Item> {
 
 			public PlayerInventory() {
 				super(new Dimension(10, 8), slotSprite, Item.class);
@@ -193,35 +188,14 @@ public final class Player extends Entity {
 				
 				if (player.getCursorSlot() == null) {
 					int count = 0;
-					rotDeg = -rotDeg;
 					if (item.canStack) {
 						count += item.count;
 					}
-					txt.setText(item.name + (count > 0 ? " (" + count + ")" : ""));
-					txt.setLocation(get().getX() - 10, get().getY() - 10);
-					color = Globals.DEFAULT_COLOR;
-					timesPerformed = 0;
-					Globals.GLOBAL_TIMER.addActionListener(this);
+					new TextBubble(item.name + (count > 0 ? " (" + count + ")" : ""), 0.25f, Globals.DEFAULT_COLOR)
+					  .setLocation(get().getX() - 10, get().getY() - 10);
 				}
 
 				super.addItem(item);
-			}
-
-			@Override
-			public void actionPerformed(java.awt.event.ActionEvent e) {
-				txt.rotate(rotDeg);
-				if (timesPerformed >= 20) {
-					if (color.getAlpha() - 10 > 0) {
-						color = new Color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha() - 10);
-					} else {
-						txt.kill();
-						Globals.GLOBAL_TIMER.removeActionListener(this);
-						txt = new Text("");
-						return;
-					}
-				}
-				txt.setColor(color);
-				timesPerformed++;
 			}
 		}
 		
@@ -229,7 +203,6 @@ public final class Player extends Entity {
 		inventory.setEssential(true);
 		inventory.setMovable(false);
 		inventory.kill();
-		Globals.GLOBAL_TIMER.addActionListener((PlayerInventory) inventory);
 
 		BufferedImage redTint = new BufferedImage(Globals.SCREEN_WIDTH, 
 		Globals.SCREEN_HEIGHT, 

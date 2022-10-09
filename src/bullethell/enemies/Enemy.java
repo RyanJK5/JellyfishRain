@@ -10,7 +10,9 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 
@@ -20,10 +22,13 @@ import bullethell.Globals;
 import bullethell.Player;
 import bullethell.Spritesheet;
 import bullethell.combat.Entity;
+import bullethell.combat.tags.StatusEffect;
+import bullethell.combat.tags.StatusEffectType;
 import bullethell.combat.tags.Tag;
 import bullethell.combat.tags.TagActivationType;
 import bullethell.items.ItemDrop;
 import bullethell.items.ItemLoot;
+import bullethell.ui.TextBubble;
 
 public abstract class Enemy extends Entity {
     
@@ -42,8 +47,6 @@ public abstract class Enemy extends Entity {
     public Area provokedArea;
     public int groupID = -1;
 
-    private final List<Hit> hits = new ArrayList<>();
-
     protected Enemy() {
         super();
         solids.remove(this);
@@ -52,6 +55,7 @@ public abstract class Enemy extends Entity {
             Dimension dimensions = getSpritesheetDimensions();
             setAnimations(new Spritesheet(Globals.getImage("enemies\\" + getClass().getSimpleName()), dimensions.width, dimensions.height)); 
         } else {
+            System.out.println(getClass().getSimpleName());
             setAnimations(new Spritesheet(Globals.getImage("enemies\\Default"), 1, 1));
         }
 
@@ -83,14 +87,20 @@ public abstract class Enemy extends Entity {
     }
 
     public void addTag(Tag tag) {
-        if (tag == null || (!tag.canStack() && tags.contains(tag))) {
+        if (tag == null || (!tag.canStack() && tags.stream().anyMatch(t -> t.getClass() == tag.getClass()))) {
             return;
         }
         if (tag.getActivationType() == TagActivationType.IMMEDIATE) {
             tag.apply(this);
-            return;
+            if (tag.oneTime()) {
+                return;
+            }
         }
         tags.add(tag);
+    }
+
+    public void removeTag(Tag tag) {
+        tags.remove(tag);
     }
 
     @Override  
@@ -161,6 +171,27 @@ public abstract class Enemy extends Entity {
     @Override
     public void update(Graphics g) {
         super.update(g);
+        Map<StatusEffectType, Integer> toBeDrawn = new HashMap<>();
+        for (Tag tag : tags) {
+            if (tag instanceof StatusEffect status) {
+                if (toBeDrawn.keySet().contains(status.type)) {
+                    toBeDrawn.put(status.type, toBeDrawn.get(status.type) + 1);
+                } else {
+                    toBeDrawn.put(status.type, 1);
+                }
+            }
+        }
+        for (int i = 0; i < toBeDrawn.size(); i++) {
+            StatusEffectType type = toBeDrawn.keySet().toArray(new StatusEffectType[0])[i];
+            BufferedImage icon = type.getIcon();
+            final int width = icon.getWidth() + 15;
+            final int xPos = getCenterX() - (int) (toBeDrawn.size() / 2f * width) + i * width;
+         
+            g.drawImage(icon, xPos, getY() - 20, null);
+            if (toBeDrawn.get(type) > 1) {
+                g.drawString(Integer.toString(toBeDrawn.get(type)), xPos + icon.getWidth(), getY() - 20 + icon.getHeight());
+            }
+        }
 
         if (Player.cursorX() >= x && Player.cursorY() >= y &&
             Player.cursorX() <= x + w && Player.cursorY() <= y + w) {
@@ -168,15 +199,6 @@ public abstract class Enemy extends Entity {
                 g.drawString(name, Player.cursorX(), Player.cursorY() - 5);
                 g.drawString(getHP() + " / " + getMaxHP(), Player.cursorX(), Player.cursorY() - 5 - g.getFont().getSize());
         }
-
-        for (int i = 0; i < hits.size(); i++) {
-            Hit hit = hits.get(i);
-            g.setColor(hit.color);
-            if (hit.y > hit.origY - 100) hit.move(1,-10);
-            if (hit.y < hit.origY - 50) hit.update();
-            g.drawString(hit.text, hit.x, hit.y);
-        }
-        g.setColor(Color.WHITE);
     }
 
     @Override
@@ -216,41 +238,6 @@ public abstract class Enemy extends Entity {
         resetHP();
     } 
 
-    private class Hit {
-        String text;
-        int x, y;
-        int origY;
-        Color color = new Color(255, 0, 0, 255);
-        private int decrNum = 25;
-
-        Hit(int value, int x, int y) {
-            this.text = Integer.toString(value);
-            this.x = x;
-            this.y = y;
-            this.origY = y;
-            hits.add(this);
-        }
-
-        void update() {
-            if (color.getAlpha() <= 0) hits.remove(this);
-            
-            while (true) {
-                try {
-                    color = new Color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha() - decrNum);
-                    return;
-                } catch (IllegalArgumentException iae) {
-                    decrNum--;
-                    if (decrNum <= 0) return;
-                }
-            }
-        }
-
-        void move(int x, int y) {
-            this.x += x;
-            this.y += y;
-        }
-    }
-
     private class HealthBar extends GameObject {
 		
 		public static final int SHOW_TIME = 2000 / Globals.TIMER_DELAY;
@@ -280,7 +267,7 @@ public abstract class Enemy extends Entity {
         return name;
     }
 
-    public void registerDMG(int dmg) {
+    public void registerDMG(int dmg, StatusEffectType statusType) {
         if (dmg <= 0) {
             return;
         }
@@ -290,7 +277,8 @@ public abstract class Enemy extends Entity {
         dmgTaken = Globals.damageFormula(dmg);
         hp -= dmgTaken;
         timeSinceHit = 0;
-        new Hit(dmgTaken, x + w, y);
+        new TextBubble(Integer.toString(dmgTaken), 1f, statusType != null ? statusType.getColor() : 
+          Globals.DEFAULT_COLOR).setLocation(getCenterX() + Globals.rand.nextInt(-50, 50), getCenterY() + Globals.rand.nextInt(-25, 50));
         healthBar.revive();
 
         updateTags(TagActivationType.ON_HIT);
@@ -298,6 +286,10 @@ public abstract class Enemy extends Entity {
         if (readyToKill()) {
             gameKill();
         }
+    }
+
+    public void registerDMG(int dmg) {
+        registerDMG(dmg, null);
     }
 
     private void updateTags(TagActivationType type) {

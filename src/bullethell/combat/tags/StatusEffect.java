@@ -23,6 +23,8 @@ public class StatusEffect implements Tag {
         switch (type) {
             case FREEZE:
                 return new Freeze(type.defaultMiliDuration);
+            case BLEED:
+                return new Bleed(type.defaultMiliDuration, type.defaultDPH, 10);
             default:
                 return new StatusEffect(type, type.defaultDPH, type.defaultMiliHitDelay, type.defaultMiliDuration);
         }
@@ -35,7 +37,7 @@ public class StatusEffect implements Tag {
     @Override
     public void apply(Enemy target) {
         if (age % hitDelay == 0) {
-            target.registerDMG(dmg);
+            target.registerDMG(dmg, type);
         }
         age++;
     }

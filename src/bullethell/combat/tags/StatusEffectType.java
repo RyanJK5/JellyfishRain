@@ -1,5 +1,6 @@
 package bullethell.combat.tags;
 
+import java.awt.image.BufferedImage;
 import java.awt.Color;
 
 import bullethell.Globals;
@@ -7,12 +8,13 @@ import bullethell.Globals;
 public enum StatusEffectType {
     POISON(3, 500, 250),
     FREEZE(0, 1000, 0),
-    BLEED(200, 1000,0);
-
+    BLEED(200, 1000, 0);
 
     public final int defaultDPH;
     public final int defaultMiliDuration;
     public final int defaultMiliHitDelay;
+
+    private static final BufferedImage iconSheet = Globals.getImage("StatusEffectIcons");
 
     private StatusEffectType(int defaultDPH, int defaultMiliDuration, int defaultMiliHitDelay) {
         this.defaultDPH = defaultDPH;
@@ -74,5 +76,10 @@ public enum StatusEffectType {
                 return new Color(150, 12, 35);
         }
         return Globals.DEFAULT_COLOR;
+    }
+
+    public BufferedImage getIcon() {
+        return iconSheet.getSubimage(Globals.indexOf(values(), this) * iconSheet.getWidth() / values().length, 0, 
+          iconSheet.getWidth() / values().length, iconSheet.getHeight());
     }
 }

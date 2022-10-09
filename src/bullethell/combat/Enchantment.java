@@ -88,7 +88,7 @@ public class Enchantment {
             case EFFECT_DAMAGE_BOOST:
                 return "+" + Math.round(floatArg * 100) + "% damage to " + sType.pastTense() + " enemies";
             case INFLICT_EFFECT:
-                return sType.futureTense() + " on enemies";
+                return sType.futureTense() + " enemies";
             case VICTIMS_EXPLODE:
                 return "Enemies explode on death";
         }
