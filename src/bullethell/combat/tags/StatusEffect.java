@@ -25,6 +25,8 @@ public class StatusEffect implements Tag {
                 return new Freeze(type.defaultMiliDuration);
             case BLEED:
                 return new Bleed(type.defaultMiliDuration, type.defaultDPH, 10);
+            case SLOW_DOWN:
+                return new SlowDown(type.defaultMiliDuration);
             default:
                 return new StatusEffect(type, type.defaultDPH, type.defaultMiliHitDelay, type.defaultMiliDuration);
         }

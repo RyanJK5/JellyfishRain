@@ -1,13 +1,14 @@
 package bullethell.combat.tags;
 
-import java.awt.image.BufferedImage;
 import java.awt.Color;
+import java.awt.image.BufferedImage;
 
 import bullethell.Globals;
 
 public enum StatusEffectType {
     POISON(3, 500, 250),
     FREEZE(0, 1000, 0),
+    SLOW_DOWN(0, 1000, 0),
     BLEED(200, 1000, 0);
 
     public final int defaultDPH;
@@ -36,6 +37,8 @@ public enum StatusEffectType {
                 return "Inflicts poison on";
             case FREEZE:
                 return "Freezes";
+            case SLOW_DOWN:
+                return "Slows down";
             case BLEED:
                 return "Inflicts bleed on";
         }
@@ -48,6 +51,8 @@ public enum StatusEffectType {
                 return "Poison";
             case FREEZE:
                 return "Frozen";
+            case SLOW_DOWN:
+                return "Slowness";
             case BLEED:
                 return "Bleed";
         }
@@ -60,6 +65,8 @@ public enum StatusEffectType {
                 return "poisoned";
             case FREEZE:
                 return "frozen";
+            case SLOW_DOWN:
+                return "slowed down";
             case BLEED:
                 return "bleeding";
         }
@@ -72,6 +79,8 @@ public enum StatusEffectType {
                 return new Color(4, 112, 0);
             case FREEZE:
                 return new Color(33, 174, 255);
+            case SLOW_DOWN:
+                return new Color(149, 208, 252);
             case BLEED:
                 return new Color(150, 12, 35);
         }

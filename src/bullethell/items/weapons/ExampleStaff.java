@@ -32,7 +32,7 @@ public final class ExampleStaff extends Weapon {
     @Override
     protected void setEnchantmentParams() {
         enchantPool = EnchantmentPool.MAGIC_RANGED_WEAPON;
-        allowedEffects = new StatusEffectType[] { StatusEffectType.POISON, StatusEffectType.FREEZE, StatusEffectType.BLEED };
+        allowedEffects = new StatusEffectType[] { StatusEffectType.POISON, StatusEffectType.FREEZE, StatusEffectType.BLEED, StatusEffectType.SLOW_DOWN };
     }
 
     @Override
