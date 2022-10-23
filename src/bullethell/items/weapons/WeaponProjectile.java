@@ -42,7 +42,7 @@ public class WeaponProjectile extends Projectile implements WeaponEntity {
 
     @Override
     public Predicate<Enemy> getCritCondition() {
-        return item.critCondition;
+        return item::critCondition;
     }
 
     @Override

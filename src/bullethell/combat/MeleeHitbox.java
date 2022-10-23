@@ -81,6 +81,6 @@ public MeleeHitbox(Weapon sender, Spritesheet spritesheet, java.awt.Rectangle bo
 
     @Override
     public Predicate<Enemy> getCritCondition() {
-        return item.critCondition;
+        return item::critCondition;
     }
 }

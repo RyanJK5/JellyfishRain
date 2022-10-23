@@ -8,6 +8,7 @@ import bullethell.Spritesheet;
 import bullethell.combat.EnchantmentPool;
 import bullethell.combat.MeleeHitbox;
 import bullethell.combat.tags.StatusEffectType;
+import bullethell.enemies.Enemy;
 import bullethell.items.ItemID;
 
 public class TripleKnife extends Weapon {
@@ -37,7 +38,6 @@ public class TripleKnife extends Weapon {
         dmg = 20;
         fireTime = 15;
 
-        critCondition = e -> strikeNum == 2;
         critMultiplier = 50f / dmg;
     }
 
@@ -47,6 +47,11 @@ public class TripleKnife extends Weapon {
         if (timeSinceLastAttack >= RESET_DELAY) {
             strikeNum = 0;
         }
+    }
+
+    @Override
+    public boolean critCondition(Enemy enemy) {
+        return strikeNum == 2;
     }
 
     @Override

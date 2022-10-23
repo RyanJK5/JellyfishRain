@@ -1,8 +1,7 @@
 package bullethell.items.weapons;
 
-import java.util.List;
 import java.util.ArrayList;
-import java.util.function.Predicate;
+import java.util.List;
 
 import bullethell.combat.Enchantment;
 import bullethell.combat.EnchantmentPool;
@@ -19,7 +18,6 @@ public abstract class Weapon extends Item {
     public EnchantmentPool enchantPool;
     public StatusEffectType[] allowedEffects;
 
-    public Predicate<Enemy> critCondition;
     public float critMultiplier;
     public int dmg;
     public int manaCost;
@@ -30,7 +28,6 @@ public abstract class Weapon extends Item {
         super();
         equipType = EquipType.WEAPON;
         enchantments = new ArrayList<>();
-        critCondition = e -> false;
         critMultiplier = 1.5f;
         allowedEffects = new StatusEffectType[0];
         setEnchantmentParams();
@@ -38,13 +35,17 @@ public abstract class Weapon extends Item {
 
     protected abstract void setEnchantmentParams();
 
+    public boolean critCondition(Enemy enemy) {
+        return false;
+    }
+
     public void addEnchantment(Enchantment enchant) {
         enchantments.add(enchant);
     }
 
     public int getModifiedDMG(Enemy enemy) {
         float finalmDmg = 1;
-        if (critCondition.test(enemy)) {
+        if (critCondition(enemy)) {
             finalmDmg += critMultiplier;
         }
         for (Enchantment enchantment : enchantments) {

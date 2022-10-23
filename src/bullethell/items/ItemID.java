@@ -5,18 +5,9 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
 import bullethell.Globals;
-import bullethell.items.abilities.AdrenalineAbility;
-import bullethell.items.abilities.DashAbility;
-import bullethell.items.abilities.FocusAbility;
-import bullethell.items.abilities.HealAbility;
-import bullethell.items.abilities.TeleportAbility;
-import bullethell.items.charms.CustomCore;
-import bullethell.items.charms.HealthCharm;
-import bullethell.items.weapons.ExampleMagicWeapon;
-import bullethell.items.weapons.ExampleScepter;
-import bullethell.items.weapons.ExampleStaff;
-import bullethell.items.weapons.ExampleSword;
-import bullethell.items.weapons.TripleKnife;
+import bullethell.items.abilities.*;
+import bullethell.items.charms.*;
+import bullethell.items.weapons.*;
 
 public enum ItemID {
     EXAMPLE_SCEPTER(ExampleScepter.class),
@@ -33,7 +24,8 @@ public enum ItemID {
     STRANGE_SIGIL(StrangeSigil.class),
     CUSTOM_CORE(CustomCore.class),
     ADRENALINE_ABILITY(AdrenalineAbility.class),
-    TRIPLE_KNIFE(TripleKnife.class);
+    TRIPLE_KNIFE(TripleKnife.class),
+	BROSKI(Broski.class);
 
     private final Class<? extends Item> itemClass;
 
