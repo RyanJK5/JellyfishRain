@@ -69,7 +69,7 @@ public final class GameDisplay extends JPanel {
 		SaveSystem.readWorldData(true);
 		player.setLocation(Globals.WIDTH / 2, 100);
 
-		setScene(EnchantmentForge.get(), Globals.WIDTH / 2, 200);
+		// setScene(EnchantmentForge.get(), Globals.WIDTH / 2, 200);
 
 		Enemy dummy = EnemyID.DUMMY.getEnemy();
 		dummy.setLocation(player.getX() + 200, player.getY());

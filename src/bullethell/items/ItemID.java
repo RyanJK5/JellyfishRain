@@ -24,8 +24,7 @@ public enum ItemID {
     STRANGE_SIGIL(StrangeSigil.class),
     CUSTOM_CORE(CustomCore.class),
     ADRENALINE_ABILITY(AdrenalineAbility.class),
-    TRIPLE_KNIFE(TripleKnife.class),
-	BROSKI(Broski.class);
+    TRIPLE_KNIFE(TripleKnife.class);
 
     private final Class<? extends Item> itemClass;
 
